@@ -35,7 +35,7 @@ def run(ctx) -> dict:
             continue
         days = (ctx.clock.now() - sent).days
         votes.open_vote(ctx, key=vkey, kind="close", case_key=key, card_id=rec["card_id"],
-                        subject=f"{rec['customer'].split('@')[0]} - {rec['title']}",
+                        subject=cases.subject(rec),
                         question=f"no reply for {days} days since our answer; close this case?",
                         identity={"case_key": key}, material={"last_sent": sent.isoformat()},
                         spec={"last_sent": sent.isoformat()})

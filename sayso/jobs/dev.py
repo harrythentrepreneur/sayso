@@ -87,7 +87,7 @@ def run(ctx) -> dict:
         ctx.board.post(rec["card_id"], "No QA runner is configured: this PR was NOT independently checked.",
                        idempotency_key=f"no-qa:{key}:{pr.number}:{pr.head_sha[:12]}")
         votes.open_vote(ctx, key=f"merge:{key}:{pr.number}:{pr.head_sha[:12]}", kind="merge", case_key=key,
-                        card_id=rec["card_id"], subject=f"{rec['customer'].split('@')[0]} - {rec['title']}",
+                        card_id=rec["card_id"], subject=cases.subject(rec),
                         question=f"merge PR {pr.number} at head {pr.head_sha[:12]}?",
                         identity={"case_key": key, "pr": pr.number}, material={"head": pr.head_sha, "state": "open"},
                         spec={"pr": pr.number, "head": pr.head_sha})

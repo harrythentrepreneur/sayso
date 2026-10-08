@@ -97,11 +97,13 @@ def send_one(ctx, rec: dict, *, sleep) -> str:
                                    "body_sha": body_sha, "started_at": ctx.clock.now().isoformat()}
             save_json(ctx.paths.attempts, attempts)
     ctx.journal.append("send_attempt", key=key, resend=resend)
+    why = ""
     if resend:
         try:
             ctx.helpdesk.send_reply(case["ticket"], recipient, safety.reply_subject(case["title"]), body, idempotency_key=key)
         except Exception as exc:  # noqa: BLE001 - the write may have happened; prove, never re-send
             ctx.journal.append("send_error", key=key, error=type(exc).__name__)
+            why = str(exc)[:300]
     receipt = _await_receipt(ctx, case["ticket"], recipient, body_sha, sleep)
     with locked(ctx.paths.attempts):
         attempts = load_json(ctx.paths.attempts)
@@ -111,8 +113,8 @@ def send_one(ctx, rec: dict, *, sleep) -> str:
     if not receipt:
         ctx.alert(f"unverified:{key}", f"reply for {case['title']!r} was started but not proven sent. "
                   "Not retried. Check the helpdesk and mailbox Sent folder by hand.")
-        ctx.board.post(rec["card_id"], "Reply send started but NOT verified. Not retried automatically.",
-                       idempotency_key=f"unverified:{key}")
+        ctx.board.post(rec["card_id"], "Reply send started but NOT verified. Not retried automatically."
+                       + (f"\nThe helpdesk said: {why}" if why else ""), idempotency_key=f"unverified:{key}")
         return UNVERIFIED
     receipt_path = ctx.paths.receipts / case_key / f"{key.replace(':', '_')}.json"
     receipt_path.parent.mkdir(parents=True, exist_ok=True)

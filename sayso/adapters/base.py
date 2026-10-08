@@ -24,6 +24,13 @@ class InboundMessage:
     subject: str
     body: str
     received_at: str  # ISO 8601 with timezone
+    # A helpdesk that already knows what the message is about (e.g. a product's own case signal) says so.
+    # Empty = let plugins classify it, else it is correspondence.
+    kind: str = ""
+    labels: tuple[str, ...] = ()
+    # A helpdesk whose messages are not emails (a texting product) supplies the card text itself: still the
+    # customer's own words first, framed for that channel. Empty = the email card (cases.email_card).
+    card: str = ""
 
 
 @dataclass(frozen=True)

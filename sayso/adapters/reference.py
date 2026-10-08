@@ -355,11 +355,13 @@ class HermesDrafter:
         self.profile = section.options.get("profile")
         if not self.profile:
             raise ConfigError("[drafter] hermes needs profile")
+        self.style = str(section.options.get("style") or "").strip()  # e.g. "a short, friendly text message"
         self.run = run
 
     def draft(self, case, thread):
         prompt = ("Write ONE plain-text customer reply for this support case. Do not claim money moved, "
-                  "do not promise dates, do not include payment ids. Output only the reply.\n\n"
+                  "do not promise dates, do not include payment ids. Output only the reply.\n"
+                  + (f"Style: {self.style}\n" if self.style else "") + "\n"
                   + "\n\n---\n\n".join(thread))
         out = self.run(["hermes", "-p", str(self.profile), "chat", "--oneshot", "--query", prompt],
                        capture_output=True, text=True, timeout=600, check=True)
@@ -455,6 +457,9 @@ class HermesQaRunner:
 
 
 def build(name: str, kind: str, section: Section, config: Config) -> Any:
+    if kind == "baker":
+        from sayso.adapters import baker
+        return baker.BakerHelpdesk(section, config.support_address) if name == "helpdesk" else baker.BakerDelivery(section)
     if kind == "discord":
         return DiscordForumBoard(section)
     if kind == "frappe":

@@ -33,8 +33,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | Section | Choices | Default |
 |---|---|---|
 | board | `fake`, `discord` | `fake` |
-| helpdesk | `fake`, `frappe` | `fake` |
-| mailbox | `fake`, `imap` | `fake` |
+| helpdesk | `fake`, `frappe`, `baker` | `fake` |
+| mailbox | `fake`, `imap`, `baker` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
@@ -51,7 +51,9 @@ Reference adapter keys:
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
 - stripe: `api_key_env`
 - github: `repo` (`owner/name`), `token_env`
-- hermes (drafter and dev_runner): `profile`
+- baker (helpdesk and mailbox): `url`, `token_env`; helpdesk also `sending` (default `true`; `false` = shadow run,
+  nothing reaches a customer whatever the votes say). See docs/ADAPTERS.md, "Texting products".
+- hermes (drafter and dev_runner): `profile`; drafter also `style` (one line on how replies should read)
 - hermes (qa_runner): `profile` (must differ from the dev profile), `red_proof_cmd` (prints one JSON line
   `{"state": "red-proved" | "not-red" | "head-red" | "error"}`; gets the PR number and head SHA as its last two arguments)
 

@@ -103,7 +103,17 @@ def move(ctx, card_id: str, to: str, *, waiting: bool = False) -> list[str]:
     return set_tags_verified(ctx, card_id, stages.move(ctx.board.get_tags(card_id), to, waiting=waiting))
 
 
+def subject(rec: dict) -> str:
+    """A poll subject a person can read cold: who, then the problem. A customer id that is not an email
+    address (``teacher:<uuid>``) means nothing to a human, so only the title is shown for those."""
+    customer = str(rec.get("customer") or "")
+    who = customer.split("@")[0] if "@" in customer else ""
+    return f"{who} - {rec['title']}" if who else str(rec["title"])
+
+
 def email_card(msg) -> str:
     """The customer's own words first, verbatim. Never a summary."""
+    if getattr(msg, "card", ""):
+        return msg.card
     return (f"**Customer wrote**\nFrom: {msg.sender}\nTo: {', '.join(msg.recipients)}\n"
             f"Date: {msg.received_at}\nSubject: {msg.subject}\n\n{msg.body}")
