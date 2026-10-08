@@ -52,7 +52,7 @@ def run(ctx) -> dict:
         ctx.board.post(rec["card_id"], f"**Draft reply v{version}** (not sent)\n\n{body}",
                        idempotency_key=f"draft:{key}:v{version}")
         votes.open_vote(ctx, key=f"reply:{key}:v{version}", kind="reply", case_key=key, card_id=rec["card_id"],
-                        subject=f"{rec['customer'].split('@')[0]} - {rec['title']}",
+                        subject=cases.subject(rec),
                         question=f"send draft reply v{version} as written?",
                         identity={"case_key": key, "ticket": rec.get("ticket"), "recipient": rec["customer"],
                                   "path": str(path)},

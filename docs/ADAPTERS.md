@@ -55,3 +55,26 @@ Rules for every adapter:
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.
+
+## Texting products: the `baker` adapter
+
+`sayso/adapters/baker.py` serves a product whose customers TEXT an AI agent (iMessage / WhatsApp)
+instead of emailing a helpdesk. It is the first non-email helpdesk, so the loop gained three small, optional
+fields on `InboundMessage`:
+
+- `kind` and `labels`: the product already knows what a message is about (its own case signal), so plugins
+  are skipped and the card groups on that kind. A label the settings file doesn't list is dropped.
+- `card`: the card text. Still the customer's own words first (the product's transcript), framed for a chat.
+- Poll subjects come from `cases.subject()`: a customer id that is not an email address shows the title only.
+
+How the email rules map:
+
+| Email loop | Baker |
+|---|---|
+| Customer address | `teacher:<uuid>`; phone shown as last four digits only |
+| Ticket | the same teacher id: one teacher, one conversation |
+| Helpdesk Sent record | Baker's own team-reply record, claimed before the send, never re-sent |
+| Mailbox Sent copy | the messaging provider's own delivery status (Sendblue status, WhatsApp receipt) |
+
+Baker refuses a reply after STOP and outside WhatsApp's 24-hour window; the loop then marks it UNVERIFIED and
+never retries. `sending = false` on `[helpdesk]` makes `send_reply` raise for a shadow run.

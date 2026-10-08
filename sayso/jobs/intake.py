@@ -41,7 +41,9 @@ def run(ctx) -> dict:
             _mark_seen(seen_path, msg.message_id, ctx)
             continue
         kind, labels = cases.CORRESPONDENCE, []
-        for plugin in ctx.plugins:
+        if msg.kind:  # The helpdesk already knows the kind; a label the board doesn't have is dropped.
+            kind, labels = msg.kind, [x for x in msg.labels if x in ctx.config.labels]
+        for plugin in ([] if msg.kind else ctx.plugins):
             claim = plugin.classify(ctx, msg) if hasattr(plugin, "classify") else None
             if claim:
                 kind, labels = claim.get("kind", kind), list(claim.get("labels", []))

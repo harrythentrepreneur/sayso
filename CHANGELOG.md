@@ -28,6 +28,11 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 - CI installs the system word list (`wamerican`) that privacy masking reads; without it one privacy test failed on every run.
 
 - Read-only web dashboard: `sayso dashboard --config F` or `--demo`. Decisions, board, case pages, money,
+- `baker` adapter for a texting product (iMessage / WhatsApp) as the helpdesk: reads the product's case signals,
+  sends an approved reply through the product, proves it with the product's record AND the provider's delivery
+  status. `sending = false` on `[helpdesk]` for a shadow run. `InboundMessage` gained optional `kind`, `labels`
+  and `card`; poll subjects come from `cases.subject()`. Drafter `style` option. See docs/ADAPTERS.md.
+- Read-only web dashboard: `sayso dashboard --config F` or `--demo`. Decisions, board, case pages, money,
   health and audit log for one or more products. GET only, loopback only, writes nothing. See docs/DASHBOARD.md.
 
 ## [0.1.0] - 2026-09-28

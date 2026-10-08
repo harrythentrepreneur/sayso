@@ -188,6 +188,24 @@ MUTATIONS = [
      '        if dev_profile and self.profile == dev_profile:', '        if False:'),
     ("safety: payment ids allowed", "sayso/safety.py",
      "    if _CARD.search(text) or _PAYMENT_ID.search(text):", "    if False:"),
+    # Baker (texting product) adapter.
+    ("baker: shadow switch ignored", "sayso/adapters/baker.py",
+     "        if not self.sending:\n            raise SendingOff", "        if False:\n            raise SendingOff"),
+    ("baker: reply to another teacher", "sayso/adapters/baker.py",
+     "        if recipient != ticket:", "        if False:"),
+    ("baker: refused send not raised", "sayso/adapters/baker.py",
+     "        if out.get(\"status\") in (\"refused\", \"failed\"):", "        if False:"),
+    ("baker: queued counts as delivered", "sayso/adapters/baker.py",
+     "        ok = row.get(\"status\") == \"sent\" and str(row.get(\"delivery\") or \"\").lower() in PROVEN",
+     "        ok = row.get(\"status\") == \"sent\""),
+    ("baker: other text counted as sent", "sayso/adapters/baker.py",
+     "            if r.get(\"body_sha\") != body_sha:\n                continue", "            if False:\n                continue"),
+    ("baker: non-teacher id accepted", "sayso/adapters/baker.py",
+     "    if not value.startswith(PREFIX) or len(value) != len(PREFIX) + 36:", "    if False:"),
+    ("intake: product kind ignored", "sayso/jobs/intake.py",
+     "        if msg.kind:  # The helpdesk", "        if False:  # The helpdesk"),
+    ("cases: product card replaced by email card", "sayso/cases.py",
+     "    if getattr(msg, \"card\", \"\"):\n        return msg.card", "    if False:\n        return msg.card"),
 ]
 
 
