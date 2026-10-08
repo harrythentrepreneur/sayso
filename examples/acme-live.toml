@@ -1,0 +1,67 @@
+# The same product wired to REAL systems. Every id below is a placeholder.
+# Secrets are NOT in this file: each *_env names an environment variable,
+# kept in ~/.config/sayso/acme.env (chmod 600). See docs/ONBOARDING.md.
+#
+# Do not switch to this file until every step of docs/ONBOARDING.md
+# "Go-live checklist" is ticked.
+
+[product]
+name = "Acme Notes"
+slug = "acme"
+mode = "live"
+support_address = "support@acme.example"
+own_addresses = ["founder@acme.example"]
+labels = ["High value"]
+
+[operators]
+"000000000000000001" = "Owner"
+"000000000000000002" = "Second operator"
+
+[state]
+dir = "/var/lib/sayso/acme"
+
+[board]
+adapter = "discord"
+forum_id = "000000000000000010"
+alerts_channel_id = "000000000000000011"
+token_env = "ACME_DISCORD_TOKEN"
+
+[helpdesk]
+adapter = "frappe"
+url = "https://helpdesk.acme.example"
+api_key_env = "ACME_FRAPPE_KEY"
+api_secret_env = "ACME_FRAPPE_SECRET"
+
+[mailbox]
+adapter = "imap"
+host = "imap.gmail.com"
+user = "support@acme.example"
+sent_folder = '"[Gmail]/Sent Mail"'
+password_env = "ACME_IMAP_APP_PASSWORD"
+
+[payments]
+adapter = "stripe"
+api_key_env = "ACME_STRIPE_RESTRICTED_KEY"   # restricted key: refunds + subscriptions only
+
+[codehost]
+adapter = "github"
+repo = "acme/acme-app"
+token_env = "ACME_GITHUB_TOKEN"
+
+[drafter]
+adapter = "hermes"
+profile = "acme-support"
+
+[dev_runner]
+adapter = "hermes"
+profile = "acme-dev"
+
+[policy]
+quiet_close_days = 3
+readback_seconds = 120
+readback_interval = 10
+unsent_alert_hours = 24
+vote_expiry_hours = 72
+max_new_cases_per_run = 40
+refund_max_minor = 10000
+currencies = ["usd"]

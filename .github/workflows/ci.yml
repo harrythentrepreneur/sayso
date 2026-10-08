@@ -1,0 +1,33 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: System word list (privacy masking reads /usr/share/dict/words)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq wamerican
+          test -s /usr/share/dict/words
+      - name: Unit, workflow, adapter, quickstart and docs tests (fakes only)
+        run: python -m unittest discover -s tests -t . -v
+      - name: End-to-end demo
+        run: python -m sayso.cli demo
+      - name: Example settings validate
+        run: python -m sayso.cli validate --config examples/acme-dry-run.toml
+      - name: Seeded-fault proof (every guard must fail a test when removed)
+        run: |
+          python scripts/mutate.py | tee mutate.log
+          grep -q '^MUTATION VERDICT: PASS' mutate.log

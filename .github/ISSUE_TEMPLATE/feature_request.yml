@@ -1,0 +1,21 @@
+name: Feature or adapter request
+description: A new capability, adapter or plugin
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What recurring manual work, or which risk, would this remove?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The behaviour you want. If it adds an action, say which vote approves it.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [core, adapter, plugin, docs, tooling]

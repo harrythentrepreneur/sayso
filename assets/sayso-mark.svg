@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sayso">
+  <!-- Sayso mark: a speech bubble whose tail becomes a check. Plum #27212d, orange #e8653b. -->
+  <path d="M14 8h30a10 10 0 0 1 10 10v16a10 10 0 0 1-10 10H30l-11 9v-9h-5A10 10 0 0 1 4 34V18A10 10 0 0 1 14 8z" fill="#e8653b"/>
+  <path d="M19 27l8 8 16-17" fill="none" stroke="#27212d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

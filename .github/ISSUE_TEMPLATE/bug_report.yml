@@ -1,0 +1,41 @@
+name: Bug report
+description: Something the loop did wrong, or failed to do
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste customer data, secrets or live ids.** If this is a security problem (for example, an action taken without approval), follow SECURITY.md instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What the loop did, and what you expected it to do.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce (on fakes if possible)
+      placeholder: |
+        1. sayso fake write-in --config ...
+        2. sayso tick --config ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Output of `sayso status`, the relevant journal lines, test output. Redact anything private.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: adapters
+    attributes:
+      label: Adapters involved
+      multiple: true
+      options: [fake, discord, frappe, imap, stripe, github, hermes, custom]

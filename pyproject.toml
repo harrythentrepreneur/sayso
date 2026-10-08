@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sayso"
+version = "0.2.0"
+description = "AI support that waits for your say-so: an approval-gated customer-support loop."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Harry" }, { name = "Kaviru Hapuarachchi" }]
+keywords = ["customer-support", "ai-agent", "human-in-the-loop", "helpdesk", "approvals", "discord", "stripe"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Communications :: Email",
+]
+
+[project.urls]
+Homepage = "https://github.com/harrythentrepreneur/sayso"
+Issues = "https://github.com/harrythentrepreneur/sayso/issues"
+
+[project.scripts]
+sayso = "sayso.cli:main"
+hcml = "sayso.cli:main"   # old name, kept for existing installs
+
+[tool.setuptools.packages.find]
+include = ["sayso*"]

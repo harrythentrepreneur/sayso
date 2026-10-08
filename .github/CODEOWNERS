@@ -1,0 +1,8 @@
+# Every change needs a maintainer review.
+*       @harrythentrepreneur @kaviru2
+
+# Safety-critical: sender, money, votes, release.
+/sayso/jobs/sender.py     @harrythentrepreneur @kaviru2
+/sayso/jobs/money_job.py  @harrythentrepreneur @kaviru2
+/sayso/votes.py           @harrythentrepreneur @kaviru2
+/sayso/jobs/release.py    @harrythentrepreneur @kaviru2

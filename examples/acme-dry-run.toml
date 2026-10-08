@@ -1,0 +1,43 @@
+# A new product on FAKE adapters. Safe to run anywhere: nothing leaves this machine.
+# Copy this file, change [product], and follow docs/QUICKSTART.md.
+
+[product]
+name = "Acme Notes"
+slug = "acme"
+mode = "dry-run"                       # "live" is required before any real adapter is allowed
+support_address = "support@acme.example"
+own_addresses = ["founder@acme.example"]   # our own mail is never treated as a customer
+labels = ["High value"]                # optional board labels; must not reuse stage names
+
+[operators]                            # board user id = name. ONLY these people can approve.
+"1001" = "Operator One"
+
+[state]
+dir = "state/acme"                     # relative to this file; holds cases, votes, receipts
+
+[board]
+adapter = "fake"
+[helpdesk]
+adapter = "fake"
+[mailbox]
+adapter = "fake"
+[payments]
+adapter = "fake"                       # "none" turns money actions off completely
+[codehost]
+adapter = "fake"
+[drafter]
+adapter = "fake"
+[dev_runner]
+adapter = "fake"
+
+[policy]
+quiet_close_days = 3
+readback_seconds = 1
+readback_interval = 1
+refund_max_minor = 5000                # 50.00 in the currency's minor unit; larger refunds are refused
+currencies = ["usd"]
+
+[[plugins]]
+name = "product_failure"
+enabled = false                        # example plugin, off by default
+options = { patterns = { quota = "out of credit" } }
