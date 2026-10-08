@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 540" role="img" aria-label="How Sayso learns: your decisions go to the Hermes learning layer, which updates your playbook, which shapes the next draft">
+  <defs>
+    <linearGradient id="hg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#c7b6ff"/></linearGradient>
+    <linearGradient id="cardg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#211d27"/><stop offset="1" stop-color="#1a1720"/></linearGradient>
+    <style>
+      .t{font-family:Nunito,system-ui,sans-serif;fill:#b3a9b6;font-weight:900;font-size:12px;letter-spacing:.1em}
+      .h{font-family:Fredoka,Nunito,system-ui,sans-serif;fill:#fff6f1;font-weight:600;font-size:17px}
+      .h2{font-family:Fredoka,Nunito,system-ui,sans-serif;fill:#fff6f1;font-weight:600;font-size:22px}
+      .b{font-family:Nunito,system-ui,sans-serif;fill:#c9bfc9;font-weight:700;font-size:13.5px}
+      .m{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;fill:#d6cbff;font-size:12.5px}
+      .flow{stroke:#b49cff;stroke-width:1.75;fill:none;stroke-dasharray:5 6;animation:d 1.6s linear infinite}
+      .arr{fill:#b49cff}
+      @keyframes d{to{stroke-dashoffset:-22}}
+    </style>
+  </defs>
+
+  <text class="t" x="40" y="38">1 · YOU DECIDE</text>
+  <text class="t" x="400" y="38">2 · HERMES LEARNS</text>
+  <text class="t" x="790" y="38">3 · NEXT DRAFT</text>
+
+  <rect x="40" y="56" width="290" height="316" rx="18" fill="url(#cardg)" stroke="#2e2834"/>
+  <g transform="translate(62,80)">
+    <circle cx="13" cy="13" r="13" fill="#2fdc8a" fill-opacity=".16"/><path d="M7.5 13.5l3.8 3.8L19 9.5" stroke="#2fdc8a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="h" x="40" y="12">Send</text><text class="b" x="40" y="31">The draft was right</text>
+  </g>
+  <line x1="62" x2="308" y1="140" y2="140" stroke="#2a2530"/>
+  <g transform="translate(62,158)">
+    <circle cx="13" cy="13" r="13" fill="#c9bfc9" fill-opacity=".13"/><path d="M8.5 8.5l9 9M17.5 8.5l-9 9" stroke="#c9bfc9" stroke-width="2.4" stroke-linecap="round"/>
+    <text class="h" x="40" y="12">Skip</text><text class="b" x="40" y="31">Not this one, or not now</text>
+  </g>
+  <line x1="62" x2="308" y1="218" y2="218" stroke="#2a2530"/>
+  <g transform="translate(62,236)">
+    <circle cx="13" cy="13" r="13" fill="#b49cff" fill-opacity=".16"/><path d="M13 5.5l2 4.8 4.8 2-4.8 2-2 4.8-2-4.8-4.8-2 4.8-2z" fill="#b49cff"/>
+    <text class="h" x="40" y="12">Revise</text><text class="b" x="40" y="31">“Warmer. No dates.”</text>
+  </g>
+  <line x1="62" x2="308" y1="296" y2="296" stroke="#2a2530"/>
+  <g transform="translate(62,314)">
+    <circle cx="13" cy="13" r="13" fill="#ff7a4d" fill-opacity=".16"/><path d="M8 18l1.2-4.4 7-7 3.2 3.2-7 7z" fill="none" stroke="#ff7a4d" stroke-width="2" stroke-linejoin="round"/>
+    <text class="h" x="40" y="12">Edit</text><text class="b" x="40" y="31">Your own words</text>
+  </g>
+
+  <path class="flow" d="M330 214 H 390"/>
+  <path class="arr" d="M390 208.5 L399 214 L390 219.5 Z"/>
+
+  <rect x="400" y="56" width="320" height="316" rx="18" fill="#17141c" stroke="url(#hg)" stroke-width="1.6"/>
+  <rect x="422" y="78" width="122" height="26" rx="13" fill="#b49cff" fill-opacity=".14" stroke="#b49cff" stroke-opacity=".35"/>
+  <text x="483" y="95.5" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="900" font-size="11.5" letter-spacing=".08em" fill="#d6cbff">HERMES AGENT</text>
+  <text class="h2" x="422" y="138">Learning layer</text>
+  <text class="b" x="422" y="160">Turns repeated signals into rules</text>
+
+  <rect x="422" y="182" width="276" height="42" rx="10" fill="#1f1b25" stroke="#2e2834"/>
+  <text class="m" x="438" y="208">signals → pattern (3+ times)</text>
+  <path d="M560 224 V 236" stroke="#4b4250" stroke-width="1.5"/><path d="M555.5 233 L560 239 L564.5 233" fill="none" stroke="#6f6673" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="422" y="241" width="276" height="42" rx="10" fill="#1f1b25" stroke="#2e2834"/>
+  <text class="m" x="438" y="267">pattern → proposed lesson</text>
+  <path d="M560 283 V 295" stroke="#4b4250" stroke-width="1.5"/><path d="M555.5 292 L560 298 L564.5 292" fill="none" stroke="#6f6673" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="422" y="300" width="276" height="42" rx="10" fill="#1f1b25" stroke="#2fdc8a" stroke-opacity=".35"/>
+  <text class="m" x="438" y="326">lesson → your playbook</text>
+  <circle cx="680" cy="321" r="4.5" fill="#2fdc8a"/>
+
+  <path class="flow" d="M720 214 H 780"/>
+  <path class="arr" d="M780 208.5 L789 214 L780 219.5 Z"/>
+
+  <rect x="790" y="56" width="290" height="316" rx="18" fill="url(#cardg)" stroke="#2e2834"/>
+  <text class="t" x="812" y="88" style="fill:#a097a4">YOUR PLAYBOOK</text>
+  <g font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700">
+    <rect x="812" y="102" width="246" height="34" rx="9" fill="#1f1b25"/><circle cx="828" cy="119" r="4" fill="#2fdc8a"/><text x="842" y="124" fill="#ece4ea">Refund duplicates first</text>
+    <rect x="812" y="142" width="246" height="34" rx="9" fill="#1f1b25"/><circle cx="828" cy="159" r="4" fill="#2fdc8a"/><text x="842" y="164" fill="#ece4ea">Replies under 60 words</text>
+    <rect x="812" y="182" width="246" height="34" rx="9" fill="#1f1b25"/><circle cx="828" cy="199" r="4" fill="#2fdc8a"/><text x="842" y="204" fill="#ece4ea">Ask before data deletion</text>
+  </g>
+  <line x1="812" x2="1058" y1="234" y2="234" stroke="#2a2530"/>
+  <text class="t" x="812" y="260" style="fill:#a097a4">NEXT DRAFT</text>
+  <rect x="812" y="272" width="246" height="78" rx="12" fill="#2a1f1b" stroke="#ff7a4d" stroke-opacity=".5"/>
+  <text x="828" y="299" font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#ffe6dc">Hi Leo, you’re not the only one.</text>
+  <text x="828" y="320" font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#ffe6dc">A fix for blank charts ships</text>
+  <text x="828" y="339" font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#ffe6dc">today.</text>
+
+  <path class="flow" d="M935 372 V 428 Q 935 450 913 450 H 207 Q 185 450 185 428 V 382"/>
+  <path class="arr" d="M179.5 382 L185 373 L190.5 382 Z"/>
+  <rect x="440" y="436" width="240" height="28" rx="14" fill="#141118" stroke="#3a3440"/>
+  <text x="560" y="455" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="12.5" fill="#d6cbff">You review it · the loop repeats</text>
+
+  <text x="40" y="512" font-family="Nunito,system-ui,sans-serif" font-weight="700" font-size="13" fill="#a097a4">Every lesson shows in Insights with an on/off switch. Nothing changes your playbook without your say-so.</text>
+</svg>

@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0f0d12" />
+<title>Sayso · Customer support you can swipe</title>
+<meta name="description" content="Sayso drafts every customer reply. Swipe right to send, left to skip, or ask it to revise. It learns from every decision." />
+<link rel="icon" href="img/sayso-mark.svg" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#0f0d12;--bg2:#141118;--card:#1b1720;--card2:#241f2a;--line:rgba(255,255,255,.07);--ink:#fff6f1;--ink2:#d9d0d8;--soft:#a097a4;--faint:#6f6673;
+ --coral:#ff7a4d;--send:#2fdc8a;--learn:#b49cff;--warn:#ffc53d;--max:1160px;--pad:24px}
+@media (min-width:64rem){:root{--pad:40px}}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Nunito",system-ui,sans-serif;background:var(--bg);color:var(--ink2);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:"Fredoka","Nunito",sans-serif;color:var(--ink);font-weight:600;line-height:1.08;letter-spacing:-.01em}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+.preview{background:#1d1822;text-align:center;font-size:13px;font-weight:800;padding:7px 12px;color:var(--soft)}
+.preview b{color:var(--warn)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font:800 13px Nunito;letter-spacing:.06em;text-transform:uppercase;color:var(--coral)}
+.eyebrow.v{color:var(--learn)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--coral);color:#1a0f0a;font:600 17px "Fredoka";padding:14px 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer;transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.2)}
+.btn.sm{font-size:15px;padding:9px 16px}
+/* nav */
+.nav{position:sticky;top:0;z-index:30;background:rgba(15,13,18,.82);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .2s}
+.nav.s{border-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;font:600 23px "Fredoka";color:var(--coral);text-decoration:none}
+.brand svg{width:34px;height:31px}
+.links{display:none;gap:4px;font-weight:800;font-size:14.5px}
+.links a{text-decoration:none;color:var(--soft);padding:8px 12px;border-radius:999px}.links a:hover{color:var(--ink);background:var(--card)}
+@media (min-width:60rem){.links{display:flex}}
+/* hero */
+.hero{padding:64px 0 40px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:720px;height:720px;background:radial-gradient(closest-side,rgba(255,122,77,.16),transparent);pointer-events:none}
+.hero .wrap{display:grid;gap:48px;align-items:center}
+@media (min-width:62rem){.hero .wrap{grid-template-columns:1.05fr .95fr}}
+.hero h1{font-size:clamp(42px,5.6vw,72px);margin:16px 0 20px}
+.hero h1 span{color:var(--coral)}
+.lede{font-size:19px;max-width:34rem;color:var(--ink2)}
+.lede b{color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.trust{display:flex;flex-wrap:wrap;gap:18px;margin-top:28px;font-size:14px;font-weight:800;color:var(--soft)}
+.trust span::before{content:"✓ ";color:var(--send)}
+/* iPhone mockup */
+.iphone{position:relative;width:300px;border-radius:52px;padding:11px;background:linear-gradient(145deg,#3a3540,#18151c 40%,#2c2832);box-shadow:0 0 0 1.5px #4a4450,0 40px 80px rgba(0,0,0,.55),inset 0 0 2px rgba(255,255,255,.15);flex:none}
+.iphone::before{content:"";position:absolute;left:50%;top:22px;transform:translateX(-50%);width:96px;height:28px;border-radius:16px;background:#000;z-index:3}
+.iphone::after{content:"";position:absolute;right:-3px;top:150px;width:3px;height:70px;border-radius:2px;background:#2a2530}
+.iphone .scr{width:100%;aspect-ratio:390/844;border-radius:42px;overflow:hidden;background:#120f15;position:relative}
+.iphone .scr img{width:100%;height:100%;object-fit:cover;object-position:top;border:0;display:block}
+.iphone .scr iframe{position:absolute;left:0;top:0;width:390px;height:844px;border:0;transform-origin:0 0;transform:scale(var(--k,.8))}
+.iphone.lg{width:340px}
+.iphone.sm{width:236px;border-radius:42px;padding:9px}.iphone.sm .scr{border-radius:34px}.iphone.sm::before{top:17px;width:76px;height:22px}
+.hero-phone{justify-self:center;position:relative}
+.hint{position:absolute;left:-112px;top:118px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13px;font-weight:800;color:var(--ink);box-shadow:0 10px 24px rgba(0,0,0,.4);width:130px;line-height:1.35}
+.hint.r{left:auto;right:-118px;top:330px}
+.hint i{font-style:normal;color:var(--send)}.hint.l i{color:var(--soft)}
+@media (max-width:760px){.hint{display:none}}
+/* sections */
+section{padding:96px 0;scroll-margin-top:80px}
+h1,h2{text-wrap:balance}
+.alt{background:var(--bg2)}
+.head{max-width:44rem;margin-bottom:48px}
+.head.c{margin-left:auto;margin-right:auto;text-align:center}
+.head h2{font-size:clamp(32px,4.2vw,50px);margin:12px 0 14px}
+.head p{font-size:18px;color:var(--ink2)}
+/* how it works */
+.steps{display:grid;gap:22px}
+@media (min-width:56rem){.steps{grid-template-columns:repeat(3,1fr)}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:22px 22px 0;display:flex;flex-direction:column;overflow:hidden}
+.step .n{font:900 12px Nunito;letter-spacing:.08em;text-transform:uppercase;color:var(--coral)}
+.step h3{font-size:24px;margin:8px 0 8px}
+.step p{font-size:15.5px;color:var(--ink2);margin-bottom:22px}
+.step .shot{margin-top:auto;display:flex;justify-content:center;height:360px;overflow:hidden}
+.step .shot.bottom .scr img{object-position:bottom}
+.step .shot .iphone{width:250px;transform:translateY(0)}
+/* gestures */
+.gest{display:grid;gap:16px}
+@media (min-width:56rem){.gest{grid-template-columns:repeat(4,1fr)}}
+.g{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px}
+.g .k{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:900 18px Nunito;margin-bottom:12px}
+.g h3{font-size:20px;margin-bottom:4px}
+.g p{font-size:14.5px}
+/* desktop mockup */
+.mac{max-width:1080px;margin:0 auto}
+.mac .lid{border-radius:18px 18px 0 0;background:#0b0a0d;padding:12px 12px 0;box-shadow:0 0 0 1.5px #3a3540,0 40px 90px rgba(0,0,0,.55)}
+.mac .bar{display:flex;align-items:center;gap:7px;height:30px;padding:0 10px;background:#1b1820;border-radius:10px 10px 0 0}
+.mac .bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.mac .bar i:nth-child(2){background:#febc2e}.mac .bar i:nth-child(3){background:#28c840}
+.mac .bar span{margin:0 auto;font-size:12px;font-weight:800;color:var(--faint);background:#120f15;border-radius:6px;padding:3px 40px}
+.mac .scr{aspect-ratio:16/10;overflow:hidden;background:#120f15}
+.mac .scr img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.mac .base{height:16px;background:linear-gradient(#3a3540,#211d26);border-radius:0 0 22px 22px;margin:0 -3%;box-shadow:0 12px 24px rgba(0,0,0,.4)}
+.mac .base::after{content:"";display:block;width:16%;height:6px;margin:0 auto;background:#16131a;border-radius:0 0 8px 8px}
+.tabs{display:flex;justify-content:center;gap:8px;margin-bottom:26px;flex-wrap:wrap}
+.tabs button{border:0;background:var(--card);color:var(--soft);font:800 14.5px Nunito;padding:9px 16px;border-radius:999px;cursor:pointer;box-shadow:inset 0 0 0 1px var(--line)}
+.tabs button.on{background:var(--ink);color:#1a1015}
+.cap{text-align:center;margin-top:18px;font-size:14.5px;color:var(--soft);font-weight:700}
+/* details row */
+.duo{display:grid;gap:40px;align-items:center}
+.duo>*{min-width:0}
+@media (min-width:56rem){.duo{grid-template-columns:1fr 1fr}}
+.phones{display:flex;gap:18px;justify-content:center;align-items:flex-start}
+@media (max-width:560px){.phones{gap:10px}.phones .iphone.sm{width:46%;border-radius:30px;padding:6px}.phones .iphone.sm .scr{border-radius:25px}.phones .iphone.sm::before{top:11px;width:48px;height:14px}.phones .iphone:nth-child(2){margin-top:24px}}
+@media (max-width:760px){.hero{padding-top:36px}.iphone.lg{width:min(calc(100vw - 32px),360px)}}
+.phones .iphone:nth-child(2){margin-top:44px}
+.list{display:grid;gap:14px;margin-top:22px}
+.list div{display:flex;gap:12px;align-items:flex-start;font-size:16px}
+.list b{color:var(--ink)}
+.list i{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:900 12px Nunito;font-style:normal;background:rgba(47,220,138,.16);color:var(--send);margin-top:1px}
+/* hermes */
+.hermes{border-radius:30px;padding:32px;background:radial-gradient(120% 120% at 50% 0%,rgba(180,156,255,.08),transparent 60%),var(--card);border:1px solid rgba(180,156,255,.22)}
+.hermes svg{width:100%;height:auto;display:block}
+.hermes{overflow-x:auto}
+@media (max-width:760px){.hermes{padding:16px}.hermes svg{min-width:720px}}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(180,156,255,.12);border:1px solid rgba(180,156,255,.3);color:#d9ccff;font:800 13px Nunito;padding:6px 12px;border-radius:999px}
+.hbadge b{color:#fff}
+.points{display:grid;gap:14px;margin-top:28px}
+@media (min-width:56rem){.points{grid-template-columns:repeat(3,1fr)}}
+.points div{background:#17141c;border:1px solid var(--line);border-radius:18px;padding:16px;font-size:15px}
+.points b{display:block;color:var(--ink);font-family:Fredoka;font-weight:600;font-size:18px;margin-bottom:4px}
+/* safety */
+.safe{display:grid;gap:16px}
+@media (min-width:56rem){.safe{grid-template-columns:repeat(3,1fr)}}
+.safe div{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
+.safe h3{font-size:21px;margin-bottom:6px}
+.safe p{font-size:15px}
+/* where */
+.where{display:grid;gap:16px}
+@media (min-width:56rem){.where{grid-template-columns:repeat(4,1fr)}}
+.where div{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px}
+.where h3{font-size:19px;margin:10px 0 4px}
+.where p{font-size:14.5px}
+.st{font:900 10.5px Nunito;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.st.live{background:rgba(47,220,138,.15);color:var(--send)}.st.soon{background:rgba(255,197,61,.14);color:var(--warn)}
+/* faq + final */
+.faq{max-width:46rem;margin:0 auto;display:grid;gap:10px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 20px}
+.faq summary{font:600 18px Fredoka;color:var(--ink);cursor:pointer;list-style:none}
+.faq summary::after{content:"+";float:right;color:var(--coral)}
+.faq details[open] summary::after{content:"–"}
+.faq p{margin-top:8px;font-size:16px}
+.final{text-align:center}
+.final h2{font-size:clamp(34px,4.6vw,56px)}
+.final p{max-width:32rem;margin:14px auto 26px;font-size:18px}
+.note{display:none;margin-top:14px;font-weight:800;color:var(--warn)}
+footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <symbol id="buddy" viewBox="0 0 120 110"><path d="M26 8h64a22 22 0 0 1 22 22v34a22 22 0 0 1-22 22H58l-22 18v-18H26A22 22 0 0 1 4 64V30A22 22 0 0 1 26 8z" fill="#ff7a4d"/><path d="M26 8h64a22 22 0 0 1 22 22v6c-18-10-70-10-108 2v-8A22 22 0 0 1 26 8z" fill="#ff9a74"/><ellipse cx="42" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><ellipse cx="76" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><circle cx="44.5" cy="40.5" r="2.4" fill="#fff"/><circle cx="78.5" cy="40.5" r="2.4" fill="#fff"/><ellipse cx="30" cy="60" rx="7" ry="4.5" fill="#ff4f7b" opacity=".55"/><ellipse cx="88" cy="60" rx="7" ry="4.5" fill="#ff4f7b" opacity=".55"/><path d="M49 60q10 9 20 0" fill="none" stroke="#24161c" stroke-width="4.5" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<div class="preview"><b>Design preview.</b> Discord approvals run today. The phone app, web app and Slack are being built.</div>
+
+<nav class="nav" id="nav"><div class="wrap">
+  <a class="brand" href="#"><svg><use href="#buddy"/></svg>sayso</a>
+  <div class="links"><a href="#how">How it works</a><a href="#web">Web app</a><a href="#learn">Learning</a><a href="#safe">Safety</a><a href="#faq">FAQ</a></div>
+  <a class="btn sm" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">★ Star on GitHub</a>
+</div></nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Customer support for small SaaS teams</span>
+      <h1>Support you can<br><span>swipe through.</span></h1>
+      <p class="lead lede">Sayso reads every customer email, checks the facts and writes the reply. <b>Swipe right to send. Swipe left to skip. Tap Revise to change it.</b> Every decision teaches it how your team answers.</p>
+      <div class="cta"><a class="btn" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Get it on GitHub →</a><a class="btn ghost" href="app.html" target="_blank">Try the demo</a></div>
+      <div class="trust"><span>Nothing sends without you</span><span>Every send checked</span><span>Learns your voice</span></div>
+    </div>
+    <div class="hero-phone">
+      <div class="hint l">← Swipe left<br><i>Skip, nothing sent</i></div>
+      <div class="iphone lg"><div class="scr"><iframe src="app.html?embed" title="Sayso phone app, try swiping" loading="eager"></iframe></div></div>
+      <div class="hint r">Swipe right →<br><i>Send the reply</i></div>
+    </div>
+  </div>
+</header>
+
+<section id="how" class="alt">
+  <div class="wrap">
+    <div class="head c"><span class="eyebrow">How it works</span><h2>Read. Swipe. Or revise.</h2><p>Each email becomes one card. The card asks one question and shows exactly what will happen.</p></div>
+    <div class="steps">
+      <div class="step"><span class="n">Step 1</span><h3>Read the card</h3><p>The question at the top, the customer's own words, and the reply Sayso wrote. Scroll up for earlier emails.</p>
+        <div class="shot"><div class="iphone"><div class="scr"><img src="img/ui/ph-card.webp" alt="A Sayso card asking: Refund $49.00 and send this reply?" loading="lazy"></div></div></div></div>
+      <div class="step"><span class="n">Step 2</span><h3>Swipe to decide</h3><p>Right sends it. Left skips it. The next card slides in, with no pop-ups in the way.</p>
+        <div class="shot"><div class="iphone"><div class="scr"><img src="img/ui/ph-swipe.webp" alt="A card being swiped right with a SEND stamp" loading="lazy"></div></div></div></div>
+      <div class="step"><span class="n">Or</span><h3>Or revise it</h3><p>Tap Revise: "Warmer", "Shorter", or your own words. Sayso rewrites it and keeps the lesson.</p>
+        <div class="shot bottom"><div class="iphone"><div class="scr"><img src="img/ui/ph-revise.webp" alt="The Revise sheet with quick options" loading="lazy"></div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="duo">
+      <div>
+        <span class="eyebrow">Swipe up for details</span>
+        <h2 style="font-size:clamp(30px,3.8vw,46px);margin:12px 0 14px">Everything behind the reply, one swipe away.</h2>
+        <p>When a case needs a closer look, swipe up. You see what Sayso checked, what each button will do, and the full history.</p>
+        <div class="list">
+          <div><i>✓</i><span><b>What Sayso checked.</b> For example: "Stripe shows 2 charges of $49.00 on 3 Oct."</span></div>
+          <div><i>✓</i><span><b>What Send will do.</b> "Refund $49.00 + send." Money only moves on your Yes.</span></div>
+          <div><i>✓</i><span><b>The full conversation and an activity log</b> of every step Sayso took.</span></div>
+        </div>
+      </div>
+      <div class="phones">
+        <div class="iphone sm"><div class="scr"><img src="img/ui/ph-details.webp" alt="Case details page" loading="lazy"></div></div>
+        <div class="iphone sm"><div class="scr"><img src="img/ui/ph-insights.webp" alt="Insights page" loading="lazy"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="web" class="alt">
+  <div class="wrap">
+    <div class="head c"><span class="eyebrow">On your desktop</span><h2>The same flow, at your desk.</h2><p id="webCap">A full web app with the queue on the left and the case in the middle. Use the arrow keys: → send, ← skip, R revise.</p></div>
+    <div class="tabs" id="tabs"><button class="on" data-i="desk-inbox">Inbox</button><button data-i="desk-insights">Insights</button><button data-i="desk-discord">In Discord</button></div>
+    <div class="mac"><div class="lid"><div class="bar"><i></i><i></i><i></i><span id="url">app.sayso.dev/inbox</span></div><div class="scr"><img id="deskImg" src="img/ui/desk-inbox.webp" alt="Sayso web app inbox" loading="lazy"></div></div><div class="base"></div></div>
+    <p class="cap"><a href="web.html" target="_blank" style="color:var(--coral);font-weight:900">Open the web app demo ↗</a> · demo data</p>
+  </div>
+</section>
+
+<section id="learn">
+  <div class="wrap">
+    <div class="head c"><span class="hbadge">Learning powered by <b>Hermes Agent</b></span><h2>Every decision makes the next draft better.</h2><p>Sayso uses Hermes, an open-source agent framework, as its learning layer. Hermes turns your sends, skips and revisions into plain rules you can see and switch off.</p></div>
+    <div class="hermes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 540" role="img" aria-label="How Sayso learns: your decisions go to the Hermes learning layer, which updates your playbook, which shapes the next draft">
+  <defs>
+    <linearGradient id="hg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#c7b6ff"/></linearGradient>
+    <linearGradient id="cardg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#211d27"/><stop offset="1" stop-color="#1a1720"/></linearGradient>
+    <style>
+      .t{font-family:Nunito,system-ui,sans-serif;fill:#b3a9b6;font-weight:900;font-size:12px;letter-spacing:.1em}
+      .h{font-family:Fredoka,Nunito,system-ui,sans-serif;fill:#fff6f1;font-weight:600;font-size:17px}
+      .h2{font-family:Fredoka,Nunito,system-ui,sans-serif;fill:#fff6f1;font-weight:600;font-size:22px}
+      .b{font-family:Nunito,system-ui,sans-serif;fill:#c9bfc9;font-weight:700;font-size:13.5px}
+      .m{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;fill:#d6cbff;font-size:12.5px}
+      .flow{stroke:#b49cff;stroke-width:1.75;fill:none;stroke-dasharray:5 6;animation:d 1.6s linear infinite}
+      .arr{fill:#b49cff}
+      @keyframes d{to{stroke-dashoffset:-22}}
+    </style>
+  </defs>
+
+  <text class="t" x="40" y="38">1 · YOU DECIDE</text>
+  <text class="t" x="400" y="38">2 · HERMES LEARNS</text>
+  <text class="t" x="790" y="38">3 · NEXT DRAFT</text>
+
+  <rect x="40" y="56" width="290" height="316" rx="18" fill="url(#cardg)" stroke="#2e2834"/>
+  <g transform="translate(62,80)">
+    <circle cx="13" cy="13" r="13" fill="#2fdc8a" fill-opacity=".16"/><path d="M7.5 13.5l3.8 3.8L19 9.5" stroke="#2fdc8a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="h" x="40" y="12">Send</text><text class="b" x="40" y="31">The draft was right</text>
+  </g>
+  <line x1="62" x2="308" y1="140" y2="140" stroke="#2a2530"/>
+  <g transform="translate(62,158)">
+    <circle cx="13" cy="13" r="13" fill="#c9bfc9" fill-opacity=".13"/><path d="M8.5 8.5l9 9M17.5 8.5l-9 9" stroke="#c9bfc9" stroke-width="2.4" stroke-linecap="round"/>
+    <text class="h" x="40" y="12">Skip</text><text class="b" x="40" y="31">Not this one, or not now</text>
+  </g>
+  <line x1="62" x2="308" y1="218" y2="218" stroke="#2a2530"/>
+  <g transform="translate(62,236)">
+    <circle cx="13" cy="13" r="13" fill="#b49cff" fill-opacity=".16"/><path d="M13 5.5l2 4.8 4.8 2-4.8 2-2 4.8-2-4.8-4.8-2 4.8-2z" fill="#b49cff"/>
+    <text class="h" x="40" y="12">Revise</text><text class="b" x="40" y="31">“Warmer. No dates.”</text>
+  </g>
+  <line x1="62" x2="308" y1="296" y2="296" stroke="#2a2530"/>
+  <g transform="translate(62,314)">
+    <circle cx="13" cy="13" r="13" fill="#ff7a4d" fill-opacity=".16"/><path d="M8 18l1.2-4.4 7-7 3.2 3.2-7 7z" fill="none" stroke="#ff7a4d" stroke-width="2" stroke-linejoin="round"/>
+    <text class="h" x="40" y="12">Edit</text><text class="b" x="40" y="31">Your own words</text>
+  </g>
+
+  <path class="flow" d="M330 214 H 390"/>
+  <path class="arr" d="M390 208.5 L399 214 L390 219.5 Z"/>
+
+  <rect x="400" y="56" width="320" height="316" rx="18" fill="#17141c" stroke="url(#hg)" stroke-width="1.6"/>
+  <rect x="422" y="78" width="122" height="26" rx="13" fill="#b49cff" fill-opacity=".14" stroke="#b49cff" stroke-opacity=".35"/>
+  <text x="483" y="95.5" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="900" font-size="11.5" letter-spacing=".08em" fill="#d6cbff">HERMES AGENT</text>
+  <text class="h2" x="422" y="138">Learning layer</text>
+  <text class="b" x="422" y="160">Turns repeated signals into rules</text>
+
+  <rect x="422" y="182" width="276" height="42" rx="10" fill="#1f1b25" stroke="#2e2834"/>
+  <text class="m" x="438" y="208">signals → pattern (3+ times)</text>
+  <path d="M560 224 V 236" stroke="#4b4250" stroke-width="1.5"/><path d="M555.5 233 L560 239 L564.5 233" fill="none" stroke="#6f6673" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="422" y="241" width="276" height="42" rx="10" fill="#1f1b25" stroke="#2e2834"/>
+  <text class="m" x="438" y="267">pattern → proposed lesson</text>
+  <path d="M560 283 V 295" stroke="#4b4250" stroke-width="1.5"/><path d="M555.5 292 L560 298 L564.5 292" fill="none" stroke="#6f6673" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="422" y="300" width="276" height="42" rx="10" fill="#1f1b25" stroke="#2fdc8a" stroke-opacity=".35"/>
+  <text class="m" x="438" y="326">lesson → your playbook</text>
+  <circle cx="680" cy="321" r="4.5" fill="#2fdc8a"/>
+
+  <path class="flow" d="M720 214 H 780"/>
+  <path class="arr" d="M780 208.5 L789 214 L780 219.5 Z"/>
+
+  <rect x="790" y="56" width="290" height="316" rx="18" fill="url(#cardg)" stroke="#2e2834"/>
+  <text class="t" x="812" y="88" style="fill:#a097a4">YOUR PLAYBOOK</text>
+  <g font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700">
+    <rect x="812" y="102" width="246" height="34" rx="9" fill="#1f1b25"/><circle cx="828" cy="119" r="4" fill="#2fdc8a"/><text x="842" y="124" fill="#ece4ea">Refund duplicates first</text>
+    <rect x="812" y="142" width="246" height="34" rx="9" fill="#1f1b25"/><circle cx="828" cy="159" r="4" fill="#2fdc8a"/><text x="842" y="164" fill="#ece4ea">Replies under 60 words</text>
+    <rect x="812" y="182" width="246" height="34" rx="9" fill="#1f1b25"/><circle cx="828" cy="199" r="4" fill="#2fdc8a"/><text x="842" y="204" fill="#ece4ea">Ask before data deletion</text>
+  </g>
+  <line x1="812" x2="1058" y1="234" y2="234" stroke="#2a2530"/>
+  <text class="t" x="812" y="260" style="fill:#a097a4">NEXT DRAFT</text>
+  <rect x="812" y="272" width="246" height="78" rx="12" fill="#2a1f1b" stroke="#ff7a4d" stroke-opacity=".5"/>
+  <text x="828" y="299" font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#ffe6dc">Hi Leo, you’re not the only one.</text>
+  <text x="828" y="320" font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#ffe6dc">A fix for blank charts</text>
+  <text x="828" y="339" font-family="Nunito,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#ffe6dc">ships today.</text>
+
+  <path class="flow" d="M935 372 V 428 Q 935 450 913 450 H 207 Q 185 450 185 428 V 382"/>
+  <path class="arr" d="M179.5 382 L185 373 L190.5 382 Z"/>
+  <rect x="440" y="436" width="240" height="28" rx="14" fill="#141118" stroke="#3a3440"/>
+  <text x="560" y="455" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="12.5" fill="#d6cbff">You review it · the loop repeats</text>
+
+  <text x="40" y="512" font-family="Nunito,system-ui,sans-serif" font-weight="700" font-size="13" fill="#a097a4">Every lesson shows in Insights with an on/off switch. Nothing changes your playbook without your say-so.</text>
+</svg>
+</div>
+    <div class="points">
+      <div><b>Learns from patterns</b>One skip is noise. The same correction three times becomes a lesson.</div>
+      <div><b>You can see every rule</b>Lessons appear in Insights in plain words, each with an on/off switch.</div>
+      <div><b>Never acts alone</b>Hermes changes how replies are written. It never sends, refunds or cancels.</div>
+    </div>
+  </div>
+</section>
+
+<section id="safe" class="alt">
+  <div class="wrap">
+    <div class="head c"><span class="eyebrow">Safe by default</span><h2>Friendly on the outside. Strict on the inside.</h2></div>
+    <div class="safe">
+      <div><h3>Nothing sends alone</h3><p>Every reply, refund and cancellation waits for a person to send it.</p></div>
+      <div><h3>Customer writes again? Card updates.</h3><p>If they reply before you decide, the old draft is cancelled and a new one answers both emails.</p></div>
+      <div><h3>Checked, not claimed</h3><p>"Sent" means it is in your Sent folder. "Refunded" means Stripe says so. No double emails.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head c"><span class="eyebrow">Where you decide</span><h2>Phone, desk or team chat.</h2></div>
+    <div class="where">
+      <div><span class="st soon">building</span><h3>iPhone app</h3><p>Swipe through support on the go.</p></div>
+      <div><span class="st soon">building</span><h3>Web app</h3><p>Keyboard-fast queue at your desk.</p></div>
+      <div><span class="st live">live</span><h3>Discord</h3><p>One post per customer, Yes/No poll, proof after every action.</p></div>
+      <div><span class="st soon">next</span><h3>Slack</h3><p>Approve and revise from a channel.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="alt">
+  <div class="wrap">
+    <div class="head c"><h2>Questions</h2></div>
+    <div class="faq">
+      <details open><summary>Who is Sayso for?</summary><p>Small SaaS teams, usually 1–10 people, where the founders still answer support themselves.</p></details>
+      <details><summary>What is Hermes, and does it see my data?</summary><p>Hermes Agent is the open-source agent framework Sayso uses for learning. It reads your decisions so it can write better drafts. Sayso only lets it change how drafts are written: sending, refunds and cancellations always wait for a person.</p></details>
+      <details><summary>Can it send without me?</summary><p>No. Every customer email and every money action waits for a person.</p></details>
+      <details><summary>Is the phone app ready?</summary><p>Not yet. Discord approvals run today. The phone app, web app and Slack are being built in the open on GitHub.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="join">
+  <div class="wrap">
+    <svg style="width:84px;height:77px;margin:0 auto 14px;display:block"><use href="#buddy"/></svg>
+    <h2>Make support a swipe.</h2>
+    <p>Sayso is open source. Run it on your own server, connect your inbox, and start swiping.</p>
+    <a class="btn" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Get Sayso on GitHub →</a>
+    <p style="margin-top:14px;font-size:14px;color:var(--soft)">Open source · Apache-2.0 · self-hosted</p>
+  </div>
+</section>
+
+<footer>Sayso · built by Harry &amp; Kaviru · learning powered by Hermes Agent · design preview with demo data</footer>
+
+<script>
+const fit=()=>document.querySelectorAll('.iphone .scr iframe').forEach(f=>{const w=f.parentNode.clientWidth;f.style.setProperty('--k',w/390);f.parentNode.style.height=(844*w/390)+'px';});fit();addEventListener('resize',fit);
+const nav=document.getElementById('nav');addEventListener('scroll',()=>nav.classList.toggle('s',scrollY>10),{passive:true});
+const urls={'desk-inbox':'app.sayso.dev/inbox','desk-insights':'app.sayso.dev/insights','desk-discord':'discord.com · #support-cases'};
+const caps={'desk-inbox':'A full web app with the queue on the left and the case in the middle. Use the arrow keys: → send, ← skip, R revise.','desk-insights':'Insights shows decisions, time to decide, what customers write about, and every lesson Sayso is using.','desk-discord':'Already on Discord? Each customer gets one post with a Yes/No poll, and Sayso posts proof after each action.'};
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));const i=document.getElementById('deskImg');i.src='img/ui/'+b.dataset.i+'.webp';i.alt=b.textContent;document.getElementById('url').textContent=urls[b.dataset.i];document.getElementById('webCap').textContent=caps[b.dataset.i];});
+
+</script>
+</body>
+</html>

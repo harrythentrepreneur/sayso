@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sayso · Inbox</title>
+<link rel="icon" href="img/sayso-mark.svg" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#120f15;--side:#16131a;--panel:#1a1720;--card:#1d1922;--card2:#2a2530;--line:rgba(255,255,255,.07);--ink:#fff6f1;--ink2:#e5dce4;--soft:#a097a4;--faint:#6f6673;
+ --coral:#ff7a4d;--send:#2fdc8a;--skip:#c9bfc9;--learn:#b49cff;--warn:#ffc53d;--danger:#ff4f6d}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink2);font-family:"Nunito",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.app{display:grid;grid-template-columns:232px 340px 1fr;height:100%}
+/* sidebar */
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 12px}
+.brand{display:flex;align-items:center;gap:8px;font:600 24px "Fredoka";color:var(--coral);padding:2px 8px 18px}
+.brand svg{width:34px;height:31px}
+.ws{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 10px;margin-bottom:16px}
+.ws i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#7b6cff,#3fa9ff);display:grid;place-items:center;font:600 13px Fredoka;color:#fff;font-style:normal}
+.ws b{display:block;color:var(--ink);font-size:14px}.ws small{font-size:11.5px;color:var(--soft);font-weight:700}
+.nav{display:grid;gap:2px}
+.nav button{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;font-weight:800;font-size:14.5px;color:var(--soft);text-align:left}
+.nav button svg{width:20px;height:20px;flex:none}
+.nav button:hover{background:rgba(255,255,255,.04);color:var(--ink2)}
+.nav button.on{background:rgba(255,122,77,.12);color:var(--coral)}
+.nav .ct{margin-left:auto;min-width:22px;height:20px;border-radius:10px;background:var(--coral);color:#1a0f0a;font:900 11px Nunito;display:grid;place-items:center;padding:0 6px}
+.nav .ct.g{background:rgba(47,220,138,.18);color:var(--send)}
+.sec-l{font:900 10.5px Nunito;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:18px 10px 6px}
+.chan{display:flex;align-items:center;gap:9px;padding:7px 10px;font-size:13.5px;font-weight:800;color:var(--soft)}
+.chan i{width:8px;height:8px;border-radius:50%;background:var(--send);font-style:normal}
+.chan i.off{background:#4b4250}
+.chan small{margin-left:auto;font-size:11px;color:var(--soft)}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px;border-top:1px solid var(--line)}
+.me .av{width:32px;height:32px;font-size:12px}
+.me b{display:block;color:var(--ink);font-size:13.5px}.me small{font-size:11.5px;color:var(--soft);font-weight:700}
+/* queue */
+.queue{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.qh{padding:18px 16px 10px}
+.qh h1{font:600 22px "Fredoka";color:var(--ink);display:flex;align-items:center;gap:8px}
+.qh h1 small{font:800 12px Nunito;color:var(--soft)}
+.filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.filters button{font:800 12px Nunito;padding:5px 10px;border-radius:999px;background:var(--card2);color:var(--soft)}
+.filters button.on{background:var(--ink);color:#1a1015}
+.ql{flex:1;overflow-y:auto;padding:4px 10px 16px;scrollbar-width:thin}
+.qi{display:block;width:100%;text-align:left;padding:11px 12px;border-radius:14px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:background .15s,transform .3s,opacity .3s}
+.qi:hover{background:rgba(255,255,255,.03)}
+.qi.on{background:var(--card);border-color:rgba(255,122,77,.35)}
+.qi .r1{display:flex;align-items:center;gap:8px}
+.qi .r1 b{color:var(--ink);font-size:14px}
+.qi .r1 time{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:800}
+.qi .q{font-size:13.5px;color:var(--ink2);font-weight:700;margin:4px 0 6px;line-height:1.35}
+.qi .p{font-size:12.5px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi .tags{display:flex;gap:5px;margin-top:7px}
+.qi.out{opacity:0;transform:translateX(40px)}
+.qi.outl{opacity:0;transform:translateX(-40px)}
+.av{border-radius:50%;display:grid;place-items:center;font:600 13px "Fredoka";color:#1a1015;flex:none;width:28px;height:28px}
+.risk{display:inline-flex;align-items:center;gap:4px;font:900 10.5px Nunito;letter-spacing:.04em;text-transform:uppercase;color:var(--r);background:color-mix(in srgb,var(--r) 15%,transparent);padding:3px 8px;border-radius:999px}
+.tag{font:900 10.5px Nunito;letter-spacing:.05em;text-transform:uppercase;color:#b3a9b6;background:var(--card2);padding:3px 8px;border-radius:999px}
+.empty-q{text-align:center;padding:40px 16px;color:var(--soft);font-weight:800}
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;position:relative}
+.view{display:none;flex:1;min-height:0}.view.on{display:flex}
+#v-inbox{flex-direction:column}
+.case{flex:1;overflow-y:auto;padding:22px 28px 28px;scrollbar-width:thin}
+.case-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.ch{grid-column:1/-1}
+.ch .meta{display:flex;gap:6px;align-items:center}
+.ch .meta .n{margin-left:auto;font:800 12px Nunito;color:var(--soft);background:var(--card);padding:4px 10px;border-radius:999px}
+.ch h2{font:600 30px/1.15 "Fredoka";color:var(--ink);margin:10px 0 10px}
+.who{display:flex;align-items:center;gap:10px}
+.who .av{width:36px;height:36px;font-size:14px}
+.who b{color:var(--ink)}.who span{color:var(--soft);font-weight:700;font-size:13.5px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}
+.box h4{font:900 11px Nunito;letter-spacing:.08em;text-transform:uppercase;color:#a89eab;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.box h4 small{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--faint);font-size:12px}
+.thread{display:flex;flex-direction:column;gap:10px}
+.day{align-self:center;font:900 10.5px Nunito;letter-spacing:.06em;text-transform:uppercase;color:#8f8593;margin:4px 0}
+.eb{max-width:78%;padding:11px 14px;border-radius:18px;font-size:15px;line-height:1.5;color:#ece4ea}
+.eb time{display:block;font-size:11px;font-weight:800;color:#b0a6b4;margin-top:5px}
+.eb.in{align-self:flex-start;background:#2a2530;border-bottom-left-radius:6px}
+.eb.out{align-self:flex-end;background:#33262b;border:1px solid rgba(255,122,77,.18);border-bottom-right-radius:6px}
+.eb.old{opacity:.75;font-size:14px}
+.draft{margin-top:14px;background:linear-gradient(180deg,#2c1f1a,#241a17);border:1.5px solid rgba(255,122,77,.5);border-radius:18px;padding:12px 14px}
+.draft .dh{display:flex;align-items:center;gap:8px;font:900 11px Nunito;letter-spacing:.06em;text-transform:uppercase;color:#ff9a74;margin-bottom:6px}
+.draft .dh small{margin-left:auto;text-transform:none;letter-spacing:0;color:#c9b8ff;font-weight:800}
+.draft textarea{width:100%;min-height:160px;background:transparent;border:0;color:#fff1ea;font:500 15.5px/1.55 Nunito;resize:vertical;outline:none;field-sizing:content}
+.draft.flash{animation:flash 1.2s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(180,156,255,.9)}100%{box-shadow:0 0 0 16px rgba(180,156,255,0)}}
+.right{display:grid;gap:14px;position:sticky;top:0}
+.chk{display:flex;gap:10px;font-size:14px;line-height:1.4;color:#ece4ea;padding:7px 0}
+.chk+.chk{border-top:1px solid rgba(255,255,255,.05)}
+.ck{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:900 11px Nunito;font-style:normal;margin-top:1px}
+.ck.ok{background:rgba(47,220,138,.18);color:var(--send)}.ck.wait{background:rgba(255,197,61,.16);color:var(--warn)}
+.does{display:grid;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.1);font-size:13.5px;color:#c9bfc9}
+.does b{color:var(--ink);margin-right:4px}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.facts span{background:var(--card2);border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:800;color:var(--ink2)}
+.lesson{background:var(--card2);border-radius:12px;padding:9px 11px;font-size:13.5px;color:#ece4ea;margin-bottom:6px}
+.log{list-style:none;position:relative;margin-left:4px}
+.log li{position:relative;padding:0 0 12px 20px;font-size:13px;line-height:1.35;color:var(--ink2)}
+.log li::before{content:"";position:absolute;left:0;top:4px;width:10px;height:10px;border-radius:50%;background:var(--learn);box-shadow:0 0 0 3px var(--card)}
+.log li:not(:last-child)::after{content:"";position:absolute;left:4px;top:14px;bottom:0;width:2px;background:#33293a}
+.log li.ok::before{background:var(--send)}.log li.w::before{background:var(--warn)}
+.log time{display:block;font-size:11px;font-weight:800;color:var(--soft)}
+.log code{font-size:11.5px;background:var(--card2);padding:1px 5px;border-radius:5px;color:#e7dcff}
+/* action bar */
+.bar{position:absolute;left:0;right:0;bottom:0;padding:22px 28px 14px;background:linear-gradient(rgba(18,15,21,0),var(--bg) 34%);display:flex;flex-direction:column;align-items:center;gap:6px}
+.kh{font-size:11.5px;font-weight:800;color:var(--faint)}.kh kbd{font:900 10.5px Nunito;background:var(--card2);border-radius:5px;padding:1px 5px;color:var(--soft)}
+.bar-in{display:flex;align-items:center;gap:10px;background:#1f1b25;border:1px solid var(--line);border-radius:999px;padding:8px;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.ab{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 18px;border-radius:999px;font:800 15px Nunito;color:var(--ink2);background:var(--card2);transition:transform .1s,filter .15s}
+.ab:hover{filter:brightness(1.15)}.ab:active{transform:scale(.96)}
+.ab svg{width:18px;height:18px}
+.ab kbd{font:900 11px Nunito;background:rgba(255,255,255,.1);border-radius:6px;padding:2px 6px;color:inherit}
+.ab.send kbd{background:rgba(0,0,0,.18)}
+.ab.send{background:var(--send);color:#06301b;padding:0 22px}
+.ab.rev{color:var(--learn)}
+.ab.und{width:46px;padding:0;justify-content:center;color:var(--warn)}
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.scrim.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);opacity:0;pointer-events:none;width:min(520px,92vw);background:#231e28;border:1px solid var(--line);border-radius:22px;padding:20px;z-index:31;transition:.22s}
+.modal.on{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.modal h3{font:600 22px "Fredoka";color:var(--ink)}
+.modal p{font-size:14px;margin:4px 0 12px;color:var(--soft)}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.quick button{background:var(--card2);color:var(--ink);font:800 13px Nunito;padding:7px 12px;border-radius:999px;border:1.5px solid transparent}
+.quick button.on{border-color:var(--learn);background:rgba(180,156,255,.15)}
+.modal textarea{width:100%;height:96px;border-radius:14px;border:1.5px solid #3c3442;background:var(--bg);color:var(--ink);font:600 15px Nunito;padding:10px 12px;resize:none;outline:none}
+.mrow{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.mrow button{border-radius:999px;padding:10px 18px;font:600 15px "Fredoka"}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-10px);background:#fff;color:#1a1015;font-weight:900;font-size:13.5px;padding:9px 16px;border-radius:999px;opacity:0;transition:.25s;z-index:40;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+/* done state */
+.done{flex:1;display:grid;place-items:center;text-align:center}
+.done svg{width:96px;height:88px}
+.done h3{font:600 28px "Fredoka";color:var(--ink);margin-top:10px}
+.done p{margin-top:6px}
+.pill{display:inline-block;margin-top:14px;background:var(--coral);color:#1a0f0a;font:600 15px "Fredoka";padding:10px 18px;border-radius:999px}
+/* insights + lists full width */
+.page{flex:1;overflow-y:auto;padding:26px 32px 40px}
+.page-in{max-width:1100px;margin:0 auto}
+.page h1{font:600 30px "Fredoka";color:var(--ink)}
+.page .lead{margin:4px 0 18px;font-weight:700;color:var(--soft)}
+.demo{font-size:10.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--warn);background:rgba(255,197,61,.12);padding:2px 7px;border-radius:999px;margin-left:4px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}
+.kpi b{display:block;font:600 32px/1.1 "Fredoka";color:var(--ink)}
+.kpi small{display:block;margin-top:6px;font-size:13px;font-weight:800;color:var(--soft)}
+.kpi small span{color:var(--send)}
+.today{display:grid;grid-template-columns:repeat(4,1fr);background:linear-gradient(135deg,#2a1f1c,#211c28);border:1px solid rgba(255,122,77,.25);border-radius:20px;padding:14px 18px;margin-bottom:14px;text-align:center;position:relative}
+.today .tl{position:absolute;left:18px;top:12px;font:900 11px Nunito;letter-spacing:.08em;text-transform:uppercase;color:#ffb199}
+.today b{display:block;font:600 30px "Fredoka";color:var(--ink);margin-top:10px}.today small{font-size:12.5px;font-weight:800;color:#b3a9b6}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px;align-items:start}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
+.ih{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.ih span{font:900 11px Nunito;letter-spacing:.08em;text-transform:uppercase;color:#a89eab}
+.ih .up{font:600 26px "Fredoka";color:var(--ink)}.ih .up em{font:900 12px Nunito;font-style:normal;color:var(--send);margin-left:6px}
+.spark{width:100%;height:auto;display:block}
+.bar2{display:grid;grid-template-columns:90px 1fr 40px;align-items:center;gap:10px;font-size:14px;font-weight:800;color:#ece4ea;margin:9px 0}
+.bar2 div{height:10px;border-radius:5px;background:var(--card2);overflow:hidden}.bar2 i{display:block;height:100%;border-radius:5px}
+.bar2 b{text-align:right;font-size:13px;color:#b3a9b6}
+.srow{display:flex;gap:12px;align-items:flex-start;padding:8px 0;font-size:14px;color:#d6ccd4;font-weight:700}
+.srow+.srow{border-top:1px solid rgba(255,255,255,.05)}
+.srow b{font:600 24px "Fredoka";color:var(--send);min-width:36px}
+.lrow{display:flex;gap:10px;align-items:center;padding:9px 0}
+.lrow+.lrow{border-top:1px solid rgba(255,255,255,.05)}
+.lrow .li{width:34px;height:34px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:17px;flex:none}
+.lrow b{display:block;color:#f1e9ef;font-size:14px}.lrow small{font-size:12px;color:#8c8290;font-weight:700}
+.tog{margin-left:auto;width:44px;height:26px;border-radius:13px;background:var(--send);position:relative;flex:none}
+.tog::after{content:"";position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.tog.off{background:#4b4250}.tog.off::after{left:3px}
+.row-item{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px}
+.row-item .av{width:38px;height:38px;font-size:14px}
+.row-item b{color:var(--ink);font-size:14.5px;display:block}.row-item small{font-size:12.5px;color:var(--soft);font-weight:700}
+.row-item .r{margin-left:auto;font-size:12px;font-weight:900;color:var(--send)}
+.kbd-help{position:absolute;right:20px;top:16px;font-size:12px;font-weight:800;color:var(--faint)}
+.kbd-help kbd{font:900 10.5px Nunito;background:var(--card2);border-radius:6px;padding:2px 6px;color:var(--soft);margin:0 2px}
+@media (max-width:1180px){.app{grid-template-columns:76px 300px 1fr}.side .brand span,.side .ws div,.nav button span,.nav .ct,.sec-l,.chan,.me div{display:none}.side{align-items:center}.ws{padding:6px}.nav button{justify-content:center}.case-in{grid-template-columns:1fr}.right{position:static}}
+@media (max-width:820px){.app{grid-template-columns:1fr}.side,.queue{display:none}.kpis,.grid2,.grid3,.today{grid-template-columns:1fr 1fr}.case{padding:18px 16px 140px}.ab kbd{display:none}.kbd-help{display:none}}
+.abar{position:sticky;bottom:-16px;margin:14px 0 -16px;padding:14px 0 16px;background:linear-gradient(rgba(29,25,34,0),var(--card) 28%);border-radius:0 0 20px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:3}
+.abar .bar-in{box-shadow:none;background:#26212c;max-width:100%;flex-wrap:nowrap}
+.ab{white-space:nowrap}
+.case-in>.box{min-width:0}
+.draft textarea{max-width:100%}
+@media (max-width:820px){.ab kbd{display:none}.ab{padding:0 12px;height:44px;font-size:14px;gap:6px}.ab.und{width:40px}.bar-in{gap:6px!important;padding:6px!important}.ab.send{padding:0 16px}.ab .lbl-x{display:none}.ch h2{font-size:24px}.who span{white-space:normal}.case{padding:16px 12px 28px}.box{padding:14px 12px}.eb{max-width:92%}}
+.thread .eb.old{display:none}.thread.open .eb.old{display:block}
+.more-btn{align-self:center;font:800 12px Nunito;color:var(--soft);background:var(--card2);padding:5px 12px;border-radius:999px}
+.filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.filters button{white-space:nowrap}
+
+/* action bar v2: fills the column, never overflows */
+.abar{container-type:inline-size}
+.abar .bar-in{width:100%;display:flex;gap:8px;padding:6px;border-radius:999px}
+.abar .ab{flex:1 1 0;min-width:0;justify-content:center;overflow:hidden;padding:0 14px}
+.abar .ab.send{flex:1.5 1 0;padding:0 16px}
+.abar .ab.und{flex:0 0 46px;padding:0}
+.abar .ab>span{overflow:hidden;text-overflow:ellipsis}
+@container (max-width:560px){.abar .ab kbd{display:none}}
+@container (max-width:400px){.abar .ab.rev{flex:0 0 46px;padding:0}.abar .ab.rev .t{display:none}.abar .bar-in{gap:6px}}
+.case{container-type:inline-size}
+@container (max-width:760px){.case-in{grid-template-columns:1fr}.right{position:static;grid-template-columns:1fr 1fr}}
+@container (max-width:560px){.right{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <symbol id="buddy" viewBox="0 0 120 110">
+      <path d="M26 8h64a22 22 0 0 1 22 22v34a22 22 0 0 1-22 22H58l-22 18v-18H26A22 22 0 0 1 4 64V30A22 22 0 0 1 26 8z" fill="#ff7a4d"/>
+      <path d="M26 8h64a22 22 0 0 1 22 22v6c-18-10-70-10-108 2v-8A22 22 0 0 1 26 8z" fill="#ff9a74"/>
+      <ellipse cx="42" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><ellipse cx="76" cy="44" rx="6.5" ry="8.5" fill="#24161c"/>
+      <circle cx="44.5" cy="40.5" r="2.4" fill="#fff"/><circle cx="78.5" cy="40.5" r="2.4" fill="#fff"/>
+      <ellipse cx="30" cy="60" rx="7" ry="4.5" fill="#ff4f7b" opacity=".55"/><ellipse cx="88" cy="60" rx="7" ry="4.5" fill="#ff4f7b" opacity=".55"/>
+      <path d="M49 60q10 9 20 0" fill="none" stroke="#24161c" stroke-width="4.5" stroke-linecap="round"/>
+    </symbol>
+ <symbol id="i-inbox" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16l2 9v7H2v-7L4 4zm.6 9H9a3 3 0 0 0 6 0h4.4L18 6H6l-1.4 7z"/></symbol>
+ <symbol id="i-chart" viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" rx="1.5" fill="currentColor"/><rect x="10" y="7" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="17" y="3" width="4" height="18" rx="1.5" fill="currentColor"/></symbol>
+ <symbol id="i-sent" viewBox="0 0 24 24"><path d="M3 11.5L21 3l-6.5 18-3.5-7.5L3 11.5z" fill="currentColor"/></symbol>
+ <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/></symbol>
+ <symbol id="i-ok" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+ <symbol id="i-rev" viewBox="0 0 24 24"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z" fill="currentColor"/></symbol>
+ <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7H4V2M4.6 7A8.5 8.5 0 1 1 3.5 13" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+ <symbol id="i-team" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="currentColor"/><path fill="currentColor" d="M1 20c0-4 4-6 8-6s8 2 8 6H1zm15-8a3.5 3.5 0 1 0 0-7v7zm2 8h5c0-3-2-5-5-5.5 1.3 1.4 2 3.2 2 5.5z"/></symbol>
+ <symbol id="i-skipped" viewBox="0 0 24 24"><path d="M5 5l8 7-8 7zM14 5l8 7-8 7z" fill="currentColor"/></symbol>
+</defs></svg>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><svg><use href="#buddy"/></svg><span>sayso</span></div>
+    <div class="ws"><i>AA</i><div><b>Acme Analytics</b><small>support@acme.io</small></div></div>
+    <nav class="nav">
+      <button class="on" data-v="v-inbox"><svg><use href="#i-inbox"/></svg><span>Inbox</span><em class="ct" id="ctInbox">5</em></button>
+      <button data-v="v-insights"><svg><use href="#i-chart"/></svg><span>Insights</span></button>
+      <button data-v="v-sent"><svg><use href="#i-sent"/></svg><span>Sent</span><em class="ct g" id="ctSent" style="display:none">0</em></button>
+      <button data-v="v-skipped"><svg><use href="#i-skipped"/></svg><span>Skipped</span><em class="ct g" id="ctSkip" style="display:none;background:var(--card2);color:var(--soft)">0</em></button>
+      <button data-v="v-team"><svg><use href="#i-team"/></svg><span>Team</span></button>
+    </nav>
+    <div class="sec-l">Connected</div>
+    <div class="chan"><i></i>Gmail inbox<small>live</small></div>
+    <div class="chan"><i></i>Stripe<small>live</small></div>
+    <div class="chan"><i></i>Discord<small>live</small></div>
+    <div class="chan"><i class="off"></i>Slack<small>soon</small></div>
+    <div class="me"><span class="av" style="background:#c9c2ff">PR</span><div><b>Priya R.</b><small>Approver</small></div></div>
+  </aside>
+
+  <section class="queue">
+    <div class="qh"><h1>Inbox <small id="qcount">5 waiting</small></h1>
+      <div class="filters" id="filters"><button class="on" data-f="all">All</button><button data-f="Money">💸 Money</button><button data-f="Cancel">⚠️ Cancel</button><button data-f="Low risk">✓ Low risk</button></div></div>
+    <div class="ql" id="ql"></div>
+  </section>
+
+  <main class="main">
+    <section class="view on" id="v-inbox">
+            <div class="case" id="case"></div>
+      <div class="bar" id="bar" style="display:none"><div class="bar-in">
+        <button class="ab und" data-a="undo" title="Undo (Z)"><svg><use href="#i-undo"/></svg></button>
+        <button class="ab" data-a="skip"><svg><use href="#i-skip"/></svg><span>Skip</span> <kbd>←</kbd></button>
+        <button class="ab rev" data-a="revise"><svg><use href="#i-rev"/></svg><span class="t">Revise</span> <kbd>R</kbd></button>
+        <button class="ab send" data-a="send"><svg><use href="#i-ok"/></svg><span class="sendLbl">Send</span> <kbd>→</kbd></button>
+      </div><div class="kh"><kbd>J</kbd><kbd>K</kbd> move · <kbd>Z</kbd> undo</div></div>
+    </section>
+    <section class="view" id="v-insights"><div class="page"><div class="page-in" id="insights"></div></div></section>
+    <section class="view" id="v-sent"><div class="page"><div class="page-in" id="sentList"></div></div></section>
+    <section class="view" id="v-skipped"><div class="page"><div class="page-in" id="skipList"></div></div></section>
+    <section class="view" id="v-team"><div class="page"><div class="page-in">
+      <h1>Team</h1><p class="lead">Who can approve, and where they get asked.</p>
+      <div class="row-item"><span class="av" style="background:#ffb199">SK</span><div><b>Sam K.</b><small>Approver · phone app, Discord</small></div><span class="r">148 decisions</span></div>
+      <div class="row-item"><span class="av" style="background:#c9c2ff">PR</span><div><b>Priya R. (you)</b><small>Approver · web, phone app</small></div><span class="r">64 decisions</span></div>
+      <div class="row-item"><span class="av" style="background:#2a2530;color:#c9bfc9">+</span><div><b>Invite a teammate</b><small>They approve from the app, Discord or Slack</small></div></div>
+    </div></div></section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="modal" id="revModal">
+  <h3>Revise the reply</h3>
+  <p>Tell Sayso what to change. It rewrites the draft and remembers the lesson.</p>
+  <div class="quick" id="quick"><button>Shorter</button><button>Warmer</button><button>More formal</button><button>Don't promise a date</button><button>Add the help link</button></div>
+  <textarea id="revText" placeholder="e.g. Offer a pro-rated refund instead"></textarea>
+  <div class="mrow"><button style="background:var(--card2)" id="revCancel">Cancel</button><button style="background:var(--learn);color:#1b1030" id="revGo">Revise</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CASES = [
+ {id:1,thread:[["in","Hi, quick question, where do I find my invoices?","16 Sep"],["out","Hi Maya, go to Billing → Invoices. You can download each one as a PDF. Sam","16 Sep"],["in","Found them, thanks!","16 Sep"]],need:"Refund $49.00 and send this reply?",risk:["💸","Money","#ffc53d"],onSend:"Refund $49.00 + send",onHold:"Skip: nothing is sent",sum:"Maya was charged twice on 3 Oct.",checks:[["ok","Stripe: 2 charges of $49.00 on 3 Oct"],["ok","Same invoice, so it is a duplicate"],["wait","Refund is ready, made only when you send"]],name:"Maya Chen",first:"Maya",init:"MC",grad:"linear-gradient(135deg,#ff8a5c,#e8457a)",col:"#ffb199",
+  plan:"Pro annual",since:"14 months",tag:"Billing",n:"2nd email",
+  msg:"Hi, I was charged twice this month?? Can you fix it please.",
+  prior:"Hi, quick question, where do I find my invoices?",
+  draft:"Hi Maya,\n\nYou're right, sorry about that. There were two charges of $49.00 on 3 Oct. I've refunded the second one, so you'll see it back on your card in 5 to 10 days.\n\nThanks for flagging it,\nSam at Acme",
+  why:"Stripe shows 2 charges on 3 Oct. You approved 4 refunds like this.",
+  facts:["Pro annual","Customer 14 months","2 charges · 3 Oct","Refund waits for your swipe"],
+  log:[["ok","09:58","Email in from maya@northwind.io"],["","09:58","Matched Stripe customer <code>cus_…8Fa</code>"],["w","09:59","Found 2 × $49.00 on 3 Oct (duplicate)"],["","10:00","Used lesson: <b>refund duplicates fast</b>"],["","10:01","Draft ready · refund NOT made yet"]],
+  lessons:["💸 Duplicate charge → refund first, explain after","✂️ You like replies under 60 words"]},
+ {id:2,thread:[],need:"Send this how-to reply?",risk:["✓","Low risk","#2fdc8a"],onSend:"Send reply",onHold:"Skip: nothing is sent",sum:"Tom can't find CSV export.",checks:[["ok","Help article found: Exporting reports"],["ok","Same answer sent 9 times, never edited"]],name:"Tom Reid",first:"Tom",init:"TR",grad:"linear-gradient(135deg,#7b6cff,#3fa9ff)",col:"#c9c2ff",
+  plan:"Free",since:"2 days",tag:"How-to",n:"1st email",
+  msg:"How do I export my dashboard to CSV? Can't find it anywhere.",
+  draft:"Hi Tom,\n\nOpen Reports, click Export (top right), then pick CSV. Here's a 30-second guide: acme.io/help/export\n\nSam at Acme",
+  why:"Same answer sent 9 times with no edits.",
+  facts:["Free plan","Signed up 2 days ago","Used Reports 3×"],
+  log:[["ok","10:12","Email in from tom@reidlabs.co"],["","10:12","Found help article: Exporting reports"],["","10:13","Draft ready"]],
+  lessons:["🔗 Always link the help article"]},
+ {id:3,thread:[["in","Can we add a 4th seat for our new designer?","2 Aug"],["out","Done! Seat 4 is active and billed from today. Sam","2 Aug"]],need:"Offer Starter instead of cancelling?",risk:["⚠️","Cancel","#ff4f6d"],onSend:"Send offer, nothing cancelled yet",onHold:"Skip: nothing sent or cancelled",sum:"Priya wants to cancel: moving to a cheaper tool.",checks:[["ok","Team plan, 3 seats, $87/month"],["ok","Logged in yesterday"],["ok","Follows your note: offer Starter first"]],name:"Priya Shah",first:"Priya",init:"PS",grad:"linear-gradient(135deg,#21c48a,#1e8bb8)",col:"#9be7c4",
+  plan:"Team monthly",since:"8 months",tag:"Cancel",n:"1st email",
+  msg:"Please cancel our plan, we're moving to a cheaper tool.",
+  draft:"Hi Priya,\n\nSorry to see you go. I can cancel today. If price is the reason, I can also move you to Starter at $19/month and keep all your dashboards.\n\nJust tell me which you'd like.\nSam at Acme",
+  why:"Your note from 2 Oct: offer Starter before cancelling.",
+  facts:["Team plan · 3 seats","Last login yesterday","$87/month"],
+  log:[["ok","10:20","Email in from priya@shahdesign.io"],["w","10:20","Cancel request → a human must decide"],["","10:21","Used your note: offer Starter first"],["","10:21","Draft ready · nothing cancelled yet"]],
+  lessons:["🛟 Offer the cheaper plan before cancelling"]},
+ {id:4,thread:[],need:"Send this bug reply?",risk:["✓","Low risk","#2fdc8a"],onSend:"Send + follow up when fixed",onHold:"Skip: nothing is sent",sum:"Leo's chart is blank: a known bug.",checks:[["ok","Matches bug #212, fix in review"],["ok","3 other customers reported it today"]],name:"Leo Martins",first:"Leo",init:"LM",grad:"linear-gradient(135deg,#ffc53d,#ff7a4d)",col:"#ffe08a",
+  plan:"Pro monthly",since:"5 months",tag:"Bug",n:"1st email",
+  msg:"The chart on my dashboard has been blank since this morning. Nothing changed on my side.",
+  draft:"Hi Leo,\n\nThanks for telling us. You're not the only one: a fix for blank charts is going out today. I'll email you as soon as it's live.\n\nSam at Acme",
+  why:"3 similar emails today. Linked to bug #212 (fix in review).",
+  facts:["Pro monthly","Chrome · macOS","3 others reported this today"],
+  log:[["ok","11:02","Email in from leo@martins.dev"],["w","11:02","Matched open bug #212 · blank charts"],["","11:03","Draft promises a follow-up when #212 ships"]],
+  lessons:["🐞 Known bug → say so, promise a follow-up"]},
+ {id:5,thread:[["in","Love the new export, saves me an hour a week 🙌","20 Sep"],["out","That made our day, thank you Ana! Sam","20 Sep"]],need:"Send this feature-request reply?",risk:["✓","Low risk","#2fdc8a"],onSend:"Send + add vote to Dark mode",onHold:"Skip: nothing is sent",sum:"Ana asks for a dark mode.",checks:[["ok","Vote added: Dark mode (41 votes)"],["ok","Same reply used for 6 requests"]],name:"Ana Ruiz",first:"Ana",init:"AR",grad:"linear-gradient(135deg,#e8457a,#b49cff)",col:"#ffc1d6",
+  plan:"Starter",since:"1 year",tag:"Feature",n:"1st email",
+  msg:"Any chance you'll add a dark mode? My eyes would thank you 😅",
+  draft:"Hi Ana,\n\nHa, you're not alone! Dark mode is on our list. I've added your vote and I'll let you know when it ships.\n\nSam at Acme",
+  why:"You used this reply for 6 feature requests.",
+  facts:["Starter","Customer 1 year","Feature vote #41"],
+  log:[["ok","11:40","Email in from ana@ruizstudio.es"],["","11:40","Added vote to: Dark mode (41 votes)"],["","11:41","Draft ready"]],
+  lessons:["😊 Match a playful customer's tone"]}
+];
+function reviseDraft(c,ins){
+  const t=ins.toLowerCase(); let d=c.draft; const sig=(d.match(/\n[^\n]*\n?Sam at Acme\s*$/)||[''])[0]||'\n\nSam at Acme';
+  const body=d.replace(/\n*(Thanks[^\n]*\n)?Sam at Acme\s*$/,'').trim();
+  const greet=(body.match(/^Hi [^,\n]+,/)||['Hi '+c.first+','])[0];
+  let core=body.replace(greet,'').trim();
+  if(/short/.test(t)){ const ss=core.split(/(?<=[.!?])\s+/); const keep=ss.filter(x=>!/sorry|thanks|thank you|just tell me|ha,|you're not alone|that made our day/i.test(x)); core=(keep.length?keep:ss).join(' '); }
+  if(/warm/.test(t)){ greet && (core='Thanks so much for reaching out. '+core); }
+  if(/formal/.test(t)){ return c.draft=`Dear ${c.name.split(' ')[0]},\n\n${core.replace(/^You're right, sorry about that\.\s*/,'Thank you for letting us know, and please accept our apologies. ')}\n\nKind regards,\nSam, Acme Support`; }
+  if(/date|promise/.test(t)){ core=core.replace(/ in \d+( to |[–-])\d+\s?days/g,' soon').replace(/ today/g,' shortly').replace(/ in 5–\u2060?10\u00a0?days/g,' soon'); }
+  if(/link|help/.test(t) && !/acme\.io\/help/.test(core)){ core+=' There\'s a short guide here: acme.io/help'; }
+  if(/pro-?rated/.test(t)){ core=core.replace(/I've refunded the second one[^.]*\./,'I can refund the unused part of your plan pro-rated, or refund the duplicate in full. Which would you prefer?'); }
+  if(!/short|warm|formal|date|promise|link|help|pro-?rated/.test(t)){ core=core+' '+'('+ins.replace(/[()]/g,'')+')'; }
+  return c.draft=`${greet}\n\n${core}\n\nSam at Acme`;
+}
+
+const INS = { // demo workspace figures (Acme Analytics, last 30 days)
+  decisions:212, medianMin:18, sent:131, dupes:0, money:[14,14], autoCancel:23, unedited:[41,52,58,66,71,78], weeks:['1 Sep','8 Sep','15 Sep','22 Sep','29 Sep','6 Oct'],
+  topics:[['Billing',34,'#ffc53d'],['How-to',29,'#3fa9ff'],['Bugs',18,'#ff7a4d'],['Cancel',11,'#ff4f6d'],['Feature',8,'#b49cff']],
+  people:[['Sam',148],['Priya (you)',64]]
+};
+
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const tick=k=>k==='ok'?'<i class="ck ok">✓</i>':'<i class="ck wait">◷</i>';
+let queue=CASES.map(c=>({...c})), done=[], notes={}, sel=0, filter='all';
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1600);}
+function visible(){return queue.filter(c=>filter==='all'||c.risk[1]===filter);}
+function renderQueue(){
+  const v=visible();
+  $('#qcount').textContent=queue.length?`${queue.length} waiting`:'all done';
+  $('#ctInbox').textContent=queue.length;$('#ctInbox').style.display=queue.length?'grid':'none';
+  const s=done.filter(d=>d.a==='send').length,k=done.filter(d=>d.a==='skip').length;
+  $('#ctSent').textContent=s;$('#ctSent').style.display=s?'grid':'none';$('#ctSkip').textContent=k;$('#ctSkip').style.display=k?'grid':'none';
+  if(sel>=v.length)sel=Math.max(0,v.length-1);
+  $('#ql').innerHTML=v.length?v.map((c,i)=>`<button class="qi ${i===sel?'on':''}" data-i="${i}">
+     <div class="r1"><span class="av" style="background:${c.col}">${c.init}</span><b>${c.name}</b><time>${c.log[0][1]}</time></div>
+     <div class="q">${c.need}</div><div class="p">“${esc(c.msg)}”</div>
+     <div class="tags"><span class="risk" style="--r:${c.risk[2]}">${c.risk[0]} ${c.risk[1]}</span>${c.tag!==c.risk[1]?`<span class="tag">${c.tag}</span>`:''}</div></button>`).join('')
+    :`<div class="empty-q">Nothing here 🎉</div>`;
+  document.querySelectorAll('.qi').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;renderQueue();renderCase();});
+}
+function cur(){return visible()[sel];}
+function renderCase(){
+  const c=cur();
+  if(!c){
+    $('#case').innerHTML=`<div class="done" style="height:100%"><div><svg viewBox="0 0 120 110"><use href="#buddy"/></svg><h3>Inbox zero 🎉</h3><p>${done.filter(d=>d.a==='send').length} sent · ${done.filter(d=>d.a==='skip').length} skipped</p><button class="pill" onclick="go('v-insights')">See insights</button></div></div>`;return;}
+
+  document.querySelectorAll('.sendLbl').forEach(e=>e.textContent=c.risk[1]==='Money'?'Refund + send':'Send');
+  const ck=c.checks||[];
+  const thread=(c.thread||[]).map(([w,t,d])=>`<div class="eb ${w} old">${esc(t)}<time>${w==='in'?c.first:'You'} · ${d}</time></div>`).join('');
+  $('#case').innerHTML=`<div class="case-in">
+   <div class="ch"><div class="meta"><span class="risk" style="--r:${c.risk[2]}">${c.risk[0]} ${c.risk[1]}</span>${c.tag!==c.risk[1]?`<span class="tag">${c.tag}</span>`:''}<span class="n">${CASES.length-queue.length+1} of ${CASES.length}</span></div>
+     <h2>${c.need}</h2><div class="who"><span class="av" style="background:${c.col}">${c.init}</span><b>${c.name}</b><span>· ${c.plan} · customer ${c.since} · ${c.n}</span></div></div>
+   <div class="box">
+     <h4>Conversation</h4>
+     <div class="thread" id="thr">${thread?`<button class="more-btn" onclick="this.parentNode.classList.add('open');this.remove()">Show ${(c.thread||[]).length} earlier messages</button>${thread}`:''}<div class="day">Today</div><div class="eb in">${esc(c.msg)}<time>${c.first} · ${c.log[0][1]}</time></div></div>
+     <div class="draft" id="draft"><div class="dh">Your reply · drafted by Sayso ${c.revised?`<small>✨ Revised: “${esc(notes[c.id]||'')}”</small>`:'<small style="color:var(--faint)">click to edit</small>'}</div>
+       <textarea id="edit">${esc(c.draft)}</textarea></div>
+     <div class="abar">${$('#bar').innerHTML}</div>
+   </div>
+   <div class="right">
+     <div class="box"><h4>Sayso checked</h4>${ck.map(([k,t])=>`<div class="chk">${tick(k)}<span>${t}</span></div>`).join('')}
+       <div class="does"><div><b>Send</b>${c.onSend}</div><div><b>Skip</b>${c.onHold.replace(/^Skip: /,'')}</div></div></div>
+     <div class="box"><h4>Why this reply</h4>${c.lessons.map(l=>`<div class="lesson">${l}</div>`).join('')}</div>
+     <div class="box"><h4>About ${c.first}</h4><div class="facts">${c.facts.map(f=>`<span>${f}</span>`).join('')}</div></div>
+     <div class="box"><h4>Activity log</h4><ul class="log">${c.log.map(([k,t,x])=>`<li class="${k}"><time>${t}</time>${x}</li>`).join('')}</ul></div>
+   </div></div>`;
+  $('#case').scrollTop=0;
+  document.querySelectorAll('#case [data-a]').forEach(b=>b.onclick=()=>({send:()=>decide('send'),skip:()=>decide('skip'),revise:openRev,undo:undo})[b.dataset.a]());
+  $('#edit').oninput=e=>{c.draft=e.target.value;c.edited=true;};
+}
+function decide(a){
+  const c=cur(); if(!c)return;
+  const el=document.querySelector('.qi.on'); if(el) el.classList.add(a==='send'?'out':'outl');
+  setTimeout(()=>{ queue=queue.filter(x=>x!==c); done.push({a,c}); renderQueue(); renderCase(); renderLists(); renderInsights(); },220);
+}
+function undo(){const l=done.pop(); if(!l){toast('Nothing to undo');return;} queue.unshift(l.c); filter='all'; document.querySelectorAll('#filters button').forEach(b=>b.classList.toggle('on',b.dataset.f==='all')); sel=0; renderQueue(); renderCase(); renderLists(); renderInsights(); if(l.a==='send')toast('↺ Undone · email pulled back');}
+function openRev(){ if(!cur())return; $('#revText').value=''; document.querySelectorAll('#quick button').forEach(b=>b.classList.remove('on')); $('#scrim').classList.add('on'); $('#revModal').classList.add('on'); setTimeout(()=>$('#revText').focus(),50); }
+function closeRev(){ $('#scrim').classList.remove('on'); $('#revModal').classList.remove('on'); }
+$('#revCancel').onclick=closeRev; $('#scrim').onclick=closeRev;
+document.querySelectorAll('#quick button').forEach(b=>b.onclick=()=>{const t=$('#revText');t.value=t.value?t.value+'. '+b.textContent:b.textContent;b.classList.add('on');});
+$('#revGo').onclick=()=>{const c=cur(),t=$('#revText').value.trim(); if(!c||!t){closeRev();return;}
+  $('#revGo').textContent='Revising…'; setTimeout(()=>{ reviseDraft(c,t); c.revised=(c.revised||0)+1; c.edited=true; notes[c.id]=t; $('#revGo').textContent='Revise'; closeRev(); renderCase(); $('#draft').classList.add('flash'); renderInsights(); },600); };
+document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>({send:()=>decide('send'),skip:()=>decide('skip'),revise:openRev,undo:undo})[b.dataset.a]());
+document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filter=b.dataset.f;sel=0;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderQueue();renderCase();});
+document.addEventListener('keydown',e=>{
+  if($('#revModal').classList.contains('on')){ if(e.key==='Escape')closeRev(); if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))$('#revGo').click(); return; }
+  if(/TEXTAREA|INPUT/.test(e.target.tagName))return;
+  if(!$('#v-inbox').classList.contains('on'))return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'){e.preventDefault();decide('send');}
+  else if(e.key==='ArrowLeft'){e.preventDefault();decide('skip');}
+  else if(k==='r'){e.preventDefault();openRev();}
+  else if(k==='z'){undo();}
+  else if(k==='j'||e.key==='ArrowDown'){e.preventDefault();sel=Math.min(visible().length-1,sel+1);renderQueue();renderCase();}
+  else if(k==='k'||e.key==='ArrowUp'){e.preventDefault();sel=Math.max(0,sel-1);renderQueue();renderCase();}
+});
+function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('.queue').style.display=v==='v-inbox'?'':'none';$('.app').style.gridTemplateColumns=v==='v-inbox'?'':(innerWidth>1180?'232px 1fr':innerWidth>820?'76px 1fr':'1fr');}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+addEventListener('resize',()=>{const on=document.querySelector('.nav button.on');on&&go(on.dataset.v);});
+function renderLists(){
+  const row=(c,a)=>`<div class="row-item"><span class="av" style="background:${c.col}">${c.init}</span><div><b>${c.name}</b><small>${c.need} · ${c.edited?'edited by you':'as drafted'}</small></div><span class="r" ${a==='skip'?'style="color:var(--soft)"':''}>${a==='send'?'✓ verified in Sent':'Skipped · nothing sent'}</span></div>`;
+  const s=done.filter(d=>d.a==='send'),k=done.filter(d=>d.a==='skip');
+  $('#sentList').innerHTML=`<h1>Sent</h1><p class="lead">Every send is checked in your mailbox's Sent folder, once.</p>`+(s.length?s.slice().reverse().map(d=>row(d.c,'send')).join(''):'<p class="lead">Nothing sent yet.</p>');
+  $('#skipList').innerHTML=`<h1>Skipped</h1><p class="lead">Nothing was sent for these. Click Undo in the inbox to bring the last one back.</p>`+(k.length?k.slice().reverse().map(d=>row(d.c,'skip')).join(''):'<p class="lead">Nothing skipped.</p>');
+}
+function spark(vals){const w=640,h=190,mx=100,n=vals.length;const pts=vals.map((v,i)=>[44+i*(w-80)/(n-1),h-26-(v/mx)*(h-50)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" class="spark"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2fdc8a" stop-opacity=".35"/><stop offset="1" stop-color="#2fdc8a" stop-opacity="0"/></linearGradient></defs>
+   ${[25,50,75].map(g=>`<line x1="36" x2="${w}" y1="${h-26-(g/mx)*(h-50)}" y2="${h-26-(g/mx)*(h-50)}" stroke="rgba(255,255,255,.06)"/><text x="0" y="${h-22-(g/mx)*(h-50)}" font-size="11" fill="#6f6673" font-family="Nunito" font-weight="800">${g}%</text>`).join('')}
+   <path d="${line} L${pts[n-1][0]} ${h} L${pts[0][0]} ${h}Z" fill="url(#sg)"/><path d="${line}" fill="none" stroke="#2fdc8a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+   ${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===n-1?6:4}" fill="${i===n-1?'#2fdc8a':'#1d1922'}" stroke="#2fdc8a" stroke-width="2"/><text x="${p[0]}" y="${p[1]-12}" text-anchor="middle" font-size="11" fill="#b3a9b6" font-family="Nunito" font-weight="800">${vals[i]}%</text><text x="${p[0]}" y="${h-1}" text-anchor="middle" font-size="11" fill="#8f8593" font-family="Nunito" font-weight="800">${INS.weeks[i]}</text>`).join('')}</svg>`;}
+function renderInsights(){
+  const sent=done.filter(d=>d.a==='send').length,skipped=done.filter(d=>d.a==='skip').length,revised=CASES.length?Object.keys(notes).length:0;const last=INS.unedited[INS.unedited.length-1];
+  $('#insights').innerHTML=`<h1>Insights</h1><p class="lead">Acme Analytics · since 1 Sep <span class="demo">demo data</span></p>
+   <div class="today"><span class="tl">Today</span><div><b>${sent+skipped}</b><small>reviewed</small></div><div><b>${sent}</b><small>sent</small></div><div><b>${skipped}</b><small>skipped</small></div><div><b>${revised}</b><small>revised</small></div></div>
+   <div class="kpis"><div class="kpi"><b>${INS.decisions}</b><small>support decisions</small></div><div class="kpi"><b>${INS.medianMin} min</b><small>median time to decide</small></div>
+     <div class="kpi"><b>${INS.sent}</b><small>emails sent · <span>${INS.dupes} duplicates</span></small></div><div class="kpi"><b>${INS.money[0]}</b><small>refunds &amp; cancels · <span>all checked in Stripe</span></small></div></div>
+   <div class="grid2"><div class="box"><div class="ih"><span>Drafts sent with no edits</span><b class="up">${last}%<em>↑ ${last-INS.unedited[0]} pts</em></b></div>${spark(INS.unedited)}<p style="font-size:13px;font-weight:700;color:var(--soft);margin-top:12px">Sayso learns from every send, skip and revision, so fewer replies need your edits.</p></div>
+     <div class="box"><div class="ih"><span>What customers write about</span></div>${INS.topics.map(([t,v,c])=>`<div class="bar2"><span>${t}</span><div><i style="width:${v}%;background:${c}"></i></div><b>${v}%</b></div>`).join('')}</div></div>
+   <div class="grid3"><div class="box"><div class="ih"><span>Safety</span></div><div class="srow"><b>${INS.autoCancel}</b><span>approvals cancelled automatically because the customer wrote again first</span></div><div class="srow"><b>0</b><span>emails or refunds sent without a person's Yes</span></div><div class="srow"><b>0</b><span>duplicate emails</span></div></div>
+     <div class="box"><div class="ih"><span>Who decided</span></div>${INS.people.map(([n,v])=>`<div class="bar2"><span>${n}</span><div><i style="width:${v/INS.decisions*100}%;background:#ff7a4d"></i></div><b>${v}</b></div>`).join('')}</div>
+     <div class="box"><div class="ih"><span>Lessons Sayso is using</span></div>${[["💸","Duplicate charge → refund first","from 4 sends"],["✂️","Keep replies under 60 words","from 6 revisions"],["🛟","Offer the cheaper plan before cancelling","your rule"],["🔗","Always link the help article","from 9 sends"],["🔒","Data deletion: always ask a human","your rule"]].map(([i,t,s])=>`<div class="lrow"><span class="li">${i}</span><div><b>${t}</b><small>${s}</small></div><button class="tog" onclick="this.classList.toggle('off')" aria-label="Toggle lesson"></button></div>`).join('')}</div></div>`;
+}
+renderQueue();renderCase();renderLists();renderInsights();
+</script>
+</body>
+</html>

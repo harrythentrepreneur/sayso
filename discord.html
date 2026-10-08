@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sayso in Discord</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{--rail:#121214;--side:#131316;--chat:#1a1a1e;--elev:#1e1f22;--poll:#202024;--ans:#2a2a2f;--ansh:#313136;--input:#222327;--border:#2e2f34;
+ --strong:#f2f3f5;--text:#dbdee1;--sub:#b5bac1;--muted:#949ba4;--faint:#6d6f78;--blurple:#5865f2;--red:#da373c;--green:#23a55a;--link:#00a8fc}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--rail);overflow:hidden}
+body{font-family:"gg sans","Noto Sans","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--text);font-size:16px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+svg{flex:none}
+.win{display:grid;grid-template-columns:72px 264px 1fr;grid-template-rows:32px 1fr;height:100%}
+.title{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:500;color:var(--text);position:relative}
+.title i{width:16px;height:16px;border-radius:5px;background:#ff7a4d;display:inline-block}
+.title .r{position:absolute;right:10px;display:flex;gap:12px;color:var(--muted)}
+.rail{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:4px;position:relative}
+.srv{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff;position:relative}
+.srv .bd{position:absolute;right:-7px;bottom:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--red);border:3px solid var(--rail);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 3px;box-sizing:content-box;line-height:1}
+.pillind{position:absolute;left:0;width:4px;height:40px;border-radius:0 4px 4px 0;background:#fff}
+.sep{width:32px;height:2px;background:#2b2b30;border-radius:1px}
+.side{background:var(--side);border-top-left-radius:8px;border:1px solid var(--border);border-right:0;border-bottom:0;display:flex;flex-direction:column;min-width:0;position:relative}
+.side .hd{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-weight:600;color:var(--strong);border-bottom:1px solid var(--border)}
+.chs{padding:8px 8px 80px;overflow:hidden;flex:1}
+.cat .pl{opacity:0}.cat:hover .pl{opacity:1}
+.cat{display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:var(--muted);padding:16px 8px 4px}
+.ch{display:flex;align-items:center;gap:6px;height:32px;padding:0 8px;border-radius:6px;color:var(--muted);font-weight:500;margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.ch.u{color:var(--strong)}
+.ch.on{background:rgba(255,255,255,.08);color:var(--strong)}
+.ch .h{font-size:20px;color:var(--faint);width:20px;text-align:center;font-weight:400}
+.ch.u::before{content:"";position:absolute;left:-8px;width:4px;height:8px;border-radius:0 4px 4px 0;background:#fff}
+.thr{position:relative;padding-left:30px}
+.thr::before{content:"";position:absolute;left:17px;top:-6px;height:22px;width:10px;border-left:1.5px solid #3a3a40;border-bottom:1.5px solid #3a3a40;border-bottom-left-radius:8px}
+.thr .ch{height:30px;font-size:15px;display:block;line-height:30px}
+.user{position:absolute;left:8px;right:-200px;bottom:8px;z-index:3}
+.main{background:var(--chat);border-top:1px solid var(--border);display:flex;flex-direction:column;min-width:0;min-height:0}
+.chh{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid var(--border);white-space:nowrap;min-width:0}
+.chh .p{color:var(--text);font-weight:500}
+.chh .t{color:var(--strong);font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.chh .rt{margin-left:auto;display:flex;align-items:center;gap:14px;color:var(--sub)}
+.search{width:200px;height:28px;border-radius:6px;background:var(--rail);color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:space-between;padding:0 8px}
+.bar{display:flex;justify-content:space-between;padding:8px 16px;flex:none}
+.pbtn{height:32px;padding:0 12px;border-radius:8px;background:var(--elev);border:1px solid var(--border);font-size:14px;font-weight:500;color:var(--strong);display:inline-flex;align-items:center;gap:6px}
+.scroll{flex:1;overflow-y:auto;padding:4px 0 16px;scroll-behavior:smooth;min-height:0}
+.scroll::-webkit-scrollbar{width:8px}.scroll::-webkit-scrollbar-thumb{background:#2b2b30;border-radius:4px}
+.post{padding:16px 16px 12px 72px;position:relative}
+.post h1{font-size:24px;font-weight:700;color:var(--strong);line-height:1.25;margin:0 0 8px -56px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px -56px}
+.tag{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px;border-radius:12px;background:#2b2b30;font-size:13px;font-weight:600;color:var(--text);transition:background .3s,color .3s}
+.tag.hl{background:rgba(88,101,242,.25);color:#c9cdfb}
+.tag.done{background:rgba(35,165,90,.25);color:#9ff0c0}
+.msg{position:relative;padding:2px 48px 2px 72px;line-height:1.375}
+.msg.g{margin-top:17px}
+.msg:hover{background:rgba(0,0,0,.08)}
+.msg.g:hover .tools{display:flex}.tools{display:none;position:absolute;right:16px;top:-14px;background:var(--elev);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px;color:var(--sub)}.tools span{width:30px;height:30px;display:grid;place-items:center;border-radius:6px}.tools span:hover{background:#2b2b30}
+.msg .av{position:absolute;left:16px;top:4px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#2b1d18}
+.msg .av svg{width:30px;height:28px}
+.nm{display:flex;align-items:baseline;gap:6px}
+.nm b{color:var(--strong);font-weight:500}
+.app{background:var(--blurple);color:#fff;font-size:10px;font-weight:600;height:15px;line-height:15px;padding:0 4px;border-radius:4px;align-self:center;display:inline-flex;align-items:center;gap:2px}
+.nm time{font-size:12px;color:var(--muted);font-weight:500}
+.msg p{margin:0;color:var(--text);white-space:pre-wrap}
+.msg p+p{margin-top:22px}
+.msg strong{color:var(--strong);font-weight:600}
+.msg code{font-family:"gg mono",Consolas,Menlo,monospace;font-size:.85em;background:#2b2d31;border:1px solid #3f4147;border-radius:4px;padding:0 3px}
+.quote{border-left:4px solid #4e5058;padding-left:12px;margin:4px 0;color:var(--text);white-space:pre-wrap}
+.card{max-width:520px;margin-top:6px;background:var(--poll);border:1px solid var(--border);border-left:4px solid #ff7a4d;border-radius:4px;padding:10px 14px;font-size:14.5px}
+.card .k{font-size:14px;font-weight:600;color:var(--strong)}
+.card .v{color:var(--text);font-weight:400}
+.card .et{font-weight:600;color:var(--strong);margin-bottom:2px}
+.card .row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+@media (max-width:560px){.card .row{grid-template-columns:1fr}}
+.poll{max-width:472px;background:var(--poll);border:1px solid var(--border);border-radius:8px;padding:16px;margin:6px 0 4px}
+.poll .q{color:var(--strong);font-size:17px;font-weight:600;line-height:1.3}
+.poll .s{color:var(--muted);font-size:14px;margin:4px 0 12px}
+.ans{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 16px;margin-bottom:8px;background:var(--ans);border:2px solid transparent;border-radius:8px;color:var(--strong);font-weight:600;cursor:pointer;position:relative;overflow:hidden;width:100%;text-align:left}
+.ans:hover{background:var(--ansh)}
+.ans .rad{width:20px;height:20px;border:2px solid var(--text);border-radius:50%;position:relative;z-index:2}
+.ans.sel{border-color:var(--blurple)}
+.ans.sel .rad{border:6px solid var(--blurple);background:#fff}
+.ans .lb{position:relative;z-index:2;display:flex;gap:8px;align-items:center}
+.ans .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(88,101,242,.28);transition:width .7s cubic-bezier(.2,.8,.2,1);z-index:1}
+.ans .pc{position:relative;z-index:2;font-size:14px;color:var(--strong);font-weight:600;display:none}
+.poll.res .ans{cursor:default}.poll.res .ans:hover{background:var(--ans)}
+.poll.res .rad{display:none}.poll.res .pc{display:block}
+.poll.closed .ans{opacity:.6}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:14px}
+.foot .l b{color:var(--text);font-weight:500}.foot .l span{color:var(--muted)}
+.lnk{color:var(--strong);font-weight:500;font-size:14px;margin-right:14px}
+.vote{background:var(--blurple);color:#fff;border-radius:8px;height:32px;padding:0 16px;font-size:14px;font-weight:500}
+.vote:disabled{opacity:.5;cursor:not-allowed}
+.sys{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;padding:6px 48px 6px 72px;position:relative}
+.sys svg{position:absolute;left:28px}
+.sys b{color:var(--strong);font-weight:500}
+.reacts{display:flex;gap:4px;margin-top:6px}
+.react{height:24px;padding:0 6px;border-radius:8px;background:rgba(88,101,242,.15);border:1px solid var(--blurple);font-size:13px;color:#c9cdfb;display:inline-flex;gap:5px;align-items:center;font-weight:600}
+.typing{height:24px;padding:0 16px;font-size:13px;color:var(--sub);display:flex;align-items:center;gap:6px;flex:none}
+.typing .d{display:inline-flex;gap:3px}.typing .d i{width:6px;height:6px;border-radius:50%;background:var(--sub);animation:t 1.2s infinite}
+.typing .d i:nth-child(2){animation-delay:.15s}.typing .d i:nth-child(3){animation-delay:.3s}
+@keyframes t{0%,60%,100%{opacity:.3}30%{opacity:1}}
+.comp{margin:0 16px 16px;min-height:52px;border-radius:8px;background:var(--input);border:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 14px;color:var(--faint);flex:none}
+.comp .ph{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp .ic{display:flex;gap:14px;color:var(--sub)}
+.new{animation:pop .35s ease-out}
+@keyframes pop{from{background:rgba(88,101,242,.12)}to{background:transparent}}
+.ping{background:rgba(250,168,26,.08);border-left:2px solid #f0b232}
+.mention{background:rgba(88,101,242,.3);color:#c9cdfb;border-radius:3px;padding:0 2px;font-weight:500}
+.hint{display:inline-block;margin:6px 0 2px;z-index:9;background:#ff7a4d;color:#1a0f0a;font-weight:700;font-size:13px;padding:8px 12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.45);animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@media (max-width:900px){.win{grid-template-columns:72px 1fr}.side{display:none}}
+@media (max-width:560px){.win{display:flex;flex-direction:column}.main{flex:1}.rail{display:none}.title{display:none}.search,.chh .rt .hide{display:none}
+ .msg{padding:2px 12px 2px 60px}.msg .av{left:10px}.post{padding:14px 12px 10px 60px}.post h1{font-size:20px;margin-left:-48px}.tags{margin-left:-48px}.sys{padding-left:60px}.sys svg{left:22px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <symbol id="buddy" viewBox="0 0 120 110"><path d="M26 8h64a22 22 0 0 1 22 22v34a22 22 0 0 1-22 22H58l-22 18v-18H26A22 22 0 0 1 4 64V30A22 22 0 0 1 26 8z" fill="#ff7a4d"/><ellipse cx="42" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><ellipse cx="76" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><circle cx="44.5" cy="40.5" r="2.4" fill="#fff"/><circle cx="78.5" cy="40.5" r="2.4" fill="#fff"/><path d="M49 60q10 9 20 0" fill="none" stroke="#24161c" stroke-width="4.5" stroke-linecap="round"/></symbol>
+ <symbol id="forum" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3.5V13a2 2 0 0 1-2-2V4zm17 4h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2v3l-4-3h-6a2 2 0 0 1-2-2v-1h7a4 4 0 0 0 4-4V8z"/></symbol>
+ <symbol id="bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6zm-2 17a2 2 0 0 0 4 0h-4z"/></symbol>
+ <symbol id="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M15 2l7 7-3 1-4 4 1 5-2 2-4-5-5 5-1-1 5-5-5-4 2-2 5 1 4-4z"/></symbol>
+ <symbol id="ppl" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="currentColor"/><path fill="currentColor" d="M1 20c0-4 4-6 8-6s8 2 8 6H1zm15-8a3.5 3.5 0 1 0 0-7v7zm2 8h5c0-3-2-5-5-5.5 1.3 1.4 2 3.2 2 5.5z"/></symbol>
+ <symbol id="smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="1.4" fill="currentColor"/><circle cx="15" cy="10" r="1.4" fill="currentColor"/><path d="M8 14.5c1 1.5 2.4 2.2 4 2.2s3-.7 4-2.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+ <symbol id="plus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 7v10M7 12h10" stroke="#222327" stroke-width="2.4" stroke-linecap="round"/></symbol>
+ <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="tagi" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8l10 10-8 8L3 11V3zm4 2.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></symbol>
+<symbol id="gift" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h16v4H4zM5 13h6v8H5zm8 0h6v8h-6zM11 9h2v12h-2zM12 9c-2-4-6-5-6-2s4 2 6 2zm0 0c2-4 6-5 6-2s-4 2-6 2z"/></symbol>
+ <symbol id="apps" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm11 0h2v3h3v2h-3v3h-2v-3h-3v-2h3z"/></symbol>
+ <symbol id="mag" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15 15l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+ <symbol id="inbox" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16l2 9v7H2v-7L4 4zm.6 9H9a3 3 0 0 0 6 0h4.4L18 6H6l-1.4 7z"/></symbol>
+ <symbol id="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5V14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></symbol>
+ <symbol id="mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+ <symbol id="head" viewBox="0 0 24 24"><path d="M3 15v-3a9 9 0 0 1 18 0v3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="2" y="14" width="5" height="7" rx="2" fill="currentColor"/><rect x="17" y="14" width="5" height="7" rx="2" fill="currentColor"/></symbol>
+ <symbol id="gear" viewBox="0 0 24 24"><path fill="currentColor" d="M10.5 2h3l.5 2.6 2 .9 2.2-1.5 2.1 2.1-1.5 2.2.9 2 2.6.5v3l-2.6.5-.9 2 1.5 2.2-2.1 2.1-2.2-1.5-2 .9-.5 2.6h-3l-.5-2.6-2-.9-2.2 1.5-2.1-2.1 1.5-2.2-.9-2L2 13.5v-3l2.6-.5.9-2L4 5.8l2.1-2.1L8.3 5.2l2-.9zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></symbol>
+ <symbol id="reply" viewBox="0 0 24 24"><path fill="currentColor" d="M10 8V4l-7 7 7 7v-4c5 0 8 1.5 11 6-1-6-4-11-11-12z"/></symbol>
+<symbol id="sticker" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7l-7 7H6a2 2 0 0 1-2-2z"/><path fill="none" stroke="currentColor" stroke-width="2" d="M20 13h-5a2 2 0 0 0-2 2v5"/></symbol>
+</defs></svg>
+
+<div class="win">
+  <div class="title"><i></i>Acme HQ<span class="r"><svg width="20" height="20"><use href="#inbox"/></svg><svg width="20" height="20"><use href="#help"/></svg></span></div>
+  <nav class="rail">
+    <span class="pillind" style="top:52px"></span>
+    <div class="srv" style="background:#5865f2;border-radius:16px"><svg width="26" height="20" viewBox="0 0 26 20"><path fill="#fff" d="M22 1.7A21 21 0 0 0 16.7 0l-.7 1.4a19 19 0 0 0-6 0L9.3 0A21 21 0 0 0 4 1.7C.6 6.7-.3 11.6.1 16.4A21 21 0 0 0 6.6 19.7l1.3-2.2a14 14 0 0 1-2.1-1l.5-.4a15 15 0 0 0 13.4 0l.5.4c-.7.4-1.4.7-2.1 1l1.3 2.2a21 21 0 0 0 6.5-3.3C26.3 10.8 25 6 22 1.7zM8.7 13.5c-1.3 0-2.3-1.2-2.3-2.6S7.4 8.3 8.7 8.3s2.3 1.2 2.3 2.6-1 2.6-2.3 2.6zm8.6 0c-1.3 0-2.3-1.2-2.3-2.6s1-2.6 2.3-2.6 2.3 1.2 2.3 2.6-1 2.6-2.3 2.6z"/></svg><span class="bd">2</span></div>
+    <div class="sep"></div>
+    <div class="srv" style="background:#ff7a4d;border-radius:16px">AC</div>
+    <div class="srv" style="background:#2b2b30;border-radius:50%">IH</div>
+    <div class="srv" style="background:#23a55a;border-radius:50%">SF</div>
+    <div class="srv" style="background:#2b2b30;border-radius:50%;color:#23a55a;font-size:22px">+</div>
+  </nav>
+  <aside class="side">
+    <div class="hd">Acme HQ <span style="color:var(--muted)">⌄</span></div>
+    <div class="chs">
+      <div class="cat"><span>⌄ Team</span><span class="pl">+</span></div>
+      <div class="ch"><span class="h">#</span>general</div>
+      <div class="ch u"><span class="h">#</span>approvals</div>
+      <div class="cat"><span>⌄ Support</span><span class="pl">+</span></div>
+      <div class="ch u"><svg width="20" height="20" style="color:var(--faint)"><use href="#forum"/></svg>support-cases</div>
+      <div class="thr"><div class="ch on">Maya Chen: charged twice this month</div></div>
+      <div class="thr"><div class="ch">Tom Reid: how do I export to CSV?</div></div>
+      <div class="thr"><div class="ch">Priya Shah: please cancel our plan</div></div>
+      <div class="ch"><span class="h">#</span>sayso-lessons</div>
+      <div class="ch"><span class="h">#</span>bugs</div>
+    </div>
+    <div style="position:absolute;left:8px;right:8px;bottom:8px;height:52px;background:var(--elev);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:8px;padding:0 8px">
+      <span style="position:relative;width:32px;height:32px;border-radius:50%;background:#7b6cff;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff">SK<i style="position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;background:var(--green);border:3px solid var(--elev)"></i></span>
+      <span style="line-height:1.15;min-width:0"><b style="display:block;font-size:14px;color:var(--strong);font-weight:600">Sam</b><small style="font-size:12px;color:var(--muted)">Online</small></span>
+      <span style="margin-left:auto;display:flex;gap:10px;color:var(--sub)"><svg width="20" height="20"><use href="#mic"/></svg><svg width="20" height="20"><use href="#head"/></svg><svg width="20" height="20"><use href="#gear"/></svg></span>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="chh">
+      <svg width="22" height="22" style="color:var(--muted)"><use href="#forum"/></svg>
+      <span class="p">support-cases</span><span style="color:var(--muted)">›</span>
+      <span class="t">Maya Chen: charged twice this month</span>
+      <span class="rt"><svg class="hide" width="22" height="22"><use href="#bell"/></svg><svg class="hide" width="22" height="22"><use href="#pin"/></svg><svg class="hide" width="22" height="22"><use href="#ppl"/></svg><span class="search">Search Acme HQ<svg width="16" height="16"><use href="#mag"/></svg></span></span>
+    </div>
+    <div class="bar"><span class="pbtn"><svg width="18" height="18"><use href="#smile"/></svg>React to Post</span><span><span class="pbtn"><svg width="16" height="16"><use href="#bell"/></svg>Following</span></span></div>
+    <div class="scroll" id="scroll">
+      <div class="post">
+        <h1>Maya Chen: charged twice this month</h1>
+        <div class="tags" id="tags"><span class="tag"><svg width="14" height="14"><use href="#tagi"/></svg>Billing</span><span class="tag hl" id="stage">⏳ Awaiting approval</span></div>
+      </div>
+
+      <div class="msg g">
+        <div class="av"><svg><use href="#buddy"/></svg></div>
+        <div class="nm"><b>Sayso</b><span class="app">✓ APP</span><time>Today at 9:58 AM</time></div>
+        <p><strong>Email from Maya Chen</strong> (maya@northwind.io) · Pro annual · customer 14 months</p>
+        <div class="quote">Hi, I was charged twice this month?? Can you fix it please.
+Maya</div>
+      </div>
+
+      <div class="msg g">
+        <div class="av"><svg><use href="#buddy"/></svg></div>
+        <div class="nm"><b>Sayso</b><span class="app">✓ APP</span><time>Today at 10:00 AM</time></div>
+        <div class="card"><div class="et">What I checked</div>
+          <div class="row">
+            <div><div class="k">Stripe</div><div class="v">2 × $49.00 on 3 Oct</div></div>
+            <div><div class="k">Duplicate?</div><div class="v">Yes, same invoice</div></div>
+            <div><div class="k">Refund</div><div class="v">Ready, not made</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg g">
+        <div class="av"><svg><use href="#buddy"/></svg></div>
+        <div class="nm"><b>Sayso</b><span class="app">✓ APP</span><time>Today at 10:01 AM</time></div>
+        <p><strong>Draft reply</strong> (used lesson: <em>refund duplicates fast</em>)</p>
+        <div class="quote">Hi Maya,
+
+You're right, sorry about that. There were two charges of $49.00 on 3 Oct. I've refunded the second one, so you'll see it back on your card in 5–10 days.
+
+Thanks for flagging it,
+Sam at Acme</div>
+        <p style="margin-top:8px"><strong>Yes</strong> = refund $49.00 and send this exact text. <strong>No</strong> = nothing happens.</p>
+      </div>
+      <div class="msg g">
+        <div class="av"><svg><use href="#buddy"/></svg></div>
+        <div class="tools"><span>🙂</span><span><svg width="18" height="18"><use href="#reply"/></svg></span><span>⋯</span></div>
+        <div class="nm"><b>Sayso</b><span class="app">✓ APP</span><time>Today at 10:01 AM</time></div>
+        <div class="hint" id="hint">👇 Tap Yes, then Vote</div>
+        <div class="poll" id="poll">
+          <div class="q">Refund $49.00 and send this reply to Maya Chen (charged twice)?</div>
+          <div class="s" id="psub">Select one answer</div>
+          <button class="ans" data-v="yes"><span class="lb">Yes</span><span class="pc"></span><span class="rad"></span><span class="fill"></span></button>
+          <button class="ans" data-v="no"><span class="lb">No</span><span class="pc"></span><span class="rad"></span><span class="fill"></span></button>
+          <div class="foot"><div class="l"><b id="nv">0 votes</b> <span id="left">• 23h left</span></div><div id="fr"><button class="lnk" id="show">Show results</button><button class="vote" id="vote" disabled>Vote</button></div></div>
+        </div>
+      </div>
+      <div id="after"></div>
+    </div>
+    <div class="typing" id="typing" style="visibility:hidden"><span class="d"><i></i><i></i><i></i></span><b style="color:var(--strong);font-weight:600">Sayso</b>&nbsp;is typing…</div>
+    <div class="comp"><svg width="24" height="24" style="color:var(--sub)"><use href="#plus"/></svg><span class="ph">Message “Maya Chen: charged twice this month”</span><span class="ic"><svg width="22" height="22"><use href="#gift"/></svg><span style="font:700 11px/22px var(--f,inherit);border:2px solid currentColor;border-radius:4px;padding:0 3px;height:20px;display:inline-flex;align-items:center">GIF</span><svg width="22" height="22"><use href="#sticker"/></svg><svg width="22" height="22"><use href="#smile"/></svg><svg width="22" height="22"><use href="#apps"/></svg></span></div>
+  </main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let pick=null, voted=false;
+const poll=$('#poll'), voteBtn=$('#vote');
+document.querySelectorAll('.ans').forEach(a=>a.onclick=()=>{
+  if(voted)return; pick=a.dataset.v;
+  document.querySelectorAll('.ans').forEach(x=>x.classList.toggle('sel',x===a));
+  voteBtn.disabled=false; $('#hint').textContent='👇 Now press Vote (bottom right of the poll)';
+});
+function now(min){const d=new Date(2026,9,8,10,min);return `Today at ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} AM`;}
+function add(html,cls=''){const w=document.createElement('div');w.innerHTML=html;const el=w.firstElementChild;el.classList.add('new');if(cls)el.classList.add(cls);$('#after').appendChild(el);const s=$('#scroll');s.scrollTop=s.scrollHeight;return el;}
+function showResults(yes,no){
+  poll.classList.add('res');const tot=yes+no;
+  const set=(v,n)=>{const a=document.querySelector(`.ans[data-v=${v}]`);const p=tot?Math.round(n*100/tot):0;a.querySelector('.pc').textContent=`${n} vote${n===1?'':'s'} · ${p}%`;requestAnimationFrame(()=>a.querySelector('.fill').style.width=p+'%');};
+  set('yes',yes);set('no',no);$('#nv').textContent=`${tot} vote${tot===1?'':'s'}`;
+}
+function typing(ms){return new Promise(r=>{$('#typing').style.visibility='visible';setTimeout(()=>{$('#typing').style.visibility='hidden';r();},ms)});}
+voteBtn.onclick=async()=>{
+  if(!pick||voted)return; voted=true; $('#hint').style.display='none';
+  showResults(pick==='yes'?1:0,pick==='no'?1:0);
+  $('#fr').innerHTML='<span style="color:var(--muted);font-size:14px">Poll closed</span>';$('#left').textContent='• Final results';
+  $('#psub').textContent='Select one answer';poll.classList.add('closed');document.querySelector(`.ans[data-v=${pick}] .lb`).insertAdjacentHTML('beforeend',' <span style="color:var(--green)">✔</span>');
+  add(`<div class="sys"><svg width="16" height="16" style="color:var(--muted)"><use href="#arrow"/></svg><span><b>Sayso</b>'s poll <b>Refund $49.00 and send this reply…</b> has closed. <b>${pick==='yes'?'Yes':'No'}</b> won.</span></div>`);
+  await typing(1400);
+  if(pick==='yes'){
+    add(`<div class="msg g"><div class="av"><svg><use href="#buddy"/></svg></div><div class="nm"><b>Sayso</b><span class="app">✓ APP</span><time>${now(4)}</time></div>
+      <p>✅ <strong>Refunded $49.00 in Stripe</strong> <code>re_…3Kq</code> · checked, status <strong>succeeded</strong></p></div>`);
+    await typing(1200);
+    add(`<div class="msg"><p>✅ <strong>Reply sent to Maya</strong> · found in your Sent folder, sent once.</p></div>`);
+    await typing(900);
+    add(`<div class="msg"><p>🧠 <strong>Learned:</strong> duplicate charge → refund first, explain after. <span style="color:var(--muted);font-size:13px">5th time you approved this</span></p><div class="reacts"><span class="react">👍 1</span></div></div>`);
+    const st=$('#stage');st.className='tag done';st.textContent='✅ Done';
+  } else {
+    add(`<div class="msg g"><div class="av"><svg><use href="#buddy"/></svg></div><div class="nm"><b>Sayso</b><span class="app">✓ APP</span><time>${now(4)}</time></div>
+      <p>⏸ <strong>Nothing sent, no refund.</strong> What was wrong? Reply here in your own words and I'll redraft.</p></div>`);
+    const st=$('#stage');st.className='tag';st.textContent='✋ In support';
+  }
+  add(`<div style="padding:8px 16px 0 72px"><button id="again" style="margin-top:6px;height:32px;padding:0 14px;border-radius:8px;background:#4e5058;color:#fff;font-size:14px;font-weight:500">↺ Reset demo</button></div>`);
+  $('#again').onclick=()=>location.reload();
+};
+$('#show').onclick=()=>{if(!voted)showResults(0,0);};
+</script>
+</body>
+</html>
