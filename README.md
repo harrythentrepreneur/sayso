@@ -33,6 +33,11 @@ shipped.
   <br><sub>The real Sayso console on a phone, with a demo product and test customers.</sub>
 </p>
 
+<p align="center">
+  <a href="assets/sayso-demo-video.mp4"><img src="assets/sayso-demo-discord.gif" alt="Sayso in Discord: a customer email becomes a case, Sayso checks Stripe, drafts the reply and asks for a Yes. One tap and the refund is made, the reply is sent once and proven." width="100%"></a>
+  <br><sub>Sayso in a Discord workspace (demo team, made-up customer). <a href="assets/sayso-demo-video.mp4">Watch with sound (MP4, 31 s)</a>. Slack support is on the roadmap.</sub>
+</p>
+
 ## Why Sayso
 
 Support automation usually fails one of two ways. Either the AI answers
