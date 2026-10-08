@@ -102,6 +102,14 @@ class Context:
         self.board.alert(f"[{self.config.name}] {text}", idempotency_key=key)
         self.journal.append("alert", key=key, text=text)
 
+    def notify(self, key: str, text: str, *, mention: str | None = None) -> None:
+        """A decision notice in the alerts channel. It pings ``mention`` (one operator
+        id) and nobody else; with no mention it pings nobody. Once per key."""
+        if mention is not None and mention not in self.config.operators:
+            raise ValueError("a notice may only ping a configured operator")
+        self.board.notify(f"[{self.config.name}] {text}", idempotency_key=key, mention=mention)
+        self.journal.append("notice", key=key, mention=mention)
+
     # -- heartbeats ----------------------------------------------------------
     def beat(self, job: str, result: str) -> None:
         with locked(self.paths.heartbeats):

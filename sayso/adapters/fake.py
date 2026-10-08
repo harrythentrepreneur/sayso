@@ -12,6 +12,7 @@ closed. Faults are named strings in ``world["faults"]``:
   refund_wrong_amount       payments refunds a different amount
   tags_ignored              board returns OK on a tag write but keeps old tags
   merge_ignored             code host returns OK on merge but does not merge
+  authors_unreadable        the board cannot list who wrote in a card
 """
 from __future__ import annotations
 
@@ -72,6 +73,13 @@ class World:
         self.data["inbox"].append(msg)
         self.save()
         return InboundMessage(**{**msg, "recipients": tuple(msg["recipients"])})
+
+    def operator_posts(self, card_id: str, user_id: str, text: str) -> None:
+        """A person writes in a card (the first operator to post owns its votes)."""
+        card = self.data["cards"][card_id]
+        card["messages"].append(text)
+        card.setdefault("authors", []).append([user_id, self.clock.now().isoformat()])
+        self.save()
 
     def operator_votes(self, poll_id: str, user_id: str, answer: str) -> None:
         """Someone taps Yes or No on one exact poll."""
@@ -140,6 +148,20 @@ class FakeBoard:
     def alert(self, text, idempotency_key):
         self.w.once("alert:" + idempotency_key, lambda: self.w.data["alerts"].append(text) or True)
         self.w.save()
+
+    def notify(self, text, idempotency_key, mention=None):
+        """Records exactly who would be pinged: ``pings`` is the full list for this notice."""
+        def make():
+            self.w.data.setdefault("notices", []).append({"text": text, "pings": [mention] if mention else []})
+            return True
+        self.w.once("notice:" + idempotency_key, make)
+        self.w.save()
+
+    def message_authors(self, card_id):
+        """[(author id, iso time)] oldest first. Tests add operator posts with ``operator_posts``."""
+        if self.w.fault("authors_unreadable"):
+            raise FaultInjected("history unreadable")
+        return [tuple(a) for a in self.w.data["cards"][card_id].get("authors", [])]
 
 
 class FakeHelpdesk:

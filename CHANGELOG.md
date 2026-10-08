@@ -4,6 +4,11 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Vote owners: every vote says whose decision it is (`For Harry:` / `For either of you:`), the card says who
+  started the work, and the decision notice pings only that operator. The owner is the first operator to post
+  in the card; `sayso set-owner` overrides it. A label only: any operator can still decide. Ported from the
+  PhonicsMaker loop.
+
 ### 0.2.0 (release candidate)
 
 - Open source under the Apache License 2.0 (was proprietary). A NOTICE file credits the authors and Hermes Agent.

@@ -28,6 +28,8 @@ passes is untested.
 | No merge vote before independent QA passes the exact head | jobs/qa.py, jobs/dev.py, jobs/release.py | Merging a fix nobody but its author checked |
 | A PR's tests must fail on the old code | jobs/qa.py | A green test that proves nothing |
 | QA rounds are bounded; then a human decides | jobs/qa.py | An agent loop burning money on a fix that will not converge |
+| A decision notice pings only the vote's owner, or nobody | votes.py, runtime.py, owners.py | Pinging everyone named in a customer's text, or the wrong person |
+| Owner is a label only; any operator can still decide | votes.py | One absent person blocking every decision |
 | Reply subject carries exactly one `Re:` | safety.py `reply_subject` | `Re: Re: ...` subjects on threads that already had one |
 | Pause flag | runtime.py | Any action while an operator investigates |
 | Only operators decide; any operator No declines | votes.py | A stranger or a bot approving |

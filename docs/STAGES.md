@@ -87,3 +87,20 @@ exact head (jobs/qa.py):
 A new head starts the steps again. The release job merges only a head QA passed.
 Without a QA runner the merge vote opens straight away and the card says the PR
 was not independently checked.
+
+## Whose vote it is
+
+Every vote carries an owner label: `For Harry: ...`, or `For either of you: ...`
+(`For any operator: ...` with more than two operators). The card gets one line
+saying who started the work, and the decision notice in the alerts channel
+pings **only** the owner. A vote for anyone pings nobody.
+
+- The owner is the first operator to post in the card, read from its oldest
+  message. Once recorded it does not change.
+- No operator post yet, or a card that cannot be read, is "anyone". A person
+  is never guessed.
+- `sayso set-owner CASE --owner NAME|all --by NAME` overrides it and records who
+  set it. An override is never replaced by inference.
+
+**It is a label only.** Any operator can still approve or decline any vote;
+the decision rule above never reads the owner.
