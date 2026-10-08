@@ -9,6 +9,8 @@
   demo                           run the fake end-to-end scenario
   cases --config F               list cases with their live stage
   handoff-dev CASE --config F    send a case to dev (voids its pending reply vote)
+  set-owner CASE --owner WHO --by WHO --config F
+                                 whose decision this case's votes are (a label; anyone can still vote)
   money-request CASE --config F --spec FILE --subject TEXT
                                  open a money vote for an exact refund/cancel spec
   fake write-in --config F --from ADDR --subject S --body B   (fake adapters only)
@@ -137,6 +139,18 @@ def cmd_handoff_dev(a) -> int:
     return 0
 
 
+def cmd_set_owner(a) -> int:
+    from sayso import owners
+    ctx = _ctx(a.config)
+    try:
+        value = owners.set_override(ctx, a.case, a.owner, a.by)
+    except owners.OwnerError as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps({"case_key": a.case, **value, "name": owners.name_of(ctx, value["owner"]) or "any operator"}))
+    return 0
+
+
 def cmd_money_request(a) -> int:
     from sayso.jobs import money_job
     ctx = _ctx(a.config)
@@ -247,6 +261,12 @@ def main(argv=None) -> int:
     s.add_argument("case")
     s.add_argument("--config", required=True)
     s.set_defaults(fn=cmd_handoff_dev)
+    s = sub.add_parser("set-owner")
+    s.add_argument("case")
+    s.add_argument("--owner", required=True, help="operator id or name, or 'all'")
+    s.add_argument("--by", required=True, help="the operator who asked for this owner")
+    s.add_argument("--config", required=True)
+    s.set_defaults(fn=cmd_set_owner)
     s = sub.add_parser("money-request")
     s.add_argument("case")
     s.add_argument("--config", required=True)

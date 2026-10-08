@@ -129,6 +129,32 @@ class DiscordForumBoard:
                           json_body={"content": text[:1900], "nonce": f"{abs(hash(idempotency_key)) % 10**18}",
                                      "enforce_nonce": True})
 
+    def notify(self, text, idempotency_key, mention=None):
+        # allowed_mentions is explicit: Discord's default would ping every user, role
+        # and @everyone written in the text. Only the one named operator is pinged.
+        uid = str(mention) if mention and str(mention).isdigit() else None
+        content = (f"<@{uid}> " if uid else "") + text
+        self.http.request("POST", f"/channels/{self.alerts}/messages",
+                          json_body={"content": content[:1900], "nonce": f"{abs(hash(idempotency_key)) % 10**18}",
+                                     "enforce_nonce": True,
+                                     "allowed_mentions": {"parse": [], "users": [uid] if uid else []}})
+
+    def message_authors(self, card_id):
+        """[(author id, iso time)] for every message in the card, oldest first (all pages).
+        Bots are skipped; a bot is never an owner."""
+        out, after = [], "0"
+        while True:
+            rows = self.http.request("GET", f"/channels/{card_id}/messages", query={"limit": 100, "after": after})
+            if not rows:
+                break
+            for m in rows:
+                if not (m.get("author") or {}).get("bot"):
+                    out.append((int(m["id"]), str(m["author"]["id"]), str(m.get("timestamp") or "")))
+            after = str(max(int(m["id"]) for m in rows))
+            if len(rows) < 100:
+                break
+        return [(a, t) for _, a, t in sorted(out)]
+
 
 # --------------------------------------------------------------------------- Frappe Helpdesk
 class FrappeHelpdesk:

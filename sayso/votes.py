@@ -7,6 +7,10 @@ VOID and must be asked again. A vote never performs an action by itself.
 
 Only configured operators can decide. Anyone else's vote is kept as an
 opinion. Any operator "no" declines; otherwise one operator "yes" approves.
+
+Every vote also carries an OWNER label (sayso/owners.py): whose decision
+it is. The label is shown on the poll and pings only that person. It never
+changes who can decide.
 """
 from __future__ import annotations
 
@@ -46,18 +50,27 @@ def open_vote(ctx, *, key: str, kind: str, case_key: str, card_id: str, subject:
     if kind not in KINDS:
         raise VoteError(f"unknown vote kind {kind}")
     check_human_subject(subject)
+    if key in load_json(ctx.paths.votes):
+        return load_json(ctx.paths.votes)[key]
+    from sayso import owners
+    owner = owners.for_vote(ctx, case_key)       # before the votes lock: it may read the board
+    tag = owners.label(ctx, owner["owner"])
     with locked(ctx.paths.votes):
         votes = load_json(ctx.paths.votes)
         if key in votes:
             return votes[key]
-        poll_id = ctx.board.open_poll(card_id, f"{subject} - {question}", idempotency_key=key)
+        ctx.board.post(card_id, owners.started_line(ctx, owner), idempotency_key=f"owner:{key}")
+        poll_id = ctx.board.open_poll(card_id, f"{tag}{subject} - {question}", idempotency_key=key)
         rec = {"key": key, "kind": kind, "case_key": case_key, "card_id": card_id, "poll_id": poll_id,
                "subject": subject, "question": question, "identity": identity,
                "fingerprint": fingerprint(kind, identity, material), "spec": spec or {},
-               "status": OPEN, "opened_at": ctx.clock.now().isoformat()}
+               "status": OPEN, "opened_at": ctx.clock.now().isoformat(), "owner": owner["owner"],
+               "owner_source": owner.get("owner_source")}
         votes[key] = rec
         save_json(ctx.paths.votes, votes)
-    ctx.journal.append("vote_opened", key=key, kind=kind, case_key=case_key)
+    ctx.journal.append("vote_opened", key=key, kind=kind, case_key=case_key, owner=owner["owner"])
+    mention = owner["owner"] if owners.name_of(ctx, owner["owner"]) else None
+    ctx.notify(f"vote:{key}", f"{tag}{subject} - {question}", mention=mention)
     return rec
 
 
