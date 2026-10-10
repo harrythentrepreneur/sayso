@@ -91,7 +91,7 @@ class QuickstartTests(unittest.TestCase):
         names = sorted(p.name for p in out.iterdir())
         self.assertIn("sayso-acme-sender.service", names)
         self.assertIn("sayso-acme-sender.timer", names)
-        self.assertEqual(len(names), 22)  # 11 jobs x (service + timer)
+        self.assertEqual(len(names), 24)  # 12 jobs x (service + timer)
 
     def test_bad_config_exits_1(self):
         (self.d / "bad.toml").write_text("[product]\nslug='x'\n")

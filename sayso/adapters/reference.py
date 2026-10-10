@@ -140,6 +140,19 @@ class DiscordForumBoard:
                                      "enforce_nonce": True,
                                      "allowed_mentions": {"parse": [], "users": [uid] if uid else []}})
 
+    def last_activity(self, card_id):
+        """Time of the newest message in the post, from the thread's last_message_id.
+
+        A post id encodes CREATION time, so it is never used: a busy old case would
+        read as months idle. No last message means the card is unreadable, not new."""
+        thread = self.http.request("GET", f"/channels/{card_id}")
+        mid = str(thread.get("last_message_id") or "")
+        if not mid.isdigit():
+            raise RuntimeError("card has no readable last message")
+        from datetime import datetime, timezone
+        ms = (int(mid) >> 22) + 1420070400000
+        return datetime.fromtimestamp(ms / 1000, tz=timezone.utc).isoformat()
+
     def message_authors(self, card_id):
         """[(author id, iso time)] for every message in the card, oldest first (all pages).
         Bots are skipped; a bot is never an owner."""

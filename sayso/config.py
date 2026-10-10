@@ -33,6 +33,7 @@ DEFAULT_JOBS = {
     "votes": 60,
     "dev": 300,
     "qa": 300,
+    "stall": 300,
     "release": 300,
     "close": 900,
     "reconcile": 600,
@@ -75,6 +76,16 @@ class Policy:
     currencies: tuple[str, ...] = ()
     max_dev_rounds: int = 2
     max_parallel_dev_runs: int = 2
+    vote_remind_minutes: int = 30
+    orphan_minutes: int = 15
+    stall_new_hours: int = 1
+    stall_support_hours: int = 2
+    stall_dev_hours: int = 2
+    stall_qa_hours: int = 1
+    stall_awaiting_hours: int = 2
+    stall_blocked_hours: int = 4
+    stall_repeat_hours: int = 24
+    parked_label: str = "Parked"
     red_proof_max_tries: int = 3
     qa_limit_retries: int = 6
     qa_ui_paths: str = ""
@@ -181,6 +192,11 @@ def parse(raw: dict, path: Path) -> Config:
            policy.qa_limit_retries) < 1:
         raise ConfigError("[policy] max_dev_rounds, max_parallel_dev_runs, red_proof_max_tries "
                           "and qa_limit_retries must be >= 1")
+    stall = [policy.vote_remind_minutes, policy.orphan_minutes, policy.stall_new_hours,
+             policy.stall_support_hours, policy.stall_dev_hours, policy.stall_qa_hours,
+             policy.stall_awaiting_hours, policy.stall_blocked_hours, policy.stall_repeat_hours]
+    if any(not isinstance(v, int) or v < 1 for v in stall):
+        raise ConfigError("[policy] stall and reminder times must be whole numbers >= 1")
     if policy.qa_ui_paths:
         try:
             re.compile(policy.qa_ui_paths)

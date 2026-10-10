@@ -35,7 +35,7 @@ from sayso import stages
 from sayso.config import Config
 from sayso.store import parse_iso
 
-HEALTH_JOBS = ("intake", "draft", "votes", "sender", "money", "dev", "qa", "release", "close", "reconcile", "health")
+HEALTH_JOBS = ("intake", "draft", "votes", "sender", "money", "dev", "qa", "release", "close", "reconcile", "stall", "health")
 STAGE_ORDER = (stages.NEW, stages.IN_SUPPORT, stages.IN_DEV, stages.IN_QA, stages.AWAITING, stages.DONE,
                stages.BLOCKED)
 

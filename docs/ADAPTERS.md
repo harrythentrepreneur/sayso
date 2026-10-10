@@ -7,7 +7,7 @@ The core never imports a vendor SDK.
 
 | Protocol | Methods | Notes |
 |---|---|---|
-| Board | `ensure_card, get_tags, set_tags, post, messages, open_poll, read_poll, alert, notify`; optional `message_authors` | `set_tags` receives the full list. `read_poll` returns `{user_id: "yes"/"no"}` and must skip bots. `notify(text, key, mention)` pings `mention` and nobody else. `message_authors(card)` returns `[(user_id, iso_time)]` oldest first, bots skipped; without it every vote is for anyone. |
+| Board | `ensure_card, get_tags, set_tags, post, messages, open_poll, read_poll, alert, notify, last_activity`; optional `message_authors` | `set_tags` receives the full list. `read_poll` returns `{user_id: "yes"/"no"}` and must skip bots. `notify(text, key, mention)` pings `mention` and nobody else. `message_authors(card)` returns `[(user_id, iso_time)]` oldest first, bots skipped; without it every vote is for anyone. `last_activity(card)` returns the ISO time of the card's NEWEST message (not its creation; a tag change is not activity) and raises when unreadable. |
 | Helpdesk | `fetch_inbound, send_reply, sent_readback, last_sent_at, last_inbound_at` | `last_inbound_at(ticket, customer)` must include mail from that customer on ANY ticket. |
 | Mailbox | `sent_copies(message_id)` | Counts copies in the mailbox's own Sent folder. It must be independent of the helpdesk. |
 | Payments | `refund, cancel_subscription, read_refunds, read_subscription` | Reads return the provider's own records. |

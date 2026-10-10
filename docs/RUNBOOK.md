@@ -28,6 +28,10 @@ Each alert fires once per problem, and the text names the case.
 | `jobs not running: ...` | No heartbeat for three intervals | `systemctl --user status sayso-acme-<job>.service`, then `journalctl`. |
 | `intake stopped at N new cards` | A burst of mail (or a loop) | Check the helpdesk for a mail loop before you raise `max_new_cases_per_run`. |
 | `awaiting-no-vote`, `bad-tags`, `card-missing` | Board and records disagree | Someone moved the card by hand. Put it back to a legal stage (STAGES.md). The reconciler never repairs anything itself. |
+| `still waiting for a decision after ...` | A vote has been open longer than `vote_remind_minutes` | Vote in the card. It repeats once a day while the vote stays open. Only the case owner is pinged. |
+| `... no activity for Nh: ...` | A card went quiet past its stage limit (`stall_*_hours`) | Post in the card or move it. Any new message resets the clock. Tag it `Parked` if it is deliberately waiting. |
+| `... nothing is moving it: ...` | No vote, draft, dev or QA run is set to move this card | Do the step it names, or move the card to the stage that matches the work. |
+| `cannot read the card's last activity` | The board could not report the newest message | Check the bot can still read the card. The stall check skips it rather than guessing. |
 | `approved-not-sent` | An approved reply is still unsent after `unsent_alert_hours` | Check the sender service. Usually the card was moved off `Awaiting approval`. |
 
 ## Recover after a crash or reboot
