@@ -137,6 +137,9 @@ class DevRunner(Protocol):
 
     def start(self, case_key: str, brief: str, idempotency_key: str) -> str: ...
     def result(self, run_id: str) -> dict[str, Any] | None: ...
+    def state(self, run_id: str) -> str:
+        """running | dead | unknown. Dead requires a terminated run and no usable output."""
+        ...
 
 
 @runtime_checkable

@@ -74,6 +74,7 @@ class Policy:
     refund_max_minor: int = 0
     currencies: tuple[str, ...] = ()
     max_dev_rounds: int = 2
+    max_parallel_dev_runs: int = 2
     red_proof_max_tries: int = 3
     qa_limit_retries: int = 6
     qa_ui_paths: str = ""
@@ -176,8 +177,10 @@ def parse(raw: dict, path: Path) -> Config:
     policy = Policy(**pol)  # type: ignore[arg-type]
     if policy.quiet_close_days < 1 or policy.readback_seconds <= 0 or policy.max_new_cases_per_run < 1:
         raise ConfigError("[policy] values must be positive")
-    if min(policy.max_dev_rounds, policy.red_proof_max_tries, policy.qa_limit_retries) < 1:
-        raise ConfigError("[policy] max_dev_rounds, red_proof_max_tries and qa_limit_retries must be >= 1")
+    if min(policy.max_dev_rounds, policy.max_parallel_dev_runs, policy.red_proof_max_tries,
+           policy.qa_limit_retries) < 1:
+        raise ConfigError("[policy] max_dev_rounds, max_parallel_dev_runs, red_proof_max_tries "
+                          "and qa_limit_retries must be >= 1")
     if policy.qa_ui_paths:
         try:
             re.compile(policy.qa_ui_paths)

@@ -14,6 +14,7 @@ from __future__ import annotations
 import email
 import imaplib
 import subprocess
+from pathlib import Path
 from typing import Any
 
 from sayso.adapters.base import InboundMessage, MoneyReceipt, PollResult, PrFacts, PullRequest, SentRecord
@@ -312,10 +313,24 @@ class GitHubCodeHost:
 
     def __init__(self, section: Section, transport=None):
         self.repo = section.options.get("repo")
+        self.allowed_repos = section.options.get("allowed_repos", str(self.repo))
         if not self.repo or "/" not in str(self.repo):
             raise ConfigError("[codehost] github needs repo = \"owner/name\"")
         self.http = Client("https://api.github.com", {"Authorization": "Bearer " + section.secret("token"),
                                                       "Accept": "application/vnd.github+json"}, transport)
+
+    def for_ref(self, ref):
+        from sayso.pr_refs import REF
+        match = REF.fullmatch(ref)
+        if not match:
+            raise ValueError("invalid PR reference")
+        repo = match.group(1)
+        allowed = {r.strip() for r in str(self.allowed_repos).split(",")}
+        if repo not in allowed:
+            raise ConfigError(f"PR repository {repo!r} is not in [codehost] allowed_repos")
+        clone = object.__new__(GitHubCodeHost)
+        clone.repo, clone.allowed_repos, clone.http = repo, self.allowed_repos, self.http
+        return clone
 
     def pull_request(self, number):
         pr = self.http.request("GET", f"/repos/{self.repo}/pulls/{number}")
@@ -404,6 +419,7 @@ class HermesDevRunner:
         if not self.profile:
             raise ConfigError("[dev_runner] hermes needs profile")
         self.dir = state_dir / "dev-runs"
+        self.state_db = Path.home() / ".hermes" / "profiles" / str(self.profile) / "state.db"
         self.run = run
 
     def start(self, case_key, brief, idempotency_key):
@@ -419,13 +435,83 @@ class HermesDevRunner:
                  check=True)
         return safe
 
+    def state(self, run_id):
+        """A missing result is dead only after systemd proves the exact unit ended.
+        Missing/unreadable unit state is unknown, never permission to restart."""
+        safe = run_id
+        if not safe or not all(c.isalnum() or c in "_-" for c in safe):
+            return "unknown"
+        try:
+            p = self.run(["systemctl", "--user", "show", f"sayso-dev-{safe}",
+                          "--property=ActiveState", "--value"], capture_output=True, text=True,
+                         timeout=15)
+        except (OSError, subprocess.TimeoutExpired):
+            return "unknown"
+        if p.returncode:
+            return "unknown"
+        state = p.stdout.strip()
+        if state in ("active", "activating", "reloading", "deactivating"):
+            return "running"
+        if state in ("failed", "inactive"):
+            return "dead"
+        return "unknown"
+
     def result(self, run_id):
+        import json
         import re
         out = self.dir / f"{run_id}.out"
         if not out.exists():
             return None
-        m = re.search(r"^PR:\s*#?(\d+)\s*$", out.read_text(encoding="utf-8"), re.M)
-        return {"pr": int(m.group(1)), "summary": "See the dev run output."} if m else None
+        text = out.read_text(encoding="utf-8", errors="replace")
+        # Only the final result block may contain multi-repo PR links. An echoed
+        # brief or a customer email can name a PR; neither is a dev result.
+        end = text.rfind("=== END RESULT ===")
+        if end >= 0:
+            start = text.rfind("=== RESULT ===", 0, end)
+            if start < 0:
+                return None
+            summary = text[start + len("=== RESULT ==="):end].strip()[:1800]
+            rest = text[end + len("=== END RESULT ==="):]
+            line = re.search(r"^PR:\s*(.+)$", rest, re.M)
+            if not line:
+                return None
+            links = [v.strip() for v in line.group(1).split(",")]
+            parsed = []
+            for link in links:
+                m = re.fullmatch(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/pull/([1-9][0-9]*)", link)
+                if not m:
+                    return None
+                parsed.append(f"{m.group(1)}#{m.group(2)}")
+            if not parsed or len(set(parsed)) != len(parsed):
+                return None
+            result = {"prs": parsed, "summary": summary}
+        else:
+            m = re.search(r"^PR:\s*#?([1-9][0-9]*)\s*$", text, re.M)
+            if not m:
+                return None
+            result = {"pr": int(m.group(1)), "summary": "See the dev run output."}
+            rest = text[m.end():]
+        # Never trust a usage number written by the agent in its answer. Read
+        # the named session's measured counters from Hermes's own database.
+        sids = re.findall(r"^session_id:\s*([A-Za-z0-9_.-]+)\s*$", text, re.M)
+        if sids:
+            try:
+                import sqlite3
+                con = sqlite3.connect(f"file:{self.state_db}?mode=ro", uri=True)
+                try:
+                    row = con.execute(
+                        "select coalesce(input_tokens,0)+coalesce(cache_read_tokens,0)+"
+                        "coalesce(cache_write_tokens,0), coalesce(output_tokens,0), "
+                        "started_at, last_activity_at from sessions where id = ?", (sids[-1],)
+                    ).fetchone()
+                finally:
+                    con.close()
+                if row and row[2] is not None and row[3] is not None:
+                    result["usage"] = {"tokens_read": int(row[0]), "tokens_out": int(row[1]),
+                                       "minutes": round(max(0.0, row[3] - row[2]) / 60, 1)}
+            except (OSError, ValueError, sqlite3.Error):
+                pass  # missing usage is honest; never invent a number
+        return result
 
 
 class HermesQaRunner:
@@ -453,7 +539,7 @@ class HermesQaRunner:
         import shlex
         if not self.red_cmd:
             return {"state": "error", "reason": "red_proof_cmd is not set"}
-        out = self.run(shlex.split(str(self.red_cmd)) + [str(int(pr)), str(head)],
+        out = self.run(shlex.split(str(self.red_cmd)) + [str(pr), str(head)],
                        capture_output=True, text=True, timeout=1800)
         try:
             got = json.loads((out.stdout or "").strip().splitlines()[-1])

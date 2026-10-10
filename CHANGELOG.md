@@ -4,6 +4,11 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Dev loop: configurable parallel runs; one bounded fresh retry for a proven dead run; multiple PRs
+  (including across allowed repositories) each require exact-head QA and a separate merge vote; a case
+  returns to support only after every PR is read back as merged. Tokens and minutes come from Hermes's
+  session database, not an agent's answer.
+
 - Vote owners: every vote says whose decision it is (`For Harry:` / `For either of you:`), the card says who
   started the work, and the decision notice pings only that operator. The owner is the first operator to post
   in the card; `sayso set-owner` overrides it. A label only: any operator can still decide. Ported from the

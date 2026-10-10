@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from sayso import votes
+from sayso import votes, pr_refs
 from sayso.store import parse_iso
 
 
@@ -21,7 +21,7 @@ def current_material(ctx, rec):
             from pathlib import Path
             return {"sha256": hashlib.sha256(Path(spec["path"]).read_bytes()).hexdigest()}
         if kind == "merge":
-            pr = ctx.codehost.pull_request(int(spec["pr"]))
+            pr = pr_refs.read(ctx, spec["pr"])
             return {"head": pr.head_sha, "state": pr.state}
         return rec.get("spec_material", spec)
     except Exception:  # noqa: BLE001 - unreadable is never approved
