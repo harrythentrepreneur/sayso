@@ -6,6 +6,13 @@ No email is sent, no money moves and no code merges without a Yes from a named
 operator on the **exact** revision. The executor re-checks that revision
 immediately before it acts.
 
+One opt-in exception, off by default: with `[policy] small_fix_release = true`,
+a **merge** (never a reply, money or close) may go ahead on an independent QA
+pass of every exact head, when the change is small and touches no sensitive
+path. The card says so, the vote record says `decided_by: policy`, and the
+release job re-checks the policy, the size and the heads immediately before it
+merges. If anything changed, it withdraws the policy release and opens a vote.
+
 A vote never acts. Tally records it; a separate executor acts on it. Neither an
 AI drafter, a customer email, nor a board reaction can approve anything.
 
@@ -47,6 +54,7 @@ passes is untested.
 | Dev brief must carry DO NOT MERGE / DEPLOY / CONTACT | jobs/dev.py | An unbounded coding run |
 | One dev run per card | jobs/dev.py | Parallel runs on one case |
 | Merge pinned to the approved head SHA | jobs/release.py | Merging code added after approval |
+| Small-fix release: off by default, needs QA, small, no sensitive path; re-checked at merge | small_fix.py, jobs/qa.py, jobs/release.py | A large or risky change merging without a person |
 | Merge read back as merged | jobs/release.py | Telling a customer a fix shipped when it did not |
 | A close is voided by any new customer mail, on any thread | jobs/close.py, helpdesk adapter | Closing on a customer who just wrote |
 | Quiet window enforced | jobs/close.py | Closing early |

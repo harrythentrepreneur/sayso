@@ -4,6 +4,12 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Small-fix release (opt-in, off by default): `[policy] small_fix_release = true` lets a fix merge on
+  an independent QA pass with no merge vote, only when every PR head passed QA, the whole set is within
+  `small_fix_max_lines` / `small_fix_max_files`, no path matches `small_fix_sensitive_paths`, and every
+  size is readable. Re-checked at merge time; if anything changed it falls back to a vote. Replies,
+  money and closing still need a person. Code hosts report `changed_lines`.
+
 - Stall checks: a new read-only `stall` job reminds the case owner about any vote open 30+ minutes
   (then daily), flags a card quiet past its stage's limit (then daily, reset by any new message),
   and flags an open card that nothing is set to move after 15 minutes (once per case, stage and day).

@@ -83,6 +83,10 @@ Reference adapter keys:
 | `stall_repeat_hours` | 24 | A vote reminder or stall notice repeats at most once per this many hours. Any new message in the card resets the stall clock. |
 | `parked_label` | `Parked` | A card with this tag gets no stall or orphan notice (its open votes still get reminders). The tag must exist on the board. |
 | `qa_ui_paths` | `""` | Regular expression for user-interface files. A PR touching one needs real-app `EVIDENCE:` to pass QA. |
+| `small_fix_release` | `false` | **Off by default.** When `true`, a fix whose QA passed every PR head merges with no merge vote if it is small: within the two limits below, no path matching `small_fix_sensitive_paths`, and every file list and size readable. Anything else gets a vote. Needs a `[qa_runner]`. The customer reply, money and closing still need a vote. |
+| `small_fix_max_lines` | 400 | Most lines (added + deleted) the whole PR set may change and still count as small. |
+| `small_fix_max_files` | 15 | Most files the whole PR set may change and still count as small. |
+| `small_fix_sensitive_paths` | `(built-in: money, login, secrets, migrations, CI, deploy)` | Regular expression. A PR touching a matching path always needs a vote. Set it to your product's own risky paths; it cannot be empty while the policy is on. |
 
 ## [jobs]
 
