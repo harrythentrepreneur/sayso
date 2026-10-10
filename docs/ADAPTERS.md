@@ -11,9 +11,9 @@ The core never imports a vendor SDK.
 | Helpdesk | `fetch_inbound, send_reply, sent_readback, last_sent_at, last_inbound_at` | `last_inbound_at(ticket, customer)` must include mail from that customer on ANY ticket. |
 | Mailbox | `sent_copies(message_id)` | Counts copies in the mailbox's own Sent folder. It must be independent of the helpdesk. |
 | Payments | `refund, cancel_subscription, read_refunds, read_subscription` | Reads return the provider's own records. |
-| CodeHost | `pull_request, pr_facts(number, head), merge(number, expected_head, key)` | `merge` must refuse if the head is not `expected_head`. `pr_facts` reports unreadable as unreadable, never as empty-and-fine. |
+| CodeHost | `pull_request, pr_facts(number, head), merge(number, expected_head, key)` and `for_ref(owner/repo#N)` | `merge` must refuse if the head is not `expected_head`. `pr_facts` reports unreadable as unreadable, never as empty-and-fine. |
 | Drafter | `draft(case, thread) -> str` | Its output is data. It is never sent unapproved. |
-| DevRunner | `start(case_key, brief, key) -> run_id, result(run_id)` | `result` returns `{"pr": int, "summary": str}` or None. |
+| DevRunner | `start(case_key, brief, key) -> run_id, result(run_id), state(run_id)` | `result` returns one PR (`{"pr": int}`) or several (`{"prs": [int or "owner/repo#N"]}`); `state` is `running`, `dead` or `unknown` (unknown never retries). Measured `usage` is optional. |
 | QaRunner | `fails_on_old_code(pr, head), start(case_key, brief, key) -> run_id, result(run_id)` | Must be a different agent from the dev runner. `result` returns `{"text": str}` or None. |
 
 Rules for every adapter:

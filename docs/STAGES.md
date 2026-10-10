@@ -104,3 +104,26 @@ pings **only** the owner. A vote for anyone pings nobody.
 
 **It is a label only.** Any operator can still approve or decline any vote;
 the decision rule above never reads the owner.
+
+## Dev runs and multi-repo fixes
+
+`[policy] max_parallel_dev_runs` bounds active dev jobs (default 2). A run that
+has no PR while still active uses a slot. If systemd proves it ended without a
+usable PR result, the dev job starts **one** fresh run; a second dead run moves
+the card to `Blocked`. Missing or unreadable unit state is `unknown`, not a
+reason to start a duplicate. The regular QA round limit still applies.
+
+One run can return two or more PRs, including the same PR number in different
+repositories (`owner/repo#N`). The GitHub adapter will read and merge only repos
+listed in `[codehost] allowed_repos`. Each PR has its own exact-head QA and its
+own merge vote. **No merge vote opens until every PR passes QA.** A changed head
+before the votes resets QA for the whole set. After approval, the card returns
+to support only when the code host reads back **every** PR as merged. A result
+without a complete PR list fails closed and stays `In dev`.
+
+The Hermes dev runner expects its last result block as `=== RESULT ===` ...
+`=== END RESULT ===` and a following line of comma-separated GitHub PR URLs,
+for example `PR: https://github.com/team/core/pull/7, https://github.com/team/web/pull/7`.
+A single `PR: 7` still works for older products. Usage is read from Hermes's
+session database using its `session_id:` line, not from an agent's claimed
+`USAGE:` line; if the database cannot be read, no number is reported.

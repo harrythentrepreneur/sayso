@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import re
 
-from sayso import cases, safety, stages, votes
+from sayso import cases, safety, stages, votes, pr_refs
 
 REQUIRED_QA_BOUNDARY = ("DO NOT MERGE", "DO NOT DEPLOY", "DO NOT PUSH", "DO NOT CONTACT THE CUSTOMER")
 
@@ -200,13 +200,15 @@ def _subject(rec: dict) -> str:
     return f"{rec['customer'].split('@')[0]} - {rec['title']}"
 
 
-def open_merge_vote(ctx, key: str, rec: dict, pr) -> None:
-    votes.open_vote(ctx, key=f"merge:{key}:{pr.number}:{pr.head_sha[:12]}", kind="merge", case_key=key,
+def open_merge_vote(ctx, key: str, rec: dict, pr, *, ref=None, move: bool = True) -> None:
+    ref = ref if ref is not None else pr.number
+    votes.open_vote(ctx, key=f"merge:{key}:{pr_refs.ident(ref)}:{pr.head_sha[:12]}", kind="merge", case_key=key,
                     card_id=rec["card_id"], subject=_subject(rec),
                     question=f"merge PR {pr.number} at head {pr.head_sha[:12]}?",
-                    identity={"case_key": key, "pr": pr.number}, material={"head": pr.head_sha, "state": "open"},
-                    spec={"pr": pr.number, "head": pr.head_sha})
-    cases.move(ctx, rec["card_id"], stages.AWAITING)
+                    identity={"case_key": key, "pr": ref}, material={"head": pr.head_sha, "state": "open"},
+                    spec={"pr": ref, "head": pr.head_sha})
+    if move:
+        cases.move(ctx, rec["card_id"], stages.AWAITING)
 
 
 def send_back(ctx, key: str, rec: dict, head: str, reason: str) -> str:
@@ -229,7 +231,12 @@ def send_back(ctx, key: str, rec: dict, head: str, reason: str) -> str:
 
 
 def step(ctx, key: str, rec: dict) -> str:
-    pr = ctx.codehost.pull_request(int(rec["pr"]))
+    refs = rec.get("prs") or [rec["pr"]]
+    index = int(rec.get("qa_pr_index") or 0)
+    if index >= len(refs):
+        return "already-checked"
+    ref = refs[index]
+    pr = pr_refs.read(ctx, ref)
     if pr.state != "open":
         ctx.alert(f"qa-pr-not-open:{key}:{pr.number}", f"{_subject(rec)}: PR {pr.url} is {pr.state}, not open")
         return "pr-not-open"
@@ -240,7 +247,7 @@ def step(ctx, key: str, rec: dict) -> str:
     head, card = pr.head_sha, rec["card_id"]
 
     if qa.get("gate") != "pass":
-        facts = ctx.codehost.pr_facts(pr.number, head)
+        facts = pr_refs.host(ctx, ref).pr_facts(pr.number, head)
         state, why = gate_findings(facts)
         if state == "wait":
             return "wait-ci"
@@ -262,7 +269,7 @@ def step(ctx, key: str, rec: dict) -> str:
         qa["red_tries"] = tries + 1
         _save(ctx, key, qa)
         try:
-            got = ctx.qa_runner.fails_on_old_code(pr.number, head) or {}
+            got = ctx.qa_runner.fails_on_old_code(ref, head) or {}
         except Exception as exc:  # noqa: BLE001 - could not run is never a pass
             got = {"state": "error", "reason": type(exc).__name__}
         state = got.get("state")
@@ -322,8 +329,21 @@ def step(ctx, key: str, rec: dict) -> str:
         return send_back(ctx, key, rec, head, reason)
     ctx.board.post(card, f"QA passed head `{head[:12]}` and confirms it fixes what the customer reported.",
                    idempotency_key=f"qa-pass:{key}:{head}")
-    cases.update(ctx, key, qa_passed_head=head)
-    open_merge_vote(ctx, key, cases.load(ctx)[key], pr)
+    checked = {**rec.get("qa_passed_heads", {}), str(ref): head}
+    cases.update(ctx, key, qa_passed_head=head, qa_passed_heads=checked, qa_pr_index=index + 1)
+    if index + 1 < len(refs):
+        return "pass-next-pr"                # no merge vote until every PR passed QA
+    # Re-read EVERY head after QA, before opening any vote. A moved head voids
+    # the whole set and sends the card back to the first PR for QA.
+    prs = [pr_refs.read(ctx, n) for n in refs]
+    if any(p.state != "open" or checked.get(str(n)) != p.head_sha for n, p in zip(refs, prs)):
+        cases.update(ctx, key, qa_pr_index=0, qa_passed_heads={})
+        ctx.board.post(card, "A PR changed while QA checked the set. Recheck every PR; no merge vote opened.",
+                       idempotency_key=f"qa-set-moved:{key}:{head}")
+        return "head-moved"
+    for n, p in zip(refs, prs):
+        open_merge_vote(ctx, key, cases.load(ctx)[key], p, ref=n, move=False)
+    cases.move(ctx, card, stages.AWAITING)
     return "pass"
 
 

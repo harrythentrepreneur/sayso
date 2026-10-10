@@ -246,19 +246,30 @@ class FakePayments:
 
 
 class FakeCodeHost:
-    def __init__(self, world: World):
-        self.w = world
+    def __init__(self, world: World, repo: str = ""):
+        self.w, self.repo = world, repo
+
+    def for_ref(self, ref):
+        from sayso.pr_refs import REF
+        match = REF.fullmatch(ref)
+        if not match:
+            raise ValueError("invalid PR reference")
+        return FakeCodeHost(self.w, match.group(1))
+
+    def _key(self, number):
+        return f"{self.repo}#{number}" if self.repo else str(number)
 
     def add_pr(self, number: int, head: str) -> None:
-        self.w.data["prs"][str(number)] = {"state": "open", "head": head}
+        self.w.data["prs"][self._key(number)] = {"state": "open", "head": head}
         self.w.save()
 
     def pull_request(self, number):
-        pr = self.w.data["prs"][str(number)]
-        return PullRequest(number, pr["state"], pr["head"], f"https://example.invalid/pr/{number}")
+        pr = self.w.data["prs"][self._key(number)]
+        return PullRequest(number, pr["state"], pr["head"],
+                           f"https://example.invalid/{self.repo or 'default'}/pull/{number}")
 
     def pr_facts(self, number, head):
-        pr = self.w.data["prs"][str(number)]
+        pr = self.w.data["prs"][self._key(number)]
         if pr["head"] != head:
             raise RuntimeError("head moved")
         added = pr.get("added", [])
@@ -266,7 +277,7 @@ class FakeCodeHost:
                        added=None if added is None else tuple(added))
 
     def merge(self, number, expected_head, idempotency_key):
-        pr = self.w.data["prs"][str(number)]
+        pr = self.w.data["prs"][self._key(number)]
         if pr["head"] != expected_head:
             raise RuntimeError("head moved; merge refused")
         if not self.w.fault("merge_ignored"):
@@ -301,10 +312,15 @@ class FakeDevRunner:
         self.w.save()
         return rid
 
-    def finish(self, run_id: str, pr: int, head: str) -> None:
-        self.w.data["runs"][run_id]["result"] = {"pr": pr, "summary": "Fix written and tested."}
+    def finish(self, run_id: str, pr: int, head: str, usage: dict | None = None) -> None:
+        self.w.data["runs"][run_id]["result"] = {"pr": pr, "summary": "Fix written and tested.",
+                                                    **({"usage": usage} if usage else {})}
         self.w.data["prs"][str(pr)] = {"state": "open", "head": head}
         self.w.save()
+
+    def state(self, run_id):
+        row = self.w.data["runs"].get(run_id)
+        return "unknown" if row is None else "dead" if row.get("dead") else "running"
 
     def result(self, run_id):
         return self.w.data["runs"][run_id]["result"]

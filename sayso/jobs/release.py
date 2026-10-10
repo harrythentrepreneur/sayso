@@ -7,7 +7,7 @@ product's own pipeline owns it.
 """
 from __future__ import annotations
 
-from sayso import cases, stages, votes
+from sayso import cases, stages, votes, pr_refs
 
 
 def run(ctx) -> dict:
@@ -21,14 +21,15 @@ def run(ctx) -> dict:
             continue
         spec = rec["spec"]
         case = cases.load(ctx).get(rec["case_key"], {})
-        if ctx.qa_runner is not None and case.get("qa_passed_head") != spec["head"]:
+        if ctx.qa_runner is not None and (case.get("qa_passed_heads") or {}).get(str(spec["pr"])) != spec["head"]:
             # QA is on, so a merge vote is only valid for the head QA passed. A vote
             # opened any other way (a hand-edited file, an old version) merges nothing.
             ctx.alert(f"merge-no-qa:{key}", f"merge of PR {spec['pr']} refused: QA did not pass head "
                       f"{str(spec['head'])[:12]}")
             out[key] = "refused-no-qa"
             continue
-        pr = ctx.codehost.pull_request(int(spec["pr"]))
+        pr = pr_refs.read(ctx, spec["pr"])
+        host = pr_refs.host(ctx, spec["pr"])
         if pr.state == "merged" and pr.head_sha == spec["head"]:
             status = "merged"
         elif not votes.still_bound(rec, {"head": pr.head_sha, "state": pr.state}):
@@ -38,8 +39,8 @@ def run(ctx) -> dict:
             out[key] = "void"
             continue
         else:
-            ctx.codehost.merge(pr.number, spec["head"], idempotency_key=key)
-            status = ctx.codehost.pull_request(pr.number).state
+            host.merge(pr.number, spec["head"], idempotency_key=key)
+            status = pr_refs.read(ctx, spec["pr"]).state
         if status != "merged":
             ctx.alert(f"merge-unverified:{key}", f"merge of PR {pr.number} reported OK but reads back as {status}")
             out[key] = "unverified"
@@ -47,6 +48,18 @@ def run(ctx) -> dict:
         votes.set_status(ctx, key, votes.DONE, merged_head=spec["head"])
         ctx.board.post(rec["card_id"], f"PR {pr.number} merged at {spec['head'][:12]} (read back).",
                        idempotency_key=f"merged:{key}")
+        # A multi-PR fix is shipped only when EVERY PR has a verified merge.
+        # A vote on one head never grants authority over the other head.
+        all_refs = case.get("prs") or [spec["pr"]]
+        done_votes = [v for v in votes.load(ctx).values()
+                      if v["case_key"] == rec["case_key"] and v["kind"] == "merge"
+                      and v["status"] == votes.DONE]
+        if (any(pr_refs.read(ctx, n).state != "merged" for n in all_refs)
+                or any(not any(v["spec"].get("pr") == n and
+                                   v.get("merged_head") == pr_refs.read(ctx, n).head_sha
+                                   for v in done_votes) for n in all_refs)):
+            out[key] = "merged-waiting-for-other-prs"
+            continue
         cases.update(ctx, rec["case_key"], dev_requested=False, needs_draft=True, dev_run=None)
         cases.move(ctx, rec["card_id"], stages.IN_SUPPORT)
         out[key] = "merged"

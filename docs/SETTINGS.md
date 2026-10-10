@@ -50,7 +50,8 @@ Reference adapter keys:
 - frappe: `url`, `api_key_env`, `api_secret_env`
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
 - stripe: `api_key_env`
-- github: `repo` (`owner/name`), `token_env`
+- github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
+  defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.
 - hermes (drafter and dev_runner): `profile`
 - hermes (qa_runner): `profile` (must differ from the dev profile), `red_proof_cmd` (prints one JSON line
   `{"state": "red-proved" | "not-red" | "head-red" | "error"}`; gets the PR number and head SHA as its last two arguments)
@@ -67,6 +68,7 @@ Reference adapter keys:
 | `max_new_cases_per_run` | 40 | Intake stops and alerts past this many new cards in one run |
 | `refund_max_minor` | 0 | Largest refund in minor units (cents). Must be > 0 when payments are on. |
 | `currencies` | `[]` | Allowed refund currencies, lower-case ISO codes. Required when payments are on. |
+| `max_parallel_dev_runs` | 2 | Maximum active dev runs at once; a finished PR frees a slot. |
 | `max_dev_rounds` | 2 | Dev rounds per case. After the last one QA blocks, the card goes to `Blocked` for a human. |
 | `red_proof_max_tries` | 3 | Times the fails-on-old-code check may fail to RUN on one head before a human is alerted. |
 | `qa_limit_retries` | 6 | QA runs stopped by a provider usage limit on one head before a human is alerted. |
