@@ -118,6 +118,7 @@ class PrFacts:
     ci: str                          # "green" | "pending" | "red"
     files: tuple[str, ...]           # changed paths; empty = unreadable
     added: tuple[str, ...] | None    # added diff lines; None = unreadable
+    changed_lines: int | None = None  # lines added + deleted; None = unreadable (small-fix keeps the vote)
 
 
 @runtime_checkable

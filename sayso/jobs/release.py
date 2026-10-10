@@ -7,7 +7,36 @@ product's own pipeline owns it.
 """
 from __future__ import annotations
 
-from sayso import cases, stages, votes, pr_refs
+from sayso import cases, small_fix, stages, votes, pr_refs
+
+
+def _withdraw_policy(ctx, key: str, rec: dict, case: dict) -> bool:
+    """Re-check a policy approval right before merging. True = withdrawn and replaced by a vote.
+
+    QA must have passed this exact head (QA on, and the exact-head check above), the
+    policy must still be on, and the whole PR set must still be small at the heads QA
+    passed. A head that moved is left to the normal fingerprint check, which voids it.
+    """
+    refs = case.get("prs") or [rec["spec"]["pr"]]
+    heads = case.get("qa_passed_heads") or {}
+    if ctx.qa_runner is None or any(str(n) not in heads for n in refs):
+        why = "QA did not pass every PR in the set"
+    else:
+        why = small_fix.why_not(ctx, refs, heads)
+    if not why:
+        return False
+    from sayso.jobs.qa import open_merge_vote
+    for k, v in sorted(votes.load(ctx).items()):
+        if (v["case_key"] == rec["case_key"] and v["kind"] == "merge" and v.get("decided_via") == votes.POLICY
+                and v["status"] == votes.APPROVED):
+            votes.set_status(ctx, k, votes.VOID, void_reason="small-fix release withdrawn: " + why)
+            pr = pr_refs.read(ctx, v["spec"]["pr"])
+            if pr.state == "open" and pr.head_sha == v["spec"]["head"]:
+                open_merge_vote(ctx, rec["case_key"], case, pr, ref=v["spec"]["pr"], move=False)
+    ctx.board.post(rec["card_id"], f"Small-fix release withdrawn before merge ({why}). Nothing merged; "
+                   "the merge now needs a vote.",
+                   idempotency_key=f"small-fix-withdrawn:{rec['case_key']}:{rec['spec']['head']}")
+    return True
 
 
 def run(ctx) -> dict:
@@ -27,6 +56,9 @@ def run(ctx) -> dict:
             ctx.alert(f"merge-no-qa:{key}", f"merge of PR {spec['pr']} refused: QA did not pass head "
                       f"{str(spec['head'])[:12]}")
             out[key] = "refused-no-qa"
+            continue
+        if rec.get("decided_via") == votes.POLICY and _withdraw_policy(ctx, key, rec, case):
+            out[key] = "policy-withdrawn"
             continue
         pr = pr_refs.read(ctx, spec["pr"])
         host = pr_refs.host(ctx, spec["pr"])

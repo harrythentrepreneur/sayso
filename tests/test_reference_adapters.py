@@ -126,6 +126,20 @@ class GitHubTests(unittest.TestCase):
         self.assertEqual((f.ci, f.files, f.added), ("green", ("a.py", "tests/test_a.py"),
                                                     ("x = 1", "def test(): pass")))
 
+    def test_pr_facts_counts_changed_lines(self):
+        _, g = self._gh([(200, [{"filename": "a.py", "patch": "+x", "additions": 3, "deletions": 2},
+                               {"filename": "b.py", "patch": "+y", "additions": 1, "deletions": 0}]),
+                         (200, {"check_runs": [{"status": "completed", "conclusion": "success"}]}),
+                         (200, {"state": "success", "statuses": []})])
+        self.assertEqual(g.pr_facts(3, "abc").changed_lines, 6)
+
+    def test_pr_facts_missing_counts_is_unreadable_size(self):
+        _, g = self._gh([(200, [{"filename": "a.py", "patch": "+x", "additions": 3, "deletions": 2},
+                               {"filename": "b.py", "patch": "+y"}]),
+                         (200, {"check_runs": [{"status": "completed", "conclusion": "success"}]}),
+                         (200, {"state": "success", "statuses": []})])
+        self.assertIsNone(g.pr_facts(3, "abc").changed_lines)
+
     def test_pr_facts_unreadable_ci_is_red_never_green(self):
         _, g = self._gh([(200, [{"filename": "a.py", "patch": "+x"}]), (500, {"message": "boom"})])
         self.assertEqual(g.pr_facts(3, "abc").ci, "red")

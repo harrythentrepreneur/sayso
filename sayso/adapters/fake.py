@@ -285,7 +285,8 @@ class FakeCodeHost:
             raise RuntimeError("head moved")
         added = pr.get("added", [])
         return PrFacts(ci=pr.get("ci", "green"), files=tuple(pr.get("files", ["src/app.py", "tests/test_app.py"])),
-                       added=None if added is None else tuple(added))
+                       added=None if added is None else tuple(added),
+                       changed_lines=pr.get("changed_lines", 20))
 
     def merge(self, number, expected_head, idempotency_key):
         pr = self.w.data["prs"][self._key(number)]

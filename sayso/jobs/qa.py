@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import re
 
-from sayso import cases, safety, stages, votes, pr_refs
+from sayso import cases, safety, small_fix, stages, votes, pr_refs
 
 REQUIRED_QA_BOUNDARY = ("DO NOT MERGE", "DO NOT DEPLOY", "DO NOT PUSH", "DO NOT CONTACT THE CUSTOMER")
 
@@ -211,6 +211,15 @@ def open_merge_vote(ctx, key: str, rec: dict, pr, *, ref=None, move: bool = True
         cases.move(ctx, rec["card_id"], stages.AWAITING)
 
 
+def record_policy_merge(ctx, key: str, rec: dict, pr, *, ref) -> None:
+    votes.record_policy_approval(ctx, key=f"merge:{key}:{pr_refs.ident(ref)}:{pr.head_sha[:12]}:policy",
+                                 case_key=key, card_id=rec["card_id"], subject=_subject(rec),
+                                 question=f"merge PR {pr.number} at head {pr.head_sha[:12]}?",
+                                 identity={"case_key": key, "pr": ref},
+                                 material={"head": pr.head_sha, "state": "open"},
+                                 spec={"pr": ref, "head": pr.head_sha}, reason="small fix, QA passed")
+
+
 def send_back(ctx, key: str, rec: dict, head: str, reason: str) -> str:
     """A failed head returns to dev with the reason, or to a human after the last round."""
     rounds = int(rec.get("dev_attempt") or 0)
@@ -341,6 +350,20 @@ def step(ctx, key: str, rec: dict) -> str:
         ctx.board.post(card, "A PR changed while QA checked the set. Recheck every PR; no merge vote opened.",
                        idempotency_key=f"qa-set-moved:{key}:{head}")
         return "head-moved"
+    # Optional small-fix policy (off by default): a small set with no sensitive
+    # paths merges on this QA pass with no merge vote. Anything else gets votes.
+    if ctx.config.policy.small_fix_release:
+        why = small_fix.why_not(ctx, refs, checked)
+        if not why:
+            for n, p in zip(refs, prs):
+                record_policy_merge(ctx, key, cases.load(ctx)[key], p, ref=n)
+            ctx.board.post(card, f"Small-fix release: QA passed every PR and the change is small "
+                           f"({small_fix.size_line(ctx, refs, checked)}), so it merges with no merge vote. "
+                           "The customer reply still needs a vote.", idempotency_key=f"small-fix:{key}:{head}")
+            cases.move(ctx, card, stages.AWAITING)
+            return "pass-small-fix"
+        ctx.board.post(card, f"Not a small fix ({why}), so the merge needs a vote.",
+                       idempotency_key=f"not-small:{key}:{head}")
     for n, p in zip(refs, prs):
         open_merge_vote(ctx, key, cases.load(ctx)[key], p, ref=n, move=False)
     cases.move(ctx, card, stages.AWAITING)
