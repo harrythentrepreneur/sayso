@@ -24,6 +24,7 @@ from sayso.store import load_json, locked, save_json
 OPEN, APPROVED, DECLINED, VOID, DONE, EXPIRED = "open", "approved", "declined", "void", "done", "expired"
 LIVE = frozenset({OPEN, APPROVED})
 KINDS = frozenset({"reply", "money", "close", "merge"})
+POLICY = "policy"   # decided_by / decided_via of a merge the small-fix release policy approved
 
 _ID_ONLY = re.compile(r"^(?:(?:ticket|case|card|pr|no\.?|#)\s*[-#]?\s*\w*\d+[\s,;/|-]*)+$", re.I)
 
@@ -71,6 +72,31 @@ def open_vote(ctx, *, key: str, kind: str, case_key: str, card_id: str, subject:
     ctx.journal.append("vote_opened", key=key, kind=kind, case_key=case_key, owner=owner["owner"])
     mention = owner["owner"] if owners.name_of(ctx, owner["owner"]) else None
     ctx.notify(f"vote:{key}", f"{tag}{subject} - {question}", mention=mention)
+    return rec
+
+
+def record_policy_approval(ctx, *, key: str, case_key: str, card_id: str, subject: str, question: str,
+                           identity: dict[str, Any], material: Any, spec: dict[str, Any], reason: str) -> dict:
+    """An APPROVED merge record granted by the small-fix release policy, not a person.
+
+    No poll opens and nobody is pinged. It is still bound to the exact head by its
+    fingerprint, and the release job re-checks the policy and QA before merging.
+    Only merges can be policy-approved; replies, money and closes always need a person.
+    """
+    check_human_subject(subject)
+    with locked(ctx.paths.votes):
+        all_votes = load_json(ctx.paths.votes)
+        if key in all_votes:
+            return all_votes[key]
+        now = ctx.clock.now().isoformat()
+        rec = {"key": key, "kind": "merge", "case_key": case_key, "card_id": card_id, "poll_id": None,
+               "subject": subject, "question": question, "identity": identity,
+               "fingerprint": fingerprint("merge", identity, material), "spec": spec,
+               "status": APPROVED, "opened_at": now, "decided_at": now, "decided_by": POLICY,
+               "decided_via": POLICY, "policy_reason": reason, "owner": "all", "owner_source": None}
+        all_votes[key] = rec
+        save_json(ctx.paths.votes, all_votes)
+    ctx.journal.append("vote_policy_approved", key=key, kind="merge", case_key=case_key, reason=reason)
     return rec
 
 

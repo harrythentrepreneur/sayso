@@ -64,6 +64,33 @@ class Section:
         return value
 
 
+SMALL_FIX_SENSITIVE = (
+    r"(?i)(stripe|billing|payment|checkout|subscri|pric|refund|invoice|coupon|discount|"
+    r"webhook|auth|login|logout|signin|signup|session|password|token|oauth|middleware|"
+    r"account|secret|credential|\.env|migration|schema\.prisma|/sql/|\.sql$|"
+    r"\.github/|deploy|docker|terraform|\.tf$|k8s|helm)")
+
+
+def validate_small_fix(policy, *, qa_runner: str) -> None:
+    """The small-fix release policy fails closed: on needs QA and a usable sensitive-path rule."""
+    if not isinstance(policy.small_fix_release, bool):
+        raise ConfigError("[policy] small_fix_release must be true or false")
+    for name in ("small_fix_max_lines", "small_fix_max_files"):
+        value = getattr(policy, name)
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise ConfigError(f"[policy] {name} must be a whole number >= 1")
+    if not policy.small_fix_release:
+        return
+    if qa_runner == "none":
+        raise ConfigError("[policy] small_fix_release needs a [qa_runner]: only a QA pass may stand in for a vote")
+    if not str(policy.small_fix_sensitive_paths).strip():
+        raise ConfigError("[policy] small_fix_sensitive_paths cannot be empty while small_fix_release is on")
+    try:
+        re.compile(policy.small_fix_sensitive_paths)
+    except re.error as exc:
+        raise ConfigError(f"[policy] small_fix_sensitive_paths is not a valid regular expression: {exc}") from exc
+
+
 @dataclass(frozen=True)
 class Policy:
     quiet_close_days: int = 3
@@ -89,6 +116,10 @@ class Policy:
     red_proof_max_tries: int = 3
     qa_limit_retries: int = 6
     qa_ui_paths: str = ""
+    small_fix_release: bool = False
+    small_fix_max_lines: int = 400
+    small_fix_max_files: int = 15
+    small_fix_sensitive_paths: str = SMALL_FIX_SENSITIVE
 
 
 @dataclass(frozen=True)
@@ -202,6 +233,7 @@ def parse(raw: dict, path: Path) -> Config:
             re.compile(policy.qa_ui_paths)
         except re.error as exc:
             raise ConfigError(f"[policy] qa_ui_paths is not a valid regular expression: {exc}") from exc
+    validate_small_fix(policy, qa_runner=sections["qa_runner"].adapter)
     if sections["qa_runner"].adapter != "none" and sections["codehost"].adapter == "none":
         raise ConfigError("[qa_runner] needs a [codehost]: QA reads the PR it checks")
     if policy.refund_max_minor < 0:

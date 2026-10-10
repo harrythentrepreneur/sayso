@@ -353,7 +353,7 @@ class GitHubCodeHost:
     def pr_facts(self, number, head):
         """CI state, changed files and added lines for one exact head. Anything that
         cannot be read is returned as unreadable, which the QA gate fails closed on."""
-        files, added = [], []
+        files, added, changed = [], [], 0
         try:
             page = 1
             while True:
@@ -361,6 +361,11 @@ class GitHubCodeHost:
                                          query={"per_page": 100, "page": page})
                 for f in rows:
                     files.append(str(f.get("filename") or ""))
+                    a, d = f.get("additions"), f.get("deletions")
+                    if changed is not None and isinstance(a, int) and isinstance(d, int) and a >= 0 and d >= 0:
+                        changed += a + d
+                    else:
+                        changed = None        # a row without counts: size unreadable
                     if "patch" not in f and f.get("status") != "removed":
                         added = None          # a patch GitHub would not show: diff unreadable
                     elif added is not None:
@@ -370,8 +375,9 @@ class GitHubCodeHost:
                     break
                 page += 1
         except HttpError:
-            files, added = [], None
-        return PrFacts(ci=self._ci(head), files=tuple(files), added=None if added is None else tuple(added))
+            files, added, changed = [], None, None
+        return PrFacts(ci=self._ci(head), files=tuple(files), added=None if added is None else tuple(added),
+                       changed_lines=changed)
 
     def _ci(self, head):
         try:

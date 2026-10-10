@@ -88,6 +88,11 @@ A new head starts the steps again. The release job merges only a head QA passed.
 Without a QA runner the merge vote opens straight away and the card says the PR
 was not independently checked.
 
+With the optional `small_fix_release` policy on (off by default), a small fix
+with no sensitive paths skips the merge vote after QA passes: the card says
+"Small-fix release" and the release job merges it. Anything not small says why
+and gets the normal vote.
+
 ## Whose vote it is
 
 Every vote carries an owner label: `For Harry: ...`, or `For either of you: ...`
