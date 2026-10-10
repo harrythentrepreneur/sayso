@@ -4,6 +4,12 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Stall checks: a new read-only `stall` job reminds the case owner about any vote open 30+ minutes
+  (then daily), flags a card quiet past its stage's limit (then daily, reset by any new message),
+  and flags an open card that nothing is set to move after 15 minutes (once per case, stage and day).
+  A dev card waiting for a free slot counts as moving. Every time is a setting; `Parked` cards are
+  skipped. Boards gain `last_activity(card)`.
+
 - Dev loop: configurable parallel runs; one bounded fresh retry for a proven dead run; multiple PRs
   (including across allowed repositories) each require exact-head QA and a separate merge vote; a case
   returns to support only after every PR is read back as merged. Tokens and minutes come from Hermes's

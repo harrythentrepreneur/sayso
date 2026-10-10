@@ -13,6 +13,7 @@ closed. Faults are named strings in ``world["faults"]``:
   tags_ignored              board returns OK on a tag write but keeps old tags
   merge_ignored             code host returns OK on merge but does not merge
   authors_unreadable        the board cannot list who wrote in a card
+  activity_unreadable       the board cannot report a card's last message time
 """
 from __future__ import annotations
 
@@ -78,6 +79,7 @@ class World:
         """A person writes in a card (the first operator to post owns its votes)."""
         card = self.data["cards"][card_id]
         card["messages"].append(text)
+        card["last_at"] = self.clock.now().isoformat()
         card.setdefault("authors", []).append([user_id, self.clock.now().isoformat()])
         self.save()
 
@@ -97,7 +99,8 @@ class FakeBoard:
     def ensure_card(self, idempotency_key, title, first_message, tags):
         def make():
             cid = self.w.next_id("card")
-            self.w.data["cards"][cid] = {"title": title, "tags": list(tags), "messages": [first_message]}
+            self.w.data["cards"][cid] = {"title": title, "tags": list(tags), "messages": [first_message],
+                                         "last_at": self.w.clock.now().isoformat()}
             return cid
         cid = self.w.once("card:" + idempotency_key, make)
         self.w.save()
@@ -114,6 +117,7 @@ class FakeBoard:
     def post(self, card_id, text, idempotency_key):
         def make():
             self.w.data["cards"][card_id]["messages"].append(text)
+            self.w.data["cards"][card_id]["last_at"] = self.w.clock.now().isoformat()
             return self.w.next_id("msg")
         mid = self.w.once("post:" + idempotency_key, make)
         self.w.save()
@@ -127,6 +131,7 @@ class FakeBoard:
             pid = self.w.next_id("poll")
             self.w.data["polls"][pid] = {"card_id": card_id, "question": question, "votes": {}, "closed": False}
             self.w.data["cards"][card_id]["messages"].append("POLL: " + question)
+            self.w.data["cards"][card_id]["last_at"] = self.w.clock.now().isoformat()
             return pid
         pid = self.w.once("poll:" + idempotency_key, make)
         self.w.save()
@@ -156,6 +161,12 @@ class FakeBoard:
             return True
         self.w.once("notice:" + idempotency_key, make)
         self.w.save()
+
+    def last_activity(self, card_id):
+        """ISO time of the newest message in the card (a tag change is not activity)."""
+        if self.w.fault("activity_unreadable"):
+            raise FaultInjected("history unreadable")
+        return self.w.data["cards"][card_id].get("last_at")
 
     def message_authors(self, card_id):
         """[(author id, iso time)] oldest first. Tests add operator posts with ``operator_posts``."""

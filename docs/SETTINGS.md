@@ -72,13 +72,23 @@ Reference adapter keys:
 | `max_dev_rounds` | 2 | Dev rounds per case. After the last one QA blocks, the card goes to `Blocked` for a human. |
 | `red_proof_max_tries` | 3 | Times the fails-on-old-code check may fail to RUN on one head before a human is alerted. |
 | `qa_limit_retries` | 6 | QA runs stopped by a provider usage limit on one head before a human is alerted. |
+| `vote_remind_minutes` | 30 | An open vote gets its first reminder after this many minutes, then one per `stall_repeat_hours`. |
+| `orphan_minutes` | 15 | An open card with nothing set to move it (no vote, no draft due, no dev/QA run or runner) is flagged after this much quiet. At most once per case, stage and day. A dev card waiting for a free slot counts as moving. |
+| `stall_new_hours` | 1 | Hours of no card activity before a `New` card is flagged. |
+| `stall_support_hours` | 2 | Same, for `In support`. |
+| `stall_dev_hours` | 2 | Same, for `In dev`. |
+| `stall_qa_hours` | 1 | Same, for `In QA`. |
+| `stall_awaiting_hours` | 2 | Same, for `Awaiting approval`. |
+| `stall_blocked_hours` | 4 | Same, for `Blocked`. |
+| `stall_repeat_hours` | 24 | A vote reminder or stall notice repeats at most once per this many hours. Any new message in the card resets the stall clock. |
+| `parked_label` | `Parked` | A card with this tag gets no stall or orphan notice (its open votes still get reminders). The tag must exist on the board. |
 | `qa_ui_paths` | `""` | Regular expression for user-interface files. A PR touching one needs real-app `EVIDENCE:` to pass QA. |
 
 ## [jobs]
 
 Seconds between runs for each job, minimum 30:
 `intake 60, draft 120, sender 120, money 120, votes 60, dev 300, qa 300, release 300,
-close 900, reconcile 600, health 600`. Health reports a job as stale after three missed intervals.
+close 900, reconcile 600, stall 300, health 600`. Health reports a job as stale after three missed intervals.
 
 ## [[plugins]]
 

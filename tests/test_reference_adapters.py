@@ -77,6 +77,17 @@ class DiscordTests(unittest.TestCase):
         b, _ = self.board([(200, {"users": [{"id": "9", "bot": True}, {"id": "1"}]}), (200, {"users": []})])
         self.assertEqual(b.read_poll("P", "M").votes, {"1": "yes"})
 
+    def test_last_activity_reads_last_message_not_post_creation(self):
+        post_id, last_id = "1477455328051200000", "1558358419046400000"   # post made in March, last message in October
+        b, rec = self.board([(200, {"id": post_id, "last_message_id": last_id})])
+        self.assertEqual(b.last_activity(post_id), "2026-10-10T06:00:00+00:00")
+        self.assertEqual(rec.calls[0]["url"].split("?")[0][-len(post_id):], post_id)
+
+    def test_last_activity_without_a_message_is_unreadable(self):
+        b, _ = self.board([(200, {"id": "1477455328051200000", "last_message_id": None})])
+        with self.assertRaises(RuntimeError):
+            b.last_activity("1477455328051200000")
+
 
 @mock.patch.dict(os.environ, ENV)
 class StripeTests(unittest.TestCase):
