@@ -13,7 +13,7 @@
 """
 from __future__ import annotations
 
-from sayso import cases, stages, votes, pr_refs
+from sayso import cases, regressions, stages, votes, pr_refs
 
 REQUIRED_BOUNDARY = ("DO NOT MERGE", "DO NOT DEPLOY", "DO NOT CONTACT THE CUSTOMER")
 
@@ -24,7 +24,8 @@ class BriefUnsafe(RuntimeError):
 
 def build_brief(ctx, case_key: str, rec: dict) -> str:
     thread = "\n\n---\n\n".join(ctx.board.messages(rec["card_id"]))
-    return (f"# Case {rec['title']} ({ctx.config.name})\n\n{thread}\n\n"
+    regs = regressions.dev_section(regressions.entries(rec)) if ctx.config.policy.qa_regression_set else ""
+    return (f"# Case {rec['title']} ({ctx.config.name})\n\n{thread}\n{regs}\n"
             "## Limits\n- DO NOT MERGE. Open a pull request and stop.\n- DO NOT DEPLOY.\n"
             "- DO NOT CONTACT THE CUSTOMER. The loop drafts and votes on every reply.\n"
             "- End with a result block: === RESULT ===, a short summary, === END RESULT ===.\n"

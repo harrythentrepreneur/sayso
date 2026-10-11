@@ -120,6 +120,7 @@ class Policy:
     small_fix_max_lines: int = 400
     small_fix_max_files: int = 15
     small_fix_sensitive_paths: str = SMALL_FIX_SENSITIVE
+    qa_regression_set: bool = True
 
 
 @dataclass(frozen=True)
@@ -219,6 +220,8 @@ def parse(raw: dict, path: Path) -> Config:
     policy = Policy(**pol)  # type: ignore[arg-type]
     if policy.quiet_close_days < 1 or policy.readback_seconds <= 0 or policy.max_new_cases_per_run < 1:
         raise ConfigError("[policy] values must be positive")
+    if not isinstance(policy.qa_regression_set, bool):
+        raise ConfigError("[policy] qa_regression_set must be true or false")
     if min(policy.max_dev_rounds, policy.max_parallel_dev_runs, policy.red_proof_max_tries,
            policy.qa_limit_retries) < 1:
         raise ConfigError("[policy] max_dev_rounds, max_parallel_dev_runs, red_proof_max_tries "

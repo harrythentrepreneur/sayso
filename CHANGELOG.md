@@ -4,6 +4,12 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- QA regression set (on by default, `[policy] qa_regression_set`): every FAILING-CHECK and DEFECT-CLASS QA
+  blocks a case on is kept in the case record. Every later QA run re-runs the whole set first (one
+  `REGRESSION: <n> PASS` line per entry; a FAIL blocks; a missing report re-runs QA once, not a dev round),
+  and every later dev brief carries the set with "fix the class, not the instance". Ported from the
+  PhonicsMaker loop, where one case had taken 5-7 QA runs, each on a new path into the same defect.
+
 - Small-fix release (opt-in, off by default): `[policy] small_fix_release = true` lets a fix merge on
   an independent QA pass with no merge vote, only when every PR head passed QA, the whole set is within
   `small_fix_max_lines` / `small_fix_max_files`, no path matches `small_fix_sensitive_paths`, and every
