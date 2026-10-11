@@ -71,6 +71,7 @@ Reference adapter keys:
 | `max_parallel_dev_runs` | 2 | Maximum active dev runs at once; a finished PR frees a slot. |
 | `max_dev_rounds` | 2 | Dev rounds per case. After the last one QA blocks, the card goes to `Blocked` for a human. |
 | `red_proof_max_tries` | 3 | Times the fails-on-old-code check may fail to RUN on one head before a human is alerted. |
+| `qa_regression_set` | `true` | Keep every check QA failed a case on. Later QA runs re-run the whole set first (a PASS needs a `REGRESSION: <n> PASS` line per entry; a FAIL blocks, a missing report re-runs QA once), and later dev briefs carry the set and its defect classes. Only adds checks. |
 | `qa_limit_retries` | 6 | QA runs stopped by a provider usage limit on one head before a human is alerted. |
 | `vote_remind_minutes` | 30 | An open vote gets its first reminder after this many minutes, then one per `stall_repeat_hours`. |
 | `orphan_minutes` | 15 | An open card with nothing set to move it (no vote, no draft due, no dev/QA run or runner) is flagged after this much quiet. At most once per case, stage and day. A dev card waiting for a free slot counts as moving. |

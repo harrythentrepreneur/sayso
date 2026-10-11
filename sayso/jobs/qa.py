@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import re
 
-from sayso import cases, safety, small_fix, stages, votes, pr_refs
+from sayso import cases, regressions, safety, small_fix, stages, votes, pr_refs
 
 REQUIRED_QA_BOUNDARY = ("DO NOT MERGE", "DO NOT DEPLOY", "DO NOT PUSH", "DO NOT CONTACT THE CUSTOMER")
 
@@ -136,6 +136,10 @@ def is_ui(files, pattern: str) -> bool:
     return bool(pattern) and any(re.search(pattern, f) for f in files or [])
 
 
+def _regs(ctx, rec: dict) -> list[dict]:
+    return regressions.entries(rec) if ctx.config.policy.qa_regression_set else []
+
+
 def build_brief(ctx, rec: dict, pr, *, ui: bool) -> str:
     thread = "\n\n---\n\n".join(ctx.board.messages(rec["card_id"]))
     evidence = ("\nThis PR changes the user interface. Check it in the REAL running app, through the control a\n"
@@ -149,13 +153,14 @@ def build_brief(ctx, rec: dict, pr, *, ui: bool) -> str:
             "2. Read the PR for what the fix claims. Run the tests and checks that cover the changed code.\n"
             "   Try to break the fix.\n"
             "3. DO NOT MERGE. DO NOT DEPLOY. DO NOT PUSH. DO NOT CONTACT THE CUSTOMER. You only report.\n"
-            f"{evidence}\n"
+            f"{evidence}{regressions.qa_section(_regs(ctx, rec))}\n"
             "The case, starting with the customer's own words:\n\n"
             f"{thread}\n\n"
             "Before the verdict, answer: does this fix what the customer reported? One line:\n"
             "CUSTOMER-FIX: YES <why>   or   CUSTOMER-FIX: NO <what is still wrong>\n"
             "If you block, name ONE check dev can run, as one line:\n"
             "FAILING-CHECK: <command or click path> -> <what it shows now>\n"
+            "DEFECT-CLASS: <the kind of fault in a few words>\n"
             "Block only on what this PR claims to fix or on something it breaks.\n\n"
             "Your final line must be exactly one of:\n"
             f"VERDICT: PASS {pr.head_sha}\n"
@@ -168,7 +173,7 @@ def assert_brief_safe(brief: str) -> None:
         raise BriefUnsafe(f"QA brief is missing its limits {missing}; refusing to start a QA run")
 
 
-def judge(text: str, head: str, *, ui: bool) -> dict:
+def judge(text: str, head: str, *, ui: bool, regs: list | None = None) -> dict:
     """The final verdict of one QA run's output."""
     verdict = parse_verdict(text, head)
     if verdict["verdict"] != "PASS" and not _VERDICT.search("\n".join((text or "").splitlines()[-1:])):
@@ -181,9 +186,15 @@ def judge(text: str, head: str, *, ui: bool) -> dict:
             return {"verdict": "BLOCKED", "reason": problem}
         if ui and not _EVIDENCE.search("\n".join(_plain_lines(text))):
             return {"verdict": "BLOCKED", "reason": "a UI change passed without real-app EVIDENCE"}
+        kind, why = regressions.report_problem(list(regs or []), _plain_lines(text))
+        if kind == "missing":
+            return {"verdict": "RERUN", "reason": why}
+        if kind == "fail":
+            verdict = {"verdict": "BLOCKED", "reason": why}
     m = _FAILING_CHECK.findall("\n".join(_plain_lines(text)))
     if m and verdict["verdict"] != "PASS":
         verdict["failing_check"] = m[-1][:300]
+        verdict["defect_class"] = regressions.defect_class(_plain_lines(text))
     return verdict
 
 
@@ -317,7 +328,15 @@ def step(ctx, key: str, rec: dict) -> str:
     usage = out.get("usage")
     if usage:
         ctx.journal.append("qa_usage", case_key=key, head=head, usage=usage)
-    verdict = judge(out.get("text") or "", head, ui=bool(qa.get("ui")))
+    verdict = judge(out.get("text") or "", head, ui=bool(qa.get("ui")), regs=_regs(ctx, rec))
+    if verdict["verdict"] == "RERUN":
+        if int(qa.get("reruns") or 0) < 1:
+            qa.update(run=None, reruns=int(qa.get("reruns") or 0) + 1)
+            _save(ctx, key, qa)
+            ctx.board.post(card, f"QA re-runs once on head `{head[:12]}`: {verdict['reason']}. Not a QA fail "
+                           "and not a dev round.", idempotency_key=f"qa-rerun:{key}:{head}")
+            return "rerun"
+        verdict = {"verdict": "BLOCKED", "reason": verdict["reason"]}
     if verdict["verdict"] == "LIMITED":
         limited = int(qa.get("limited") or 0) + 1
         qa.update(run=None, limited=limited)
@@ -333,6 +352,11 @@ def step(ctx, key: str, rec: dict) -> str:
     qa["verdict"] = verdict
     _save(ctx, key, qa)
     if verdict["verdict"] != "PASS":
+        if verdict.get("failing_check") and ctx.config.policy.qa_regression_set:
+            grown = regressions.added(cases.load(ctx)[key], check=verdict["failing_check"],
+                                      defect_class=verdict.get("defect_class", ""), head=head, pr=ref)
+            if grown is not None:
+                cases.update(ctx, key, qa_regressions=grown)
         reason = verdict["reason"] + (f"\nFAILING-CHECK: {verdict['failing_check']}"
                                       if verdict.get("failing_check") else "")
         return send_back(ctx, key, rec, head, reason)
