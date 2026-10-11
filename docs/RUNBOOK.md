@@ -31,6 +31,9 @@ Each alert fires once per problem, and the text names the case.
 | `still waiting for a decision after ...` | A vote has been open longer than `vote_remind_minutes` | Vote in the card. It repeats once a day while the vote stays open. Only the case owner is pinged. |
 | `... no activity for Nh: ...` | A card went quiet past its stage limit (`stall_*_hours`) | Post in the card or move it. Any new message resets the clock. Tag it `Parked` if it is deliberately waiting. |
 | `... nothing is moving it: ...` | No vote, draft, dev or QA run is set to move this card | Do the step it names, or move the card to the stage that matches the work. |
+| `the drafter said no-reply again after a No` | An operator declined a no-reply close and the drafter still says no reply | Write the reply by hand, or close the card yourself. It is never asked twice for the same message. |
+| `a held reply's money vote is missing` / `the held reply file changed` | A reply held for a refund lost its money vote or its file | Check `votes.json` and the drafts folder. A new draft follows when the file changed. |
+| `<job>: another run still held the lock after Ns` (exit 75) | One run of a job outlived the next start | Check the job's log for a hang. Nothing was done in the skipped run, and the journal records `job_skipped_busy`. |
 | `cannot read the card's last activity` | The board could not report the newest message | Check the bot can still read the card. The stall check skips it rather than guessing. |
 | `approved-not-sent` | An approved reply is still unsent after `unsent_alert_hours` | Check the sender service. Usually the card was moved off `Awaiting approval`. |
 

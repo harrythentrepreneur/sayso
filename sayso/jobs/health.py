@@ -9,14 +9,29 @@ from datetime import timedelta
 
 from sayso.store import load_json, parse_iso
 
-ACTIVE_JOBS = ("intake", "draft", "votes", "sender", "close", "reconcile")
+ACTIVE_JOBS = ("intake", "draft", "votes", "sender", "close", "reconcile", "stall")  # health cannot watch itself
+
+
+def watched(ctx) -> tuple[str, ...]:
+    """Every job that should be beating for THIS product. A job whose adapter is off
+    beats 'off' too, but it is not watched, so turning a feature off is not an alarm."""
+    extra = []
+    if ctx.payments is not None:
+        extra.append("money")
+    if ctx.dev_runner is not None:
+        extra.append("dev")
+    if ctx.codehost is not None:
+        extra.append("release")
+        if ctx.qa_runner is not None:
+            extra.append("qa")
+    return ACTIVE_JOBS + tuple(extra)
 
 
 def check(ctx) -> dict:
     beats = load_json(ctx.paths.heartbeats)
     now = ctx.clock.now()
     report = {"paused": ctx.paused, "stale": [], "never": [], "ok": []}
-    for job in ACTIVE_JOBS:
+    for job in watched(ctx):
         beat = beats.get(job)
         if not beat:
             report["never"].append(job)

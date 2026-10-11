@@ -118,3 +118,8 @@ A cancellation:
 
 Exactly these fields. The spec is what the vote approves: change any field and
 the vote is void.
+
+A drafter can propose the same spec by ending its reply with one line per action:
+`MONEY: {"action": "refund", ...}`. The line is stripped from the reply and never
+sent. Each becomes a money vote under the same cap and currency rules, and the
+reply waits until every one is verified with the provider.

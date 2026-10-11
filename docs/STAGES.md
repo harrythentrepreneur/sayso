@@ -51,9 +51,9 @@ Each vote is one Yes/No poll on the card, about one exact thing:
 | Kind | Opened by | Bound to (fingerprint) | Carried out by |
 |---|---|---|---|
 | reply | draft job | SHA-256 of the draft file | sender |
-| money | `sayso money-request` | the full money spec | money job |
+| money | `sayso money-request`, or the draft job when the drafter proposes it | the full money spec | money job |
 | merge | qa job (dev job when no QA runner is set) | the PR's head SHA and open state | release job |
-| close | close job | the time of our last sent reply | close job |
+| close | close job (quiet after our reply), or the draft job when the drafter says no reply is owed | the time of our last sent reply, or the customer message it answers plus the reason | close job |
 
 Statuses: `open` → `approved` / `declined` / `expired` / `void` → `done`.
 

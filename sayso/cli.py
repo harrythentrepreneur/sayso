@@ -53,15 +53,33 @@ def cmd_run(a) -> int:
     if a.job not in jobs:
         print(f"unknown job {a.job}; known: {sorted(jobs)}", file=sys.stderr)
         return 2
-    with single_flight(ctx.paths.locks / f"{a.job}.run") as mine:
-        if not mine:
-            print(f"{a.job}: another run holds the lock; skipped")
-            return 0
-        try:
-            print(json.dumps(jobs[a.job](ctx), default=str))
-        except runtime.Paused as exc:
-            print(str(exc))
+    wait = min(240, ctx.config.jobs.get(a.job, 240))
+    try:
+        result = run_job_locked(ctx, a.job, jobs[a.job], wait_seconds=wait)
+    except runtime.Paused as exc:
+        print(str(exc))
+        return 0
+    if result is None:
+        print(f"{a.job}: another run still held the lock after {wait}s; nothing done", file=sys.stderr)
+        return 75                              # EX_TEMPFAIL: visible to systemd, never a silent success
+    print(json.dumps(result, default=str))
     return 0
+
+
+def run_job_locked(ctx, job: str, fn, *, wait_seconds: float):
+    """Run ``fn(ctx)`` holding the job's lock. Waits up to ``wait_seconds`` for a busy
+    lock rather than skipping (a skip that looks like success stopped the PhonicsMaker
+    close check for nine days). Still busy: journalled and None, never silent."""
+    import time
+    deadline = time.monotonic() + wait_seconds
+    while True:
+        with single_flight(ctx.paths.locks / f"{job}.run") as mine:
+            if mine:
+                return fn(ctx)
+        if time.monotonic() >= deadline:
+            ctx.journal.append("job_skipped_busy", job=job, waited_seconds=wait_seconds)
+            return None
+        time.sleep(0.1)
 
 
 def cmd_tick(a) -> int:
