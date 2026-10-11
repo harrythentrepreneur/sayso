@@ -43,6 +43,10 @@ passes is untested.
 | Poll subject must be human-readable | votes.py | An operator approving the wrong case |
 | Material changed → vote void | jobs/tally.py | Approving one thing and doing another |
 | A new customer email voids reply and close votes | jobs/intake.py | Answering or closing past what they just said |
+| No-reply close: needs a reason, one vote per customer message, void if they write again, never asked twice after a No | decisions.py, jobs/draft.py, jobs/close.py | Silently ignoring a real customer, or restarting a settled thank-you forever |
+| A drafter-proposed refund/cancel is a money vote; the reply waits for every provider receipt | jobs/draft.py, jobs/money_job.py | Telling a customer money moved before it did, or redrafting a reply that was already right |
+| A busy job lock is waited for; still busy is journalled and exits non-zero | cli.py | A skipped run that looks like success (it stopped a live close check for nine days) |
+| Health watches every job the product has switched on | jobs/health.py | A stopped money, dev, QA, release or stall job going unnoticed |
 | Our own addresses are never customers | jobs/intake.py | Loops and self-replies |
 | Replayed mail is ignored | jobs/intake.py | Duplicate cards and posts after a restart |
 | Tag writes read back | cases.py | Believing a stage moved when it did not |

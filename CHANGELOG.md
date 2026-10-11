@@ -4,6 +4,13 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Close and money: a drafter can answer `NO-REPLY: <reason>` (spam, invites, a bare thank-you) to get ONE
+  close vote that ends the case with nothing sent, never redrafted until the customer writes again, and
+  never re-asked after a No; or end a reply with `MONEY: {spec}` lines to open refund/cancel votes while
+  the reply waits for every provider receipt and is then voted on as written. A busy job lock is waited
+  for (still busy exits 75 and is journalled, never a silent success), and health watches every job the
+  product switched on, including money, dev, QA, release and stall.
+
 - QA regression set (on by default, `[policy] qa_regression_set`): every FAILING-CHECK and DEFECT-CLASS QA
   blocks a case on is kept in the case record. Every later QA run re-runs the whole set first (one
   `REGRESSION: <n> PASS` line per entry; a FAIL blocks; a missing report re-runs QA once, not a dev round),

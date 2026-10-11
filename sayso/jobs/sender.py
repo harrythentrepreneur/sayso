@@ -34,14 +34,17 @@ def verified_money(ctx, case_key: str) -> set[str]:
     return out
 
 
-def check_sendable(ctx, case_key: str, case: dict, recipient: str, body: str) -> None:
+def check_sendable(ctx, case_key: str, case: dict, recipient: str, body: str,
+                   assume_money: frozenset[str] = frozenset()) -> None:
     """Every text rule the sender applies. The draft job calls this SAME function
     before it opens a vote, so a vote is never opened on a reply the sender would
     refuse after the operator said Yes."""
     if cases.normalise(recipient) in ctx.config.own_addresses:
         raise safety.Refused("recipient is one of our own addresses")
     safety.check_reply_text(body)
-    safety.check_claims_backed(body, verified_money(ctx, case_key))
+    # ``assume_money`` lets the draft job check a reply that is HELD for a proposed
+    # money action. It never reaches a vote until that action is verified for real.
+    safety.check_claims_backed(body, verified_money(ctx, case_key) | set(assume_money))
     safety.check_plugins(ctx, case, body)
 
 
