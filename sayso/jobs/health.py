@@ -24,6 +24,8 @@ def watched(ctx) -> tuple[str, ...]:
         extra.append("release")
         if ctx.qa_runner is not None:
             extra.append("qa")
+    if ctx.config.policy.archive_finished:
+        extra.append("tidy")
     return ACTIVE_JOBS + tuple(extra)
 
 

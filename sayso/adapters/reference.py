@@ -140,6 +140,15 @@ class DiscordForumBoard:
                                      "enforce_nonce": True,
                                      "allowed_mentions": {"parse": [], "users": [uid] if uid else []}})
 
+    def is_archived(self, card_id):
+        thread = self.http.request("GET", f"/channels/{card_id}")
+        return bool((thread.get("thread_metadata") or {}).get("archived"))
+
+    def set_archived(self, card_id, archived):
+        """Archive (or unarchive) the post. ``locked`` is always false: anyone may still
+        write, and a new message brings it back. Nothing is deleted."""
+        self.http.request("PATCH", f"/channels/{card_id}", json_body={"archived": bool(archived), "locked": False})
+
     def last_activity(self, card_id):
         """Time of the newest message in the post, from the thread's last_message_id.
 

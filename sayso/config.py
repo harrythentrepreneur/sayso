@@ -37,6 +37,7 @@ DEFAULT_JOBS = {
     "release": 300,
     "close": 900,
     "reconcile": 600,
+    "tidy": 600,
     "health": 600,
 }
 _SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
@@ -69,6 +70,16 @@ SMALL_FIX_SENSITIVE = (
     r"webhook|auth|login|logout|signin|signup|session|password|token|oauth|middleware|"
     r"account|secret|credential|\.env|migration|schema\.prisma|/sql/|\.sql$|"
     r"\.github/|deploy|docker|terraform|\.tf$|k8s|helm)")
+
+
+def validate_tidy(policy) -> None:
+    """Board tidy is opt-in. Its limits must be whole numbers >= 1 whether or not it is on."""
+    if not isinstance(policy.archive_finished, bool):
+        raise ConfigError("[policy] archive_finished must be true or false")
+    for name in ("archive_waiting_days", "archive_quiet_minutes"):
+        value = getattr(policy, name)
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise ConfigError(f"[policy] {name} must be a whole number >= 1")
 
 
 def validate_small_fix(policy, *, qa_runner: str) -> None:
@@ -117,6 +128,9 @@ class Policy:
     qa_limit_retries: int = 6
     qa_ui_paths: str = ""
     small_fix_release: bool = False
+    archive_finished: bool = False
+    archive_waiting_days: int = 7
+    archive_quiet_minutes: int = 60
     small_fix_max_lines: int = 400
     small_fix_max_files: int = 15
     small_fix_sensitive_paths: str = SMALL_FIX_SENSITIVE
@@ -237,6 +251,7 @@ def parse(raw: dict, path: Path) -> Config:
         except re.error as exc:
             raise ConfigError(f"[policy] qa_ui_paths is not a valid regular expression: {exc}") from exc
     validate_small_fix(policy, qa_runner=sections["qa_runner"].adapter)
+    validate_tidy(policy)
     if sections["qa_runner"].adapter != "none" and sections["codehost"].adapter == "none":
         raise ConfigError("[qa_runner] needs a [codehost]: QA reads the PR it checks")
     if policy.refund_max_minor < 0:

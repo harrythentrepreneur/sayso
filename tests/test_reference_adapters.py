@@ -83,6 +83,17 @@ class DiscordTests(unittest.TestCase):
         self.assertEqual(b.last_activity(post_id), "2026-10-10T06:00:00+00:00")
         self.assertEqual(rec.calls[0]["url"].split("?")[0][-len(post_id):], post_id)
 
+    def test_archive_never_locks(self):
+        b, rec = self.board([(200, {})])
+        b.set_archived("P", True)
+        self.assertEqual(json.loads(rec.calls[0]["body"]), {"archived": True, "locked": False})
+        self.assertEqual(rec.calls[0]["method"], "PATCH")
+
+    def test_is_archived_reads_thread_metadata(self):
+        b, _ = self.board([(200, {"thread_metadata": {"archived": True}}), (200, {"thread_metadata": {}})])
+        self.assertTrue(b.is_archived("P"))
+        self.assertFalse(b.is_archived("P"))
+
     def test_last_activity_without_a_message_is_unreadable(self):
         b, _ = self.board([(200, {"id": "1477455328051200000", "last_message_id": None})])
         with self.assertRaises(RuntimeError):
