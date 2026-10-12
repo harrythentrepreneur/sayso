@@ -155,6 +155,57 @@ class GitHubTests(unittest.TestCase):
                          (200, {"state": "success", "statuses": []})])
         self.assertEqual(g.pr_facts(3, "abc").ci, "red")
 
+    BILL = [{"annotation_level": "failure", "path": ".github",
+             "message": "The job was not started because recent account payments have failed or your spending "
+                        "limit needs to be increased."}]
+
+    def _billing(self, notes=None, job=None, conclusion="failure", status=None):
+        return self._gh([(200, [{"filename": "a.py", "patch": "+x"}]),
+                         (200, {"check_runs": [{"id": 11, "status": "completed", "conclusion": conclusion}]}),
+                         (200, status or {"state": "success", "statuses": []}),
+                         (200, self.BILL if notes is None else notes),
+                         (200, job if job is not None else {"steps": [], "runner_id": None, "runner_name": None})])
+
+    def test_ci_github_refused_for_billing_is_not_run(self):
+        rec, g = self._billing()
+        self.assertEqual(g.pr_facts(3, "abc").ci, "not-run")
+        self.assertTrue(rec.calls[3]["url"].endswith("/check-runs/11/annotations"))
+        self.assertTrue(rec.calls[4]["url"].endswith("/actions/jobs/11"))
+
+    def test_billing_text_from_a_job_that_ran_is_red(self):
+        _, g = self._billing(job={"steps": [{"name": "x"}], "runner_id": 4, "runner_name": "r"})
+        self.assertEqual(g.pr_facts(3, "abc").ci, "red")
+
+    def test_billing_text_with_any_sign_the_job_ran_is_red(self):
+        for job in ({"steps": [{"name": "x"}], "runner_id": None, "runner_name": None},
+                    {"steps": [], "runner_id": 4, "runner_name": None},
+                    {"steps": [], "runner_id": None, "runner_name": "runner-1"},
+                    {"runner_id": None, "runner_name": None}, []):
+            with self.subTest(job=job):
+                _, g = self._billing(job=job)
+                self.assertEqual(g.pr_facts(3, "abc").ci, "red")
+
+    def test_billing_words_not_from_github_are_red(self):
+        for notes in ([], [{**self.BILL[0], "path": "tests/x.py"}], [{**self.BILL[0], "annotation_level": "notice"}],
+                      [{**self.BILL[0], "message": "Printed: " + self.BILL[0]["message"]}]):
+            with self.subTest(notes=notes):
+                _, g = self._gh([(200, [{"filename": "a.py", "patch": "+x"}]),
+                                 (200, {"check_runs": [{"id": 11, "status": "completed", "conclusion": "failure"}]}),
+                                 (200, {"state": "success", "statuses": []}), (200, notes)])
+                self.assertEqual(g.pr_facts(3, "abc").ci, "red")
+
+    def test_unreadable_billing_record_is_red(self):
+        _, g = self._gh([(200, [{"filename": "a.py", "patch": "+x"}]),
+                         (200, {"check_runs": [{"id": 11, "status": "completed", "conclusion": "failure"}]}),
+                         (200, {"state": "success", "statuses": []}), (500, {"message": "boom"})])
+        self.assertEqual(g.pr_facts(3, "abc").ci, "red")
+
+    def test_a_failing_status_context_beside_billing_is_red(self):
+        _, g = self._gh([(200, [{"filename": "a.py", "patch": "+x"}]),
+                         (200, {"check_runs": [{"id": 11, "status": "completed", "conclusion": "failure"}]}),
+                         (200, {"state": "failure", "statuses": [{"state": "failure"}]})])
+        self.assertEqual(g.pr_facts(3, "abc").ci, "red")
+
     def test_pr_facts_hidden_patch_is_unreadable_diff(self):
         _, g = self._gh([(200, [{"filename": "big.json", "status": "modified"}]),
                          (200, {"check_runs": [{"status": "completed", "conclusion": "success"}]}),
