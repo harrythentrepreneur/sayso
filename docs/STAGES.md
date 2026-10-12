@@ -83,6 +83,18 @@ exact head (jobs/qa.py):
 4. **Rounds**: BLOCKED returns the card to `In dev`; QA's reason is on the card,
    so the next dev brief carries it. After `max_dev_rounds` the card goes to
    `Blocked`. A provider usage limit is neither a fail nor a round.
+   - `BLOCK-KIND: EVIDENCE <what is missing>` with no `FAILING-CHECK` anywhere:
+     only proof is missing. The card goes to `Blocked`, no dev round spent.
+   - QA's own tool timed out and it shows no defect: QA re-runs once on the
+     same head; a second timeout is a normal block.
+
+QA's labels and verdict are read only from lines CommonMark shows as plain text
+(not inside a code fence, an HTML block or a `>` quote). The final
+`VERDICT: PASS <head>` must itself be such a line.
+
+CI that GitHub refused to start for account billing (GitHub's own annotation and
+a job with no runner and no steps) is "not run", not red: QA starts, the card
+says so, and the change never counts as a small fix.
 
 A new head starts the steps again. The release job merges only a head QA passed.
 Without a QA runner the merge vote opens straight away and the card says the PR

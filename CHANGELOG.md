@@ -4,6 +4,23 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- QA answers are read the way CommonMark shows them (zero dependencies): a fence opens only with 3+
+  backticks or tildes at most 3 spaces in, closes only with the same character and at least as many,
+  and runs to the end when unclosed; list items, block quotes and HTML blocks are modelled too. A PASS
+  counts only when that exact final line is plain, so an earlier plain PASS can no longer vouch for a
+  fenced one. Cross-checked against markdown-it-py (randomized) and on 80 real QA answers.
+- QA `BLOCK-KIND: EVIDENCE <what is missing>`: a block that only lacks proof no dev run can make goes
+  to `Blocked` for a human with no dev round spent. Any `FAILING-CHECK` line anywhere means a code
+  defect; an unclear label keeps today's rule. A BLOCK-KIND line beside a PASS is a block.
+- A QA block caused by QA's own tool timing out (no FAILING-CHECK, plain answer) re-runs QA once on the
+  same head, not a dev round. A second timeout is a normal block.
+- CI that GitHub refused to start (account billing) reads as `not-run`, not red, only with GitHub's own
+  record: a failure annotation on `.github` with GitHub's billing sentence AND a job with no runner and
+  no steps. QA on the exact head is the gate; content checks still apply and small-fix release never
+  applies to such a case.
+- Stall: an Awaiting-approval card whose vote is open gets only the vote reminder, not a second stall
+  line repeating it.
+
 - Close and money: a drafter can answer `NO-REPLY: <reason>` (spam, invites, a bare thank-you) to get ONE
   close vote that ends the case with nothing sent, never redrafted until the customer writes again, and
   never re-asked after a No; or end a reply with `MONEY: {spec}` lines to open refund/cancel votes while

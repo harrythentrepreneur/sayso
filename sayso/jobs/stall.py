@@ -7,7 +7,8 @@ Three checks, ported from the PhonicsMaker loop's stall guard (Kaviru, 27 Sep - 
 2. **Stall limits.** Every open stage has a time limit on card activity (the
    newest message in the card). Past it the case is flagged once, then at most
    once per ``stall_repeat_hours`` while the same quiet stretch lasts. Any new
-   message in the card resets the clock.
+   message in the card resets the clock. An Awaiting-approval card whose vote is
+   still open gets only the vote reminder, never a second stall line for it.
 3. **Nobody is working on it.** An open card with nothing set to move it (no
    open vote, no draft due, no dev or QA run, no runner configured) is flagged
    after ``orphan_minutes`` of quiet, once per case and stage per day.
@@ -126,6 +127,7 @@ def run(ctx) -> dict:
                 out["reminded"].append(vkey)
 
         # 2 and 3. Stall limits and cards nobody is working on.
+        all_votes = votes.load(ctx)
         hours = limits(ctx)
         orphan_after = timedelta(minutes=policy.orphan_minutes)
         for key, rec in sorted(all_cases.items()):
@@ -149,7 +151,12 @@ def run(ctx) -> dict:
                 continue
             idle = now - at
             limit = timedelta(hours=hours[stage])
-            if idle >= limit:
+            # An Awaiting-approval card whose vote is still open already gets vote
+            # reminders; a stall line would only repeat the vote. An approved vote
+            # that is not acting, or no vote at all, is still flagged.
+            vote_open = stage == stages.AWAITING and any(
+                v["case_key"] == key and v["status"] == votes.OPEN for v in all_votes.values())
+            if idle >= limit and not vote_open:
                 period = 1 + int((idle - limit) / repeat)
                 text = (f"{_subject(rec)} - {stage}, no activity for {int(idle.total_seconds() // 3600)}h: "
                         f"{WHY_STALL[stage]}.")

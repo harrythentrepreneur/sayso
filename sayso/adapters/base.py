@@ -115,7 +115,7 @@ class Payments(Protocol):
 @dataclass(frozen=True)
 class PrFacts:
     """What the pre-QA gate reads about one exact head."""
-    ci: str                          # "green" | "pending" | "red"
+    ci: str                          # "green" | "pending" | "red" | "not-run" (GitHub refused to start CI)
     files: tuple[str, ...]           # changed paths; empty = unreadable
     added: tuple[str, ...] | None    # added diff lines; None = unreadable
     changed_lines: int | None = None  # lines added + deleted; None = unreadable (small-fix keeps the vote)

@@ -379,6 +379,26 @@ class GitHubCodeHost:
         return PrFacts(ci=self._ci(head), files=tuple(files), added=None if added is None else tuple(added),
                        changed_lines=changed)
 
+    # GitHub's own words when it refuses to START a job because of account billing.
+    BILLING_NOT_STARTED = "The job was not started because recent account payments have failed"
+
+    def _billing_refused(self, run) -> bool:
+        """GitHub's own record that it never started this job for billing: a failure
+        annotation on `.github` opening with the billing sentence AND a job record with
+        no runner and no steps. PR code can print any annotation text, but it cannot
+        run without a runner. Anything unreadable is False (real red)."""
+        try:
+            notes = self.http.request("GET", f"/repos/{self.repo}/check-runs/{int(run['id'])}/annotations")
+            if not isinstance(notes, list) or not any(
+                    isinstance(n, dict) and n.get("annotation_level") == "failure" and n.get("path") == ".github"
+                    and str(n.get("message") or "").startswith(self.BILLING_NOT_STARTED) for n in notes):
+                return False
+            job = self.http.request("GET", f"/repos/{self.repo}/actions/jobs/{int(run['id'])}")
+        except (HttpError, KeyError, TypeError, ValueError):
+            return False
+        return (isinstance(job, dict) and job.get("steps") == [] and not job.get("runner_id")
+                and not job.get("runner_name"))
+
     def _ci(self, head):
         try:
             runs = self.http.request("GET", f"/repos/{self.repo}/commits/{head}/check-runs",
@@ -392,7 +412,11 @@ class GitHubCodeHost:
                 and status.get("statuses"):
             return "pending"
         bad = [r for r in runs if r.get("conclusion") not in ("success", "skipped", "neutral")]
-        if bad or (status.get("statuses") and status.get("state") != "success"):
+        if status.get("statuses") and status.get("state") != "success":
+            return "red"                      # a failing status context is always real red
+        if bad and all(self._billing_refused(r) for r in bad):
+            return "not-run"                  # GitHub never started these jobs: not red, not green
+        if bad:
             return "red"
         return "green"
 
