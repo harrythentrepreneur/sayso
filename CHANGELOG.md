@@ -4,6 +4,11 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Board tidy (opt-in, off by default): `[policy] archive_finished = true` runs a `tidy` job that archives
+  quiet, finished cards so the board shows working cases. A live vote opened after the case's last close,
+  recent activity, or the `Parked` tag keeps a card. Archiving never locks, deletes or re-stages, every
+  stage move unarchives first, and reconcile stays report-only.
+
 - Close and money: a drafter can answer `NO-REPLY: <reason>` (spam, invites, a bare thank-you) to get ONE
   close vote that ends the case with nothing sent, never redrafted until the customer writes again, and
   never re-asked after a No; or end a reply with `MONEY: {spec}` lines to open refund/cancel votes while

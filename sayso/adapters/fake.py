@@ -14,6 +14,7 @@ closed. Faults are named strings in ``world["faults"]``:
   merge_ignored             code host returns OK on merge but does not merge
   authors_unreadable        the board cannot list who wrote in a card
   activity_unreadable       the board cannot report a card's last message time
+  archive_ignored           the board accepts an archive call but the card stays visible
 """
 from __future__ import annotations
 
@@ -112,6 +113,18 @@ class FakeBoard:
     def set_tags(self, card_id, tags):
         if not self.w.fault("tags_ignored"):
             self.w.data["cards"][card_id]["tags"] = list(tags)
+        self.w.save()
+
+    def is_archived(self, card_id):
+        return bool(self.w.data["cards"][card_id].get("archived"))
+
+    def set_archived(self, card_id, archived):
+        """Hide (or show) a card. Never locks it and never touches tags or messages."""
+        card = self.w.data["cards"][card_id]
+        if not self.w.fault("archive_ignored"):
+            if bool(card.get("archived")) != bool(archived):
+                card["archive_writes"] = card.get("archive_writes", 0) + 1
+            card["archived"] = bool(archived)
         self.w.save()
 
     def post(self, card_id, text, idempotency_key):

@@ -34,6 +34,8 @@ Each alert fires once per problem, and the text names the case.
 | `the drafter said no-reply again after a No` | An operator declined a no-reply close and the drafter still says no reply | Write the reply by hand, or close the card yourself. It is never asked twice for the same message. |
 | `a held reply's money vote is missing` / `the held reply file changed` | A reply held for a refund lost its money vote or its file | Check `votes.json` and the drafts folder. A new draft follows when the file changed. |
 | `<job>: another run still held the lock after Ns` (exit 75) | One run of a job outlived the next start | Check the job's log for a hang. Nothing was done in the skipped run, and the journal records `job_skipped_busy`. |
+| `the board did not archive the finished card` | The board accepted an archive call but the card still reads visible | Check the bot's Manage Threads permission on the forum. Nothing else changed. |
+| `archive_finished is on but this board cannot archive cards` | The board adapter has no archive support | Turn `archive_finished` off, or use a board adapter that supports it. |
 | `cannot read the card's last activity` | The board could not report the newest message | Check the bot can still read the card. The stall check skips it rather than guessing. |
 | `approved-not-sent` | An approved reply is still unsent after `unsent_alert_hours` | Check the sender service. Usually the card was moved off `Awaiting approval`. |
 

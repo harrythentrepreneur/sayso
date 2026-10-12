@@ -92,6 +92,9 @@ def update(ctx, case_key: str, **fields: Any) -> dict:
 def set_tags_verified(ctx, card_id: str, tags: list[str]) -> list[str]:
     """Write tags, then READ THEM BACK. A 200 response is not proof."""
     stages.validate(tags)
+    unarchive = getattr(ctx.board, "set_archived", None)
+    if unarchive is not None and getattr(ctx.board, "is_archived", lambda c: False)(card_id):
+        unarchive(card_id, False)            # a moved card is a live card: it must be visible
     ctx.board.set_tags(card_id, tags)
     live = ctx.board.get_tags(card_id)
     if sorted(live) != sorted(tags):

@@ -1,5 +1,5 @@
 """Loop jobs. Each is one timer-driven, idempotent pass."""
-from sayso.jobs import close, dev, draft, health, intake, money_job, qa, reconcile, release, sender, stall, tally
+from sayso.jobs import close, dev, draft, health, intake, money_job, qa, reconcile, release, sender, stall, tally, tidy
 
 JOBS = {
     "intake": intake.run,
@@ -13,8 +13,9 @@ JOBS = {
     "close": close.run,
     "reconcile": reconcile.run,
     "stall": stall.run,
+    "tidy": tidy.run,
     "health": health.run,
 }
 
 # One full pass in dependency order (used by `sayso tick` and the demo).
-ORDER = ("intake", "votes", "release", "money", "sender", "dev", "qa", "draft", "close", "reconcile", "stall", "health")
+ORDER = ("intake", "votes", "release", "money", "sender", "dev", "qa", "draft", "close", "reconcile", "stall", "tidy", "health")
