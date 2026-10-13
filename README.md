@@ -28,6 +28,12 @@ Sayso sends it exactly once and proves it left.
 No autopilot replies. No refunds nobody approved. No "we fixed it" before it
 shipped.
 
+**Two ways to run it.** Self-host this repository for free (Apache-2.0), or use
+**[Sayso Cloud](https://sayso.omo.sh)**: the same core, hosted, with Gmail/IMAP,
+Stripe and your own AI key connected in the browser. $49 a month or $490 a year,
+14-day free trial. See the [website](https://harrythentrepreneur.github.io/sayso/)
+for both, and for what is coming next.
+
 <p align="center">
   <img src="assets/sayso-demo.gif" alt="Sayso on a phone: a customer email, the AI draft, one tap to approve, the send proven, and a vote cancelled when the customer writes again" width="300">
   <br><sub>The real Sayso console on a phone, with a demo product and test customers.</sub>
@@ -215,9 +221,12 @@ dry-run mode. Every key is described in [docs/SETTINGS.md](docs/SETTINGS.md).
 - [x] Mutation-tested safety guards
 - [x] Web console with operator sign-in and votes from a phone
 - [x] First live product (PhonicsMaker)
-- [ ] Gmail as the inbox
+- [x] Hosted version for teams that do not want to run a server ([Sayso Cloud](https://sayso.omo.sh))
+- [x] Gmail as the inbox (Gmail app password or any IMAP/SMTP inbox, in Sayso Cloud)
+- [ ] One-tap Revise ("Warmer", "Shorter") that rewrites a draft
+- [ ] Learning: repeated corrections become rules you can see and switch off
+- [ ] Phone app with swipe to decide
 - [ ] Slack and Zendesk adapters
-- [ ] Hosted version for teams that do not want to run a server
 
 ## Contributing
 
