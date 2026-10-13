@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0f0d12" />
-<title>Sayso · Customer support you can swipe</title>
+<title>Sayso · AI support that waits for your say-so</title>
 <meta name="description" content="Sayso drafts every customer reply. Swipe right to send, left to skip, or ask it to revise. It learns from every decision." />
 <link rel="icon" href="img/sayso-mark.svg" />
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet" />
@@ -60,6 +60,8 @@ img{display:block;max-width:100%}
 .hero-phone{justify-self:center;position:relative}
 .hint{position:absolute;left:-112px;top:118px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13px;font-weight:800;color:var(--ink);box-shadow:0 10px 24px rgba(0,0,0,.4);width:130px;line-height:1.35}
 .hint.r{left:auto;right:-118px;top:330px}
+.hint{z-index:3}
+.head h2{text-wrap:balance}
 .hint i{font-style:normal;color:var(--send)}.hint.l i{color:var(--soft)}
 @media (max-width:760px){.hint{display:none}}
 /* sections */
@@ -136,6 +138,9 @@ h1,h2{text-wrap:balance}
 .where div{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px}
 .where h3{font-size:19px;margin:10px 0 4px}
 .where p{font-size:14.5px}
+.ways{max-width:860px;margin:0 auto}.ways .price{font:600 34px Fredoka;color:var(--ink);margin:6px 0 4px}.ways .price small{font:800 15px Nunito;color:var(--soft)}.ways .btn{margin-top:14px}
+@media(min-width:760px){.ways{grid-template-columns:1fr 1fr!important}}
+#how .safe{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
 .st{font:900 10.5px Nunito;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
 .st.live{background:rgba(47,220,138,.15);color:var(--send)}.st.soon{background:rgba(255,197,61,.14);color:var(--warn)}
 /* faq + final */
@@ -157,25 +162,25 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
  <symbol id="buddy" viewBox="0 0 120 110"><path d="M26 8h64a22 22 0 0 1 22 22v34a22 22 0 0 1-22 22H58l-22 18v-18H26A22 22 0 0 1 4 64V30A22 22 0 0 1 26 8z" fill="#ff7a4d"/><path d="M26 8h64a22 22 0 0 1 22 22v6c-18-10-70-10-108 2v-8A22 22 0 0 1 26 8z" fill="#ff9a74"/><ellipse cx="42" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><ellipse cx="76" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><circle cx="44.5" cy="40.5" r="2.4" fill="#fff"/><circle cx="78.5" cy="40.5" r="2.4" fill="#fff"/><ellipse cx="30" cy="60" rx="7" ry="4.5" fill="#ff4f7b" opacity=".55"/><ellipse cx="88" cy="60" rx="7" ry="4.5" fill="#ff4f7b" opacity=".55"/><path d="M49 60q10 9 20 0" fill="none" stroke="#24161c" stroke-width="4.5" stroke-linecap="round"/></symbol>
 </defs></svg>
 
-<div class="preview"><b>Design preview.</b> Discord approvals run today. The phone app, web app and Slack are being built.</div>
+<div class="preview"><b>Hosted Sayso is live</b> at <a href="https://sayso.omo.sh" style="color:inherit">sayso.omo.sh</a>. Phone swipe, one-tap Revise and learning are designs we are building next, marked <b>Coming next</b> below.</div>
 
 <nav class="nav" id="nav"><div class="wrap">
   <a class="brand" href="#"><svg><use href="#buddy"/></svg>sayso</a>
-  <div class="links"><a href="#how">How it works</a><a href="#web">Web app</a><a href="#learn">Learning</a><a href="#safe">Safety</a><a href="#faq">FAQ</a></div>
-  <a class="btn sm" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">★ Star on GitHub</a>
+  <div class="links"><a href="#how">How it works</a><a href="#ways">Pricing</a><a href="#safe">Safety</a><a href="#next">Coming next</a><a href="#faq">FAQ</a></div>
+  <a class="btn sm" href="https://sayso.omo.sh">Start free trial</a>
 </div></nav>
 
 <header class="hero">
   <div class="wrap">
     <div>
-      <span class="eyebrow">Customer support for small SaaS teams</span>
-      <h1>Support you can<br><span>swipe through.</span></h1>
-      <p class="lead lede">Sayso reads every customer email, checks the facts and writes the reply. <b>Swipe right to send. Swipe left to skip. Tap Revise to change it.</b> Every decision teaches it how your team answers.</p>
-      <div class="cta"><a class="btn" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Get it on GitHub →</a><a class="btn ghost" href="app.html" target="_blank">Try the demo</a></div>
-      <div class="trust"><span>Nothing sends without you</span><span>Every send checked</span><span>Learns your voice</span></div>
+      <span class="eyebrow">Open source · hosted or self-hosted</span>
+      <h1>AI support that waits<br><span>for your say-so.</span></h1>
+      <p class="lead lede">Sayso reads your support inbox, checks the customer in Stripe and drafts each reply and refund. Then it waits. <b>You read the exact words, say Yes, and it goes out once, with proof.</b></p>
+      <div class="cta"><a class="btn" href="https://sayso.omo.sh">Try it hosted →</a><a class="btn ghost" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Self-host free on GitHub</a></div>
+      <div class="trust"><span>Nothing sends without your Yes</span><span>Sent once, proven in your Sent folder</span><span>Refunds capped and checked in Stripe</span></div>
     </div>
     <div class="hero-phone">
-      <div class="hint l">← Swipe left<br><i>Skip, nothing sent</i></div>
+      <div class="hint l">Phone app<br><i>Coming next · try the design</i></div>
       <div class="iphone lg"><div class="scr"><iframe src="app.html?embed" title="Sayso phone app, try swiping" loading="eager"></iframe></div></div>
       <div class="hint r">Swipe right →<br><i>Send the reply</i></div>
     </div>
@@ -184,13 +189,36 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
 
 <section id="how" class="alt">
   <div class="wrap">
-    <div class="head c"><span class="eyebrow">How it works</span><h2>Read. Swipe. Or revise.</h2><p>Each email becomes one card. The card asks one question and shows exactly what will happen.</p></div>
+    <div class="head c"><span class="eyebrow">How it works today</span><h2>Four steps. A person decides at the one that matters.</h2><p>This is what runs today, in the hosted web app and in Discord.</p></div>
+    <div class="safe">
+      <div><h3>1 · Email comes in</h3><p>Sayso reads new mail in your support inbox and pulls up the customer's Stripe history.</p></div>
+      <div><h3>2 · AI drafts</h3><p>It writes the reply, and the refund if one is due, with your own AI key. Nothing has gone out yet.</p></div>
+      <div><h3>3 · You say Yes</h3><p>You see the exact words and the exact amount. Yes sends it. No drops it. Edit the text and you are asked again.</p></div>
+      <div><h3>4 · Sent once, proven</h3><p>It goes out once. "Sent" means your Sent folder has it. "Refunded" means Stripe says so.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="ways">
+  <div class="wrap">
+    <div class="head c"><span class="eyebrow">Two ways to use Sayso</span><h2>Same loop. Your server or ours.</h2><p>The hosted app and the open-source project share one core, so the safety rules are the same in both.</p></div>
+    <div class="where ways">
+      <div><span class="st live">hosted</span><h3>Sayso Cloud</h3><p class="price">$49<small> / month</small></p><p>Or $490 a year. Founding teams keep $29 a month. 14-day free trial, card required. Sign in, connect Gmail or any IMAP inbox, Stripe and your AI key in the browser. We run the server, backups and alerts.</p><a class="btn sm" href="https://sayso.omo.sh">Start free trial →</a></div>
+      <div><span class="st live">open source</span><h3>Self-hosted</h3><p class="price">Free<small> · Apache-2.0</small></p><p>Run it on your own Linux server with systemd timers. Python standard library only. Approve in the web console or in Discord. You keep every key and every byte.</p><a class="btn sm ghost" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Get it on GitHub →</a></div>
+    </div>
+    <p class="cap" style="text-align:center;margin-top:14px">Prices in US dollars. No per-reply fee. Your AI provider bills you directly for usage on your own key.</p>
+  </div>
+</section>
+
+<section id="next-how">
+  <div class="wrap">
+    <div class="head c" id="next"><span class="eyebrow">Coming next · the phone app</span><h2>Read. Swipe. Or revise.</h2><p>This is the design we are building now. Each email becomes one card that asks one question. It is not in the product yet.</p></div>
     <div class="steps">
       <div class="step"><span class="n">Step 1</span><h3>Read the card</h3><p>The question at the top, the customer's own words, and the reply Sayso wrote. Scroll up for earlier emails.</p>
         <div class="shot"><div class="iphone"><div class="scr"><img src="img/ui/ph-card.webp" alt="A Sayso card asking: Refund $49.00 and send this reply?" loading="lazy"></div></div></div></div>
-      <div class="step"><span class="n">Step 2</span><h3>Swipe to decide</h3><p>Right sends it. Left skips it. The next card slides in, with no pop-ups in the way.</p>
+      <div class="step"><span class="n">Step 2</span><h3>Swipe to decide</h3><p>Right sends it. Left skips it. Today you tap Yes or No instead. The next card slides in, with no pop-ups in the way.</p>
         <div class="shot"><div class="iphone"><div class="scr"><img src="img/ui/ph-swipe.webp" alt="A card being swiped right with a SEND stamp" loading="lazy"></div></div></div></div>
-      <div class="step"><span class="n">Or</span><h3>Or revise it</h3><p>Tap Revise: "Warmer", "Shorter", or your own words. Sayso rewrites it and keeps the lesson.</p>
+      <div class="step"><span class="n">Or</span><h3>Or revise it</h3><p>Tap Revise: "Warmer", "Shorter", or your own words, and Sayso rewrites it. Today you edit the draft text yourself.</p>
         <div class="shot bottom"><div class="iphone"><div class="scr"><img src="img/ui/ph-revise.webp" alt="The Revise sheet with quick options" loading="lazy"></div></div></div></div>
     </div>
   </div>
@@ -200,9 +228,9 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
   <div class="wrap">
     <div class="duo">
       <div>
-        <span class="eyebrow">Swipe up for details</span>
+        <span class="eyebrow">Coming next · swipe up for details</span>
         <h2 style="font-size:clamp(30px,3.8vw,46px);margin:12px 0 14px">Everything behind the reply, one swipe away.</h2>
-        <p>When a case needs a closer look, swipe up. You see what Sayso checked, what each button will do, and the full history.</p>
+        <p>In the phone app, swipe up for the details. The web app already shows all three on every case.</p>
         <div class="list">
           <div><i>✓</i><span><b>What Sayso checked.</b> For example: "Stripe shows 2 charges of $49.00 on 3 Oct."</span></div>
           <div><i>✓</i><span><b>What Send will do.</b> "Refund $49.00 + send." Money only moves on your Yes.</span></div>
@@ -219,16 +247,16 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
 
 <section id="web" class="alt">
   <div class="wrap">
-    <div class="head c"><span class="eyebrow">On your desktop</span><h2>The same flow, at your desk.</h2><p id="webCap">A full web app with the queue on the left and the case in the middle. Use the arrow keys: → send, ← skip, R revise.</p></div>
+    <div class="head c"><span class="eyebrow">Coming next · the new web app</span><h2>The same flow, at your desk.</h2><p id="webCap">The design for the next web app, with the queue on the left and keyboard shortcuts. The web app you can use today is at sayso.omo.sh.</p></div>
     <div class="tabs" id="tabs"><button class="on" data-i="desk-inbox">Inbox</button><button data-i="desk-insights">Insights</button><button data-i="desk-discord">In Discord</button></div>
-    <div class="mac"><div class="lid"><div class="bar"><i></i><i></i><i></i><span id="url">app.sayso.dev/inbox</span></div><div class="scr"><img id="deskImg" src="img/ui/desk-inbox.webp" alt="Sayso web app inbox" loading="lazy"></div></div><div class="base"></div></div>
-    <p class="cap"><a href="web.html" target="_blank" style="color:var(--coral);font-weight:900">Open the web app demo ↗</a> · demo data</p>
+    <div class="mac"><div class="lid"><div class="bar"><i></i><i></i><i></i><span id="url">design preview</span></div><div class="scr"><img id="deskImg" src="img/ui/desk-inbox.webp" alt="Sayso web app inbox" loading="lazy"></div></div><div class="base"></div></div>
+    <p class="cap"><a href="web.html" target="_blank" style="color:var(--coral);font-weight:900">Open the design ↗</a> · demo data · <a href="https://sayso.omo.sh" style="color:var(--coral);font-weight:900">Use the live app</a></p>
   </div>
 </section>
 
 <section id="learn">
   <div class="wrap">
-    <div class="head c"><span class="hbadge">Learning powered by <b>Hermes Agent</b></span><h2>Every decision makes the next draft better.</h2><p>Sayso uses Hermes, an open-source agent framework, as its learning layer. Hermes turns your sends, skips and revisions into plain rules you can see and switch off.</p></div>
+    <div class="head c"><span class="hbadge">Coming next · learning powered by <b>Hermes Agent</b></span><h2>Every decision will make the next draft better.</h2><p>We are building a learning layer on Hermes, an open-source agent framework. It will turn your sends, skips and revisions into plain rules you can see and switch off. It is not in the product yet.</p></div>
     <div class="hermes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 540" role="img" aria-label="How Sayso learns: your decisions go to the Hermes learning layer, which updates your playbook, which shapes the next draft">
   <defs>
     <linearGradient id="hg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#c7b6ff"/></linearGradient>
@@ -311,13 +339,13 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
   <rect x="440" y="436" width="240" height="28" rx="14" fill="#141118" stroke="#3a3440"/>
   <text x="560" y="455" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="12.5" fill="#d6cbff">You review it · the loop repeats</text>
 
-  <text x="40" y="512" font-family="Nunito,system-ui,sans-serif" font-weight="700" font-size="13" fill="#a097a4">Every lesson shows in Insights with an on/off switch. Nothing changes your playbook without your say-so.</text>
+  <text x="40" y="512" font-family="Nunito,system-ui,sans-serif" font-weight="700" font-size="13" fill="#a097a4">Planned: every lesson in Insights with an on/off switch. Nothing changes your playbook without your say-so.</text>
 </svg>
 </div>
     <div class="points">
-      <div><b>Learns from patterns</b>One skip is noise. The same correction three times becomes a lesson.</div>
-      <div><b>You can see every rule</b>Lessons appear in Insights in plain words, each with an on/off switch.</div>
-      <div><b>Never acts alone</b>Hermes changes how replies are written. It never sends, refunds or cancels.</div>
+      <div><b>Will learn from patterns</b>One skip is noise. The same correction three times becomes a lesson.</div>
+      <div><b>You will see every rule</b>Lessons in plain words, each with an on/off switch.</div>
+      <div><b>Never acts alone</b>Learning only changes how replies are written. It never sends, refunds or cancels.</div>
     </div>
   </div>
 </section>
@@ -329,6 +357,9 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
       <div><h3>Nothing sends alone</h3><p>Every reply, refund and cancellation waits for a person to send it.</p></div>
       <div><h3>Customer writes again? Card updates.</h3><p>If they reply before you decide, the old draft is cancelled and a new one answers both emails.</p></div>
       <div><h3>Checked, not claimed</h3><p>"Sent" means it is in your Sent folder. "Refunded" means Stripe says so. No double emails.</p></div>
+      <div><h3>Refunds capped and voted</h3><p>A refund needs its own Yes and can never go over the cap you set.</p></div>
+      <div><h3>One pause button</h3><p>Anyone on the team can pause. Nothing is sent or charged until an owner resumes.</p></div>
+      <div><h3>Keys stay locked</h3><p>Hosted: inbox, Stripe and AI keys are encrypted per workspace and never shown again. Self-hosted: they never leave your server.</p></div>
     </div>
   </div>
 </section>
@@ -337,10 +368,10 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
   <div class="wrap">
     <div class="head c"><span class="eyebrow">Where you decide</span><h2>Phone, desk or team chat.</h2></div>
     <div class="where">
-      <div><span class="st soon">building</span><h3>iPhone app</h3><p>Swipe through support on the go.</p></div>
-      <div><span class="st soon">building</span><h3>Web app</h3><p>Keyboard-fast queue at your desk.</p></div>
-      <div><span class="st live">live</span><h3>Discord</h3><p>One post per customer, Yes/No poll, proof after every action.</p></div>
-      <div><span class="st soon">next</span><h3>Slack</h3><p>Approve and revise from a channel.</p></div>
+      <div><span class="st live">live</span><h3>Web app</h3><p>Hosted at sayso.omo.sh, or the console in the open-source project. Works on a phone browser.</p></div>
+      <div><span class="st soon">coming next</span><h3>iPhone app</h3><p>Swipe through support on the go.</p></div>
+      <div><span class="st live">live</span><h3>Discord</h3><p>One post per customer, Yes/No poll, proof after every action. Self-hosted today.</p></div>
+      <div><span class="st soon">planned</span><h3>Slack</h3><p>Approve and revise from a channel.</p></div>
     </div>
   </div>
 </section>
@@ -350,9 +381,10 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
     <div class="head c"><h2>Questions</h2></div>
     <div class="faq">
       <details open><summary>Who is Sayso for?</summary><p>Small SaaS teams, usually 1–10 people, where the founders still answer support themselves.</p></details>
-      <details><summary>What is Hermes, and does it see my data?</summary><p>Hermes Agent is the open-source agent framework Sayso uses for learning. It reads your decisions so it can write better drafts. Sayso only lets it change how drafts are written: sending, refunds and cancellations always wait for a person.</p></details>
+      <details><summary>Hosted or self-hosted?</summary><p>Hosted (sayso.omo.sh) is $49 a month with a 14-day trial: we run the server, backups and alerts. Self-hosted is free under Apache-2.0: you run it on your own server. Both use the same core and the same safety rules.</p></details>
+      <details><summary>Does my data train an AI?</summary><p>No. Drafts are written with your own AI key, under your provider's terms. We do not use your customers' emails to train models. See the <a href="https://sayso.omo.sh/privacy" style="color:var(--coral)">privacy policy</a>.</p></details>
       <details><summary>Can it send without me?</summary><p>No. Every customer email and every money action waits for a person.</p></details>
-      <details><summary>Is the phone app ready?</summary><p>Not yet. Discord approvals run today. The phone app, web app and Slack are being built in the open on GitHub.</p></details>
+      <details><summary>Is the phone app ready?</summary><p>Not yet. Today you approve in the web app (it works in a phone browser) or in Discord. The swipe app, one-tap Revise and learning are coming next, built in the open on GitHub.</p></details>
     </div>
   </div>
 </section>
@@ -360,20 +392,20 @@ footer{padding:34px 0 48px;text-align:center;color:var(--faint);font-size:14px;b
 <section class="final" id="join">
   <div class="wrap">
     <svg style="width:84px;height:77px;margin:0 auto 14px;display:block"><use href="#buddy"/></svg>
-    <h2>Make support a swipe.</h2>
-    <p>Sayso is open source. Run it on your own server, connect your inbox, and start swiping.</p>
-    <a class="btn" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Get Sayso on GitHub →</a>
-    <p style="margin-top:14px;font-size:14px;color:var(--soft)">Open source · Apache-2.0 · self-hosted</p>
+    <h2>Nothing goes out without your say-so.</h2>
+    <p>Start a 14-day trial of hosted Sayso, or run the open-source version on your own server.</p>
+    <a class="btn" href="https://sayso.omo.sh">Try it hosted →</a> <a class="btn ghost" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Self-host free</a>
+    <p style="margin-top:14px;font-size:14px;color:var(--soft)">Hosted from $29 a month for founding teams · open source under Apache-2.0</p>
   </div>
 </section>
 
-<footer>Sayso · built by Harry &amp; Kaviru · learning powered by Hermes Agent · design preview with demo data</footer>
+<footer>Sayso · built by Harry &amp; Kaviru · <a href="https://sayso.omo.sh" style="color:inherit">sayso.omo.sh</a> · <a href="https://github.com/harrythentrepreneur/sayso" style="color:inherit">GitHub</a> · <a href="https://sayso.omo.sh/privacy" style="color:inherit">Privacy</a> · <a href="https://sayso.omo.sh/terms" style="color:inherit">Terms</a> · designs marked Coming next use demo data</footer>
 
 <script>
 const fit=()=>document.querySelectorAll('.iphone .scr iframe').forEach(f=>{const w=f.parentNode.clientWidth;f.style.setProperty('--k',w/390);f.parentNode.style.height=(844*w/390)+'px';});fit();addEventListener('resize',fit);
 const nav=document.getElementById('nav');addEventListener('scroll',()=>nav.classList.toggle('s',scrollY>10),{passive:true});
-const urls={'desk-inbox':'app.sayso.dev/inbox','desk-insights':'app.sayso.dev/insights','desk-discord':'discord.com · #support-cases'};
-const caps={'desk-inbox':'A full web app with the queue on the left and the case in the middle. Use the arrow keys: → send, ← skip, R revise.','desk-insights':'Insights shows decisions, time to decide, what customers write about, and every lesson Sayso is using.','desk-discord':'Already on Discord? Each customer gets one post with a Yes/No poll, and Sayso posts proof after each action.'};
+const urls={'desk-inbox':'design preview','desk-insights':'design preview','desk-discord':'discord.com · #support-cases'};
+const caps={'desk-inbox':'The design for the next web app, with the queue on the left and keyboard shortcuts. The web app you can use today is at sayso.omo.sh.','desk-insights':'Insights today shows decisions, time to decide and what was sent. Lessons are coming next.','desk-discord':'Already on Discord? Each customer gets one post with a Yes/No poll, and Sayso posts proof after each action.'};
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));const i=document.getElementById('deskImg');i.src='img/ui/'+b.dataset.i+'.webp';i.alt=b.textContent;document.getElementById('url').textContent=urls[b.dataset.i];document.getElementById('webCap').textContent=caps[b.dataset.i];});
 
 </script>
