@@ -290,6 +290,48 @@ class DraftedMoneyTests(Base):
                          "a follow-up does not cancel the operator's money decision")
 
 
+    def _count_draft_calls(self, passes=5):
+        calls = []
+        orig = self.ctx.drafter.draft
+        self.ctx.drafter.draft = lambda *a: calls.append(1) or orig(*a)
+        before = self.posts().count("Draft held")
+        for _ in range(passes):
+            self.tick("draft")
+        return len(calls), self.posts().count("Draft held") - before
+
+    def test_held_money_draft_waits_for_a_person(self):
+        """QA 13 Oct 2026: a held draft was redrafted on every pass (one paid AI call + one held note a minute)."""
+        self.refund_case(spec={**REFUND, "amount": 999999})
+        self.assertEqual(self._count_draft_calls(), (0, 0))
+
+    def test_held_payments_off_waits_for_a_person(self):
+        self.ctx.payments = None
+        self.refund_case()
+        self.assertEqual(self._count_draft_calls(), (0, 0))
+
+    def test_held_plain_reply_waits_for_a_person(self):
+        self.write_in(subject="Charged twice")
+        self.drafter_says("Hi Pat,\n\nI have refunded you in full.")   # claims money with no receipt -> held
+        self.tick("intake", "draft")
+        self.assertIn("held", self.posts())
+        self.assertEqual(self._count_draft_calls(), (0, 0))
+
+    def test_held_case_redrafts_when_the_customer_writes_again(self):
+        self.refund_case(spec={**REFUND, "amount": 999999})
+        self.drafter_says("Hi Pat,\n\nThanks, we are looking into it.")
+        self.write_in(subject="Charged twice", body="Any news?")
+        self.tick("intake", "draft")
+        self.assertEqual(len(self.all_votes("reply")), 1, "a new customer message reopens drafting")
+
+    def test_held_case_redrafts_when_a_person_asks(self):
+        self.refund_case(spec={**REFUND, "amount": 999999})
+        self.drafter_says("Hi Pat,\n\nThanks, we are looking into it.")
+        key = next(iter(cases.load(self.ctx)))
+        cases.update(self.ctx, key, needs_draft=True)          # what Sayso Cloud's "Write a new draft" does
+        self.tick("draft")
+        self.assertEqual(len(self.all_votes("reply")), 1)
+
+
 class LockTests(Base):
     def test_run_waits_for_a_busy_lock_instead_of_skipping(self):
         from sayso import cli

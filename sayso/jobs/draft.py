@@ -34,8 +34,13 @@ def _subject(rec: dict) -> str:
 
 
 def _hold(ctx, key: str, rec: dict, why: str, text: str) -> None:
+    """Hold a draft for a person. The case then waits: it is NOT redrafted on the next pass (that would bill
+    the drafter and post the same note every minute) until the customer writes again or a person asks for a
+    new draft; both set needs_draft. ``held_draft`` records which inbound message the hold answered."""
     ctx.board.post(rec["card_id"], f"Draft held, not offered for a vote: {why}",
                    idempotency_key=f"draft-held:{key}:{hashlib.sha256(text.encode()).hexdigest()[:12]}")
+    cases.update(ctx, key, needs_draft=False,
+                 held_draft=str(rec.get("last_inbound") or rec.get("created_at") or "held"))
 
 
 def _store_draft(ctx, key: str, rec: dict, text: str) -> tuple[int, str, str]:
@@ -178,8 +183,9 @@ def run(ctx) -> dict:
             continue
         if rec.get("dev_requested") or votes.live_for_case(ctx, key, "reply"):
             continue
-        if not rec.get("needs_draft") and (rec.get("draft_version") or rec.get("no_reply_asked_for")):
-            continue                          # drafted, or a no-reply decision is pending or settled
+        if not rec.get("needs_draft") and (rec.get("draft_version") or rec.get("no_reply_asked_for")
+                                           or rec.get("held_draft")):
+            continue                          # drafted, a no-reply decision pending/settled, or held for a person
         text = ctx.drafter.draft({"case_key": key, **rec}, ctx.board.messages(rec["card_id"])).strip()
         try:
             decision = decisions.parse(text)
