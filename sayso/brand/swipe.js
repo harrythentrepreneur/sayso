@@ -34,6 +34,9 @@
       c.classList.toggle("is-top", i === 0);
       c.classList.toggle("is-next", i === 1);
       c.setAttribute("aria-hidden", i === 0 ? "false" : "true");
+      // Only the top card can be reached: cards under it (even the visible next one) take no focus or clicks.
+      c.inert = i !== 0;
+      if (i === 0) c.removeAttribute("inert"); else c.setAttribute("inert", "");
       if (!c.classList.contains("is-dragging")) {
         c.style.transform = i === 0 ? "" : "translateY(" + Math.min(i, 2) * 10 + "px) scale(" + (1 - Math.min(i, 2) * 0.04) + ")";
       }

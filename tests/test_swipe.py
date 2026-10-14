@@ -157,6 +157,13 @@ class SwipeTests(_Fixture):
         s = dashboard.Snapshot(self.config, dashboard.board_reader_for(self.config))
         self.assertNotIn("/swipe", dashboard.render_decisions(s, [self.config.slug]))
 
+    def test_swipe_script_makes_every_card_but_the_top_one_inert(self):
+        js = swipe.script_bytes().decode()
+        # A card under the top one must never take focus or a click (QA round 4: Tab reached the hidden
+        # next card's "Yes, send" and Enter voted on a card the user could not see).
+        self.assertIn('c.inert = i !== 0;', js)
+        self.assertIn('c.setAttribute("inert", "")', js)
+
     @unittest.skipUnless(shutil.which("node"), "node not installed")
     def test_swipe_script_parses(self):
         js = Path(swipe.__file__).with_name("swipe.js")
