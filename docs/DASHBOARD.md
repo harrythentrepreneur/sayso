@@ -17,6 +17,7 @@ Then open <http://127.0.0.1:8765/>. Use `--port` to change the port.
 |---|---|---|
 | Products | `/` | Each product: decisions waiting, cases, running or paused, job health |
 | Decisions | `/p/<slug>/` | Cards per stage, and every open vote with the exact thing being voted on: the draft text, the money spec, the PR head, or the last-reply time |
+| Swipe | `/p/<slug>/swipe` | Console only (signed-in operators). One open decision at a time: drag right for Yes, left for No, or use the arrow keys or buttons. A swipe posts the same fingerprinted vote as the Yes / No buttons; if the version changed, the card springs back with the reason. Only this page runs a script (`/static/swipe.js`, same origin, CSP `script-src 'self'`). |
 | Board | `/p/<slug>/board` | Cards in columns by their live stage, with labels |
 | Case | `/p/<slug>/case/<key>` | The customer's own email first, then votes with who decided, every draft version, send receipts, the card thread and a timeline |
 | Money | `/p/<slug>/money` | Refund cap, currencies, and each money request with its vote and provider check |
@@ -54,5 +55,5 @@ dashboard for people rather than for polling scripts.
 
 ## Not yet
 
-Approving from the web, login, and cost tracking are not built. Web approval
-will be a new board adapter with its own safety tests, so the core does not change.
+The read-only dashboard cannot approve; approving from the web is the console's job
+(`sayso console`, operator sign-in, see the Swipe and Decisions screens). Cost tracking is not built.

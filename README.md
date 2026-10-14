@@ -86,8 +86,8 @@ One founder approved almost all of them from a phone.
    own words, never an AI summary first.
 2. **AI drafts.** The reply, refund or fix is written, checked against your
    rules, and saved as one immutable version.
-3. **You tap Yes.** In Discord or the Sayso console. Your Yes is fingerprinted
-   to that exact text, amount or commit.
+3. **You say Yes.** Tap it or swipe right, in Discord or the Sayso console. Your
+   Yes is fingerprinted to that exact text, amount or commit.
 4. **Sent once.** The attempt is recorded before anything goes out. After a
    crash or a timeout, Sayso looks for proof. It never resends blindly.
 5. **Proven.** Two independent records must agree before the case moves on.
@@ -166,6 +166,9 @@ steps on every change. When you are ready for real systems, follow
 - **Dev hand-off with QA.** A bounded coding run opens a PR, independent QA checks that head, the merge is pinned to it.
 - **Quiet close.** After N quiet days a close vote opens; any new email from the customer voids it.
 - **Web console.** Inbox, overview, cases, money, health and audit log. Operators can sign in and vote from a phone.
+- **Swipe to decide.** The console's Swipe tab shows one decision at a time: drag right for Yes, left for No
+  (arrow keys work too). A swipe sends the same fingerprinted vote as the Yes / No buttons, so every check
+  still applies, and if the draft changed the card springs back and says why.
 - **Plugins.** Product-only rules stay out of the core.
 - **Fakes by default.** Nothing real is touched until `mode = "live"`.
 - **One-command pause.** `sayso pause` stops every job that acts; reporting keeps running.
@@ -223,9 +226,10 @@ dry-run mode. Every key is described in [docs/SETTINGS.md](docs/SETTINGS.md).
 - [x] First live product (PhonicsMaker)
 - [x] Hosted version for teams that do not want to run a server ([Sayso Cloud](https://sayso.omo.sh))
 - [x] Gmail as the inbox (Gmail app password or any IMAP/SMTP inbox, in Sayso Cloud)
+- [x] Swipe to decide: right for Yes, left for No, one card at a time (console and Sayso Cloud, in any phone browser)
+- [ ] Native iPhone app
 - [ ] One-tap Revise ("Warmer", "Shorter") that rewrites a draft
 - [ ] Learning: repeated corrections become rules you can see and switch off
-- [ ] Phone app with swipe to decide
 - [ ] Slack and Zendesk adapters
 
 ## Contributing

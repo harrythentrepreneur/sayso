@@ -57,7 +57,7 @@ def css() -> str:
         ".s-card-swipe.is-dragging{cursor:grabbing;transition:none}"
         ".s-card-swipe.is-yes{box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 3px rgba(47,220,138,calc(var(--glow,0)*.9))}"
         ".s-card-swipe.is-no{box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 3px rgba(160,151,164,calc(var(--glow,0)*.9))}"
-        ".s-stamp{position:absolute;top:12px;background:var(--sw-card);padding:4px 12px;border:3px solid;border-radius:10px;"
+        ".s-stamp{position:absolute;top:auto;bottom:40%;background:var(--sw-card);padding:4px 12px;border:3px solid;border-radius:10px;"
         "font:700 22px var(--font-head,inherit);letter-spacing:.06em;opacity:0;pointer-events:none;z-index:2}"
         ".s-stamp-yes{left:14px;color:var(--sw-send);border-color:var(--sw-send);transform:rotate(-10deg)}"
         ".s-stamp-no{right:14px;color:var(--sw-soft);border-color:var(--sw-soft);transform:rotate(10deg)}"
