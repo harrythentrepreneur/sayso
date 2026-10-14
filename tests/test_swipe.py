@@ -11,10 +11,18 @@ from pathlib import Path
 from sayso import runtime, votes
 from sayso.brand import swipe
 from sayso.jobs import tally
-from tests.test_console import ConsoleTests as _Base
+from tests import test_console as _tc
 
 
-class SwipeTests(_Base):
+class _Fixture(_tc.ConsoleTests):
+    """The console fixture (server, sign-in, helpers) without its tests."""
+
+
+for _name in [n for n in dir(_tc.ConsoleTests) if n.startswith("test_")]:
+    setattr(_Fixture, _name, None)
+
+
+class SwipeTests(_Fixture):
 
     def swipe_page(self, cookie):
         return self.req("GET", f"/p/{self.config.slug}/swipe", cookie=cookie)
@@ -153,12 +161,6 @@ class SwipeTests(_Base):
     def test_swipe_script_parses(self):
         js = Path(swipe.__file__).with_name("swipe.js")
         self.assertEqual(subprocess.run(["node", "--check", str(js)], capture_output=True).returncode, 0)
-
-
-# Reuse the console fixture without running its tests a second time.
-_SKIP = unittest.skip("covered by tests.test_console")
-for _name in [n for n in dir(_Base) if n.startswith("test_") and not n.startswith("test_swipe")]:
-    setattr(SwipeTests, _name, _SKIP(lambda self: None))
 
 
 if __name__ == "__main__":

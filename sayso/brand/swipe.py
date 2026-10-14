@@ -63,7 +63,7 @@ def css() -> str:
         ".s-stamp-no{right:14px;color:var(--sw-soft);border-color:var(--sw-soft);transform:rotate(10deg)}"
         ".s-card-swipe .s-card-q{font:600 19px/1.3 var(--font-head,inherit);color:var(--sw-ink);margin:0 0 6px}"
         ".s-card-swipe .s-card-who{font-size:14px;color:var(--sw-soft);margin:0 0 12px}"
-        ".s-card-swipe .s-card-body{max-height:min(38vh,380px);overflow:auto;-webkit-overflow-scrolling:touch;"
+        ".s-card-swipe .s-card-body{max-height:max(140px,calc(100svh - 300px));overflow:auto;-webkit-overflow-scrolling:touch;"
         "border-top:1px solid var(--sw-line);padding-top:12px}"
         ".s-card-hint{display:flex;justify-content:space-between;gap:10px;margin:12px 0 0;font-size:13px;color:var(--sw-faint)}"
         ".s-card-btns{display:flex;gap:10px;margin:12px 0 0}"

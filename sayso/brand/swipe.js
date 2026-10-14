@@ -160,4 +160,9 @@
   deck.classList.add("is-live");
   cards().forEach(bind);
   restack();
+  // Small screens: bring the deck up so the top card's Yes / No are in reach without scrolling.
+  var first = top();
+  if (first && first.getBoundingClientRect().bottom > window.innerHeight && window.scrollY === 0) {
+    window.scrollTo(0, Math.max(0, deck.getBoundingClientRect().top + window.scrollY - 8));
+  }
 })();
