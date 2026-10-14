@@ -14,7 +14,7 @@ permissions:
 jobs:
   test:
     runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","ci-shared"]') || 'ubuntu-latest' }}
-    timeout-minutes: 150
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -43,6 +43,11 @@ jobs:
       - name: Example settings validate
         run: python -m sayso.cli validate --config examples/acme-dry-run.toml
       - name: Seeded-fault proof (every guard must fail a test when removed)
+        # Once, on 3.12: a mutation tests the guards, not the interpreter. Parallel copies
+        # (one per CPU the container has) keep it inside the job timeout.
+        if: matrix.python == '3.12'
+        env:
+          MUTATE_JOBS: "4"
         run: |
           python scripts/mutate.py | tee mutate.log
           grep -q '^MUTATION VERDICT: PASS' mutate.log

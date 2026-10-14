@@ -5,17 +5,19 @@ A guard that can be removed with every test still green is untested. Each
 mutation below names the rule it breaks. The harness:
   1. copies the repo to a temp dir (never edits the working tree);
   2. proves the unmodified copy is GREEN (a broken harness looks like broken code);
-  3. applies one mutation at a time, asserts the text actually changed, runs the
-     suite, and requires a FAILURE;
+  3. applies each mutation in its own scratch copy (several in parallel, MUTATE_JOBS),
+     asserts the text actually changed, runs the suite, and requires a FAILURE;
   4. prints one verdict line: `MUTATION VERDICT: PASS n/n` or `FAIL`.
 Exit code is 0 only when every mutation is killed.
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -477,6 +479,30 @@ def run_suite(where: Path) -> subprocess.CompletedProcess:
                           cwd=where, capture_output=True, text=True, timeout=600)
 
 
+def _one(tmp: str, base: Path, i: int, rel: str, old: str, new: str) -> tuple[str, str | None]:
+    """Apply one mutation in its OWN scratch copy and run the suite.
+    Returns ("stale", n) | ("killed", first failing line) | ("survived", None)."""
+    work = Path(tmp) / f"work-{i}"
+    shutil.copytree(base, work)
+    try:
+        path = work / rel
+        text = path.read_text()
+        if text.count(old) != 1:
+            return "stale", str(text.count(old))
+        path.write_text(text.replace(old, new))
+        result = run_suite(work)
+        if result.returncode != 0:
+            return "killed", next((ln for ln in result.stderr.splitlines() if ln.startswith(("FAIL:", "ERROR:"))), "?")
+        return "survived", None
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def workers() -> int:
+    """Parallel suite runs. MUTATE_JOBS overrides; default = CPUs, at most 8."""
+    return max(1, int(os.environ.get("MUTATE_JOBS") or min(8, os.cpu_count() or 1)))
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="sayso-mutate-") as tmp:
         base = Path(tmp) / "base"
@@ -486,37 +512,29 @@ def main() -> int:
             print(baseline.stderr[-3000:])
             print("MUTATION VERDICT: FAIL baseline not green; harness proves nothing")
             return 2
+        jobs = workers()
+        print(f"baseline green; {len(MUTATIONS)} mutations + {len(EQUIVALENT)} equivalents on {jobs} workers", flush=True)
+        everything = [(n, r, o, w, False) for n, r, o, w in MUTATIONS] + [(n, r, o, w, True) for n, r, o, w in EQUIVALENT]
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            futures = [pool.submit(_one, tmp, base, i, r, o, w) for i, (_, r, o, w, _) in enumerate(everything)]
+            results = [f.result() for f in futures]          # report in list order, whatever finished first
         killed, survived = 0, []
-        for name, rel, old, new in MUTATIONS:
-            work = Path(tmp) / "work"
-            shutil.rmtree(work, ignore_errors=True)
-            shutil.copytree(base, work)
-            path = work / rel
-            text = path.read_text()
-            if text.count(old) != 1:
-                survived.append(f"{name} (pattern found {text.count(old)} times; harness stale)")
+        for (name, _, _, _, equivalent), (outcome, detail) in zip(everything, results):
+            if equivalent:
+                if outcome == "survived":
+                    print(f"EQUIVALENT {name}")
+                else:
+                    survived.append(f"{name} (listed equivalent but now {outcome}; re-check the list)")
+                    print(f"CHANGED   {name}  <- {detail}")
+            elif outcome == "stale":
+                survived.append(f"{name} (pattern found {detail} times; harness stale)")
                 print(f"STALE     {name}")
-                continue
-            path.write_text(text.replace(old, new))
-            result = run_suite(work)
-            if result.returncode != 0:
+            elif outcome == "killed":
                 killed += 1
-                first = next((ln for ln in result.stderr.splitlines() if ln.startswith(("FAIL:", "ERROR:"))), "?")
-                print(f"KILLED    {name}  <- {first}")
+                print(f"KILLED    {name}  <- {detail}")
             else:
                 survived.append(name)
                 print(f"SURVIVED  {name}")
-        for name, rel, old, new in EQUIVALENT:
-            work = Path(tmp) / "work"
-            shutil.rmtree(work, ignore_errors=True)
-            shutil.copytree(base, work)
-            path = work / rel
-            path.write_text(path.read_text().replace(old, new))
-            if run_suite(work).returncode == 0:
-                print(f"EQUIVALENT {name}")
-            else:
-                survived.append(f"{name} (listed equivalent but now killed; re-check the list)")
-                print(f"CHANGED   {name}")
         total = len(MUTATIONS)
         verdict = "PASS" if not survived else "FAIL"
         print(f"MUTATION VERDICT: {verdict} {killed}/{total} killed")
