@@ -3,26 +3,41 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
+
+# Maintainers' commits and same-repo PRs run on the shared self-hosted pool (ephemeral,
+# non-root container, no secrets; GitHub-hosted runners are blocked by account billing).
+# A PR from a FORK never runs on the pool: this is a public repo, and fork code must not
+# execute on the maintainers' machine. Fork PRs use GitHub-hosted runners instead.
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","ci-shared"]') || 'ubuntu-latest' }}
+    timeout-minutes: 150
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
-      - name: System word list (privacy masking reads /usr/share/dict/words)
+          persist-credentials: false
+      - name: Python ${{ matrix.python }}
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq wamerican
-          test -s /usr/share/dict/words
+          if [ "$RUNNER_ENVIRONMENT" = "github-hosted" ]; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq wamerican
+          fi
+          export UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/uv-python"
+          uv --version >/dev/null 2>&1 || pip install -q uv
+          uv venv -q -p ${{ matrix.python }} "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+      - name: Word list present (privacy masking reads /usr/share/dict/words)
+        run: test -s /usr/share/dict/words && python --version
       - name: Unit, workflow, adapter, quickstart and docs tests (fakes only)
         run: python -m unittest discover -s tests -t . -v
+      - name: Stable API (what Sayso Cloud builds on)
+        run: python scripts/stable_api.py
       - name: End-to-end demo
         run: python -m sayso.cli demo
       - name: Example settings validate
