@@ -328,9 +328,9 @@ MUTATIONS = [
      "    first = next((ln.strip() for ln in lines if ln.strip().startswith(\"NO-REPLY:\")), lines[0].strip() if lines else \"\")"),
     ("no-reply: asked twice after a No", "sayso/jobs/draft.py",
      "    if rec.get(\"no_reply_asked_for\") == marker:", "    if False:"),
-    ("no-reply: settled card redrafted", "sayso/jobs/draft.py",
-     "        if not rec.get(\"needs_draft\") and (rec.get(\"draft_version\") or rec.get(\"no_reply_asked_for\")):",
-     "        if not rec.get(\"needs_draft\") and rec.get(\"draft_version\"):"),
+    ("draft: held draft redrafted every pass", "sayso/jobs/draft.py",
+     "                                           or rec.get(\"held_draft\")):",
+     "                                           ):"),
     ("no-reply: close ignores a new message", "sayso/jobs/close.py",
      "    if marker is None or (inbound is not None and inbound > marker) \\",
      "    if marker is None \\"),
@@ -445,6 +445,9 @@ MUTATIONS = [
 # Each one names the guard that already covers it. They must SURVIVE; if one
 # starts failing, the covering guard changed and this list must be re-checked.
 EQUIVALENT = [
+    ("no-reply: settled card redrafted (since f5ba3f6 every no-reply hold also sets held_draft, and a settled close leaves In support, so the stage and held_draft guards already stop the redraft)", "sayso/jobs/draft.py",
+     "        if not rec.get(\"needs_draft\") and (rec.get(\"draft_version\") or rec.get(\"no_reply_asked_for\")\n",
+     "        if not rec.get(\"needs_draft\") and (rec.get(\"draft_version\")\n"),
     ("qa: indented code read as a paragraph (the second, loose read in _plain_mask already lets any block "
      "start interrupt it, and 4+ space fences/HTML are refused by their own indent checks)",
      "sayso/jobs/qa.py",
