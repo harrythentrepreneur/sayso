@@ -488,8 +488,9 @@ nav a{white-space:nowrap;padding:6px 8px}main{padding:24px 18px 48px}h1{font-siz
 .item-body,.item-foot,.act,.ballots{padding-left:0}.meta{display:none}}
 """
 
-NAV = (("", "Inbox", "inbox"), ("overview", "Overview", "chart"), ("board", "Cases", "board"),
+NAV = (("", "Inbox", "inbox"), ("swipe", "Swipe", "swipe"), ("overview", "Overview", "chart"), ("board", "Cases", "board"),
        ("money", "Money", "money"), ("health", "Health", "health"), ("audit", "Audit log", "audit"))
+ICONS["swipe"] = '<path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM21 9l2 3-2 3M3 9l-2 3 2 3"/>'
 ICONS["chart"] = '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
 
 SAYSO_MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"> <path d="M14 8h30a10 10 0 0 1 10 10v16a10 10 0 0 1-10 10H30l-11 9v-9h-5A10 10 0 0 1 4 34V18A10 10 0 0 1 14 8z" fill="#e8653b"/> <path d="M19 27l8 8 16-17" fill="none" stroke="#27212d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
@@ -505,6 +506,8 @@ def page(title: str, body: str, products: list[str], current: str | None, tab: s
     if current:
         waiting = len(snap.open_votes()) if snap is not None else 0
         for name, label, ic in NAV:
+            if name == "swipe" and not getattr(snap, "console", None):
+                continue  # the read-only dashboard cannot vote, so it has no swipe deck
             href = f"/p/{e(current)}/{name}" if name else f"/p/{e(current)}/"
             badge = f'<span class=n>{waiting}</span>' if name == "" and waiting else ""
             if name == "health" and snap is not None and any(h["state"] == "stale" for h in snap.health()):
@@ -810,6 +813,44 @@ def _console_form(s: Snapshot, action: str, label: str, cls: str = "") -> str:
             f"<input type=hidden name=csrf value='{e(s.console['csrf'])}'><button class='{cls}'>{e(label)}</button></form>")
 
 
+def render_swipe(s: Snapshot, products: list[str]) -> str:
+    """One decision at a time: drag right for Yes, left for No. Signed-in operators only (the console)."""
+    from sayso.brand import swipe
+    slug = s.config.slug
+    waiting = s.open_votes()
+    if not s.console or not s.console.get("can_vote", True):
+        why = (s.console or {}).get("vote_off_reason") or "sign in to the console to vote"
+        body = head("Swipe", "Voting from here is switched off", crumb=e(s.config.name)) + \
+            f"<div class=empty><b>Nothing to swipe</b>{e(why)}</div>"
+        return page("Swipe", body, products, slug, "swipe", snap=s)
+    # A card this operator already answered (for this exact version) waits for the next run, not for them.
+    mine = _read_json(s.config.state_dir / "web-votes.json", {})
+    op = s.console.get("op")
+    waiting = [v for v in waiting
+               if not (op and (mine.get(v.get("key")) or {}).get(op, {}).get("fingerprint") == v.get("fingerprint"))]
+    cards = []
+    for v in waiting:
+        rec = s.cases.get(v.get("case_key"), {})
+        kind = v.get("kind")
+        label = KIND_LABEL.get(kind, kind)
+        if kind == "money":
+            label = "Refund" if (v.get("spec") or {}).get("action") == "refund" else "Money"
+        yes = {"reply": "Yes, send", "money": "Yes, do it", "close": "Yes, close"}.get(kind, "Yes, approve")
+        no = {"reply": "No, skip", "money": "No, don't", "close": "No, keep open"}.get(kind, "No, decline")
+        cards.append(swipe.card_form(
+            action=f"/p/{slug}/vote", csrf=s.console["csrf"], key=str(v.get("key")),
+            fingerprint=str(v.get("fingerprint")), question=str(v.get("question") or v.get("subject") or label),
+            who=f"{label} · {rec.get('customer') or ''}",
+            body_html=_decision_material(s, v, rec), yes_label=yes, no_label=no,
+            yes_hint=yes, no_hint=no))
+    body = (f"{_paused_banner(s)}" + head("Swipe", "Right is Yes, left is No. Each answer is for the exact version shown.",
+                                          crumb=e(s.config.name))
+            + f"<style>{swipe.css()}</style>"
+            + swipe.deck(cards, script_url="/static/swipe.js",
+                         done_html="<b>All done</b><br>Nothing is waiting. New decisions appear here."))
+    return page("Swipe", body, products, slug, "swipe", snap=s)
+
+
 def render_decisions(s: Snapshot, products: list[str]) -> str:
     slug, ref = s.config.slug, ref_time(s)
     waiting = s.open_votes()
@@ -1041,6 +1082,8 @@ def route(path: str, snapshot_for: Callable[[str], Snapshot], products: list[str
               "overview": render_overview}
     if tab in simple and len(parts) == 3:
         return 200, "text/html", simple[tab](s, products)
+    if tab == "swipe" and len(parts) == 3:
+        return 200, "text/html", render_swipe(s, products)
     if tab == "case" and len(parts) == 4:
         out = render_case(s, parts[3], products)
         if out is not None:

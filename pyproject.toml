@@ -31,4 +31,4 @@ hcml = "sayso.cli:main"   # old name, kept for existing installs
 include = ["sayso*"]
 
 [tool.setuptools.package-data]
-"sayso.brand" = ["*.svg", "fonts/*.woff2", "fonts/*.txt"]
+"sayso.brand" = ["*.svg", "*.js", "fonts/*.woff2", "fonts/*.txt"]

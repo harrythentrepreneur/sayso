@@ -42,6 +42,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from sayso import dashboard, votes
+from sayso.brand import swipe
 from sayso.config import Config
 from sayso.store import load_json, locked, save_json
 
@@ -290,12 +291,12 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
     class Handler(BaseHTTPRequestHandler):
         server_version = "sayso-console"
 
-        def _send(self, status, ctype, body, extra=(), head=False):
-            data = body.encode("utf-8")
+        def _send(self, status, ctype, body, extra=(), head=False, csp=None):
+            data = body if isinstance(body, bytes) else body.encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", f"{ctype}; charset=utf-8")
             self.send_header("Content-Length", str(len(data)))
-            self.send_header("Content-Security-Policy",
+            self.send_header("Content-Security-Policy", csp or
                              "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; form-action 'self'; "
                              "frame-ancestors 'none'; base-uri 'none'")
             self.send_header("X-Content-Type-Options", "nosniff")
@@ -336,7 +337,7 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
         def _snapshot(self, user):
             s = dashboard.Snapshot(config, reader)
             s.label = label
-            s.console = {"user": user["name"], "csrf": auth.csrf(user),
+            s.console = {"user": user["name"], "op": user.get("operator_id"), "csrf": auth.csrf(user),
                          "can_tick": allow_tick and not config.live,
                          "can_vote": vote_off_reason is None, "vote_off_reason": vote_off_reason}
             return s
@@ -355,11 +356,15 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
                 return self._redirect("/login")
             if path == "/":
                 return self._redirect(f"/p/{config.slug}/")
+            if path == "/static/swipe.js":
+                return self._send(200, "application/javascript", swipe.script_bytes(), head=head)
             try:
                 status, ctype, body = dashboard.route(self.path, lambda _slug: self._snapshot(user), products)
             except Exception as exc:  # noqa: BLE001 - corrupt state is shown, never hidden
                 status, ctype, body = 500, "text/plain", f"state could not be read: {type(exc).__name__}"
-            self._send(status, ctype, body, head=head)
+            # Only the swipe page may run a script, and only our own file.
+            csp = swipe.DECK_CSP if path == f"/p/{config.slug}/swipe" and status == 200 else None
+            self._send(status, ctype, body, head=head, csp=csp)
 
         def do_GET(self):  # noqa: N802
             self._get(False)
@@ -394,11 +399,17 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
                     return self._send(410, "text/html", login_page("That invite link is used or expired."))
                 return self._redirect(f"/p/{config.slug}/", [self._set_cookie(auth.make_cookie(user),
                                                                               SESSION_HOURS * 3600)])
+            wants_json = swipe.is_swipe(self.headers)
+
+            def refuse(code, why):
+                if wants_json:
+                    return self._send(code, "application/json", json.dumps({"error": why}))
+                return self._send(code, "text/plain", why)
             user = auth.user_for(self._cookie())
             if user is None:
-                return self._send(401, "text/plain", "sign in first")
+                return refuse(401, "Signed out. Sign in again; nothing was recorded.")
             if not auth.csrf_ok(user, form.get("csrf")):
-                return self._send(403, "text/plain", "form expired; reload the page")
+                return refuse(403, "This page has expired. Reload it; nothing was recorded.")
             if path == "/logout":
                 return self._redirect("/login", [self._set_cookie("", 0)])
             base = f"/p/{config.slug}"
@@ -408,6 +419,8 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
                         raise ConsoleError(f"voting is switched off here: {vote_off_reason}")
                     record_web_vote(config, journal, user=user, key=form.get("key", ""),
                                     answer=form.get("answer", ""), fingerprint=form.get("fp", ""))
+                    if wants_json:
+                        return self._send(200, "application/json", json.dumps({"ok": True}))
                     return self._redirect(f"{base}/?done={form.get('answer')}")
                 if path == f"{base}/pause":
                     flag = config.state_dir / "PAUSED"
@@ -424,7 +437,7 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
                     run_tick(config, user["name"], journal)
                     return self._redirect(f"{base}/")
             except ConsoleError as exc:
-                return self._send(409, "text/plain", str(exc))
+                return refuse(409, str(exc))
             self._send(404, "text/plain", "not found")
 
         def _refuse(self):
