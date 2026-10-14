@@ -336,14 +336,14 @@ EVENT_TONE = {"case_opened": "blue", "mail_appended": "blue", "vote_opened": "am
 
 
 CSS = """
-:root{--ink:#1f1b24;--text:#2b2630;--mute:#6f6775;--faint:#9a929f;--line:#ece8e1;--line2:#f3f0ea;
---bg:#ffffff;--side:#fbfaf7;--hover:#f4f1ec;--accent:#e8653b;--accent-soft:#fdf0ea;--plum:#27212d;
+:root{--ink:#18181b;--text:#3f3f46;--mute:#5f5f68;--faint:#6b6b74;--line:#e6e5e1;--line2:#efefec;
+--bg:#ffffff;--side:#f7f7f5;--hover:#f1f1ee;--accent:#b8461c;--accent-soft:#fbeee8;--plum:#27212d;
 --green:#2f7d4f;--green-bg:#eaf5ee;--amber:#9a5b00;--amber-bg:#fdf3e2;--red:#b93a32;--red-bg:#fbecea;
 --violet:#6a4bb8;--violet-bg:#f1edfa;--blue:#2f6db5;--blue-bg:#ebf2fb;--cyan:#1f7a86;--cyan-bg:#e8f5f6;
 --indigo:#c2521f;--indigo-bg:#fdf0ea;--grey:#6f6775;--grey-bg:#f2f0ec;--r:10px}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:14.5px/1.6 ui-sans-serif,-apple-system,BlinkMacSystemFont,
-"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh;
+body{margin:0;background:var(--bg);color:var(--text);font:14.5px/1.6 Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,
+"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh;
 -webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}main a:not(.row):not(.pc):not(.btn){color:var(--accent)}main a:hover{text-decoration:underline}
 code,.mono,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em}
@@ -429,9 +429,9 @@ pre{white-space:pre-wrap;word-break:break-word;background:var(--side);border-rad
 .empty{padding:56px 20px;text-align:center;color:var(--mute)}.empty b{display:block;color:var(--ink);font-size:17px;
 margin-bottom:4px}
 .act{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:18px 0 0 40px}
-.act button,form.inline button,.btn{border:0;border-radius:8px;padding:9px 16px;font:600 13.5px/1 inherit;cursor:pointer}
+.act button,form.inline button,.btn{border:0;border-radius:6px;padding:9px 16px;font:600 13.5px/1 inherit;cursor:pointer}
 .act .faint{font-size:12.5px;flex:1 1 240px}
-.yes{background:var(--plum);color:#fff}.yes:hover{background:#000}
+.yes{background:var(--accent);color:#fff}.yes:hover{background:#a03c18}
 .no{background:#fff;color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}.no:hover{background:var(--hover)}
 .ghost{background:var(--hover);color:var(--ink)}form.inline{display:inline-block;margin:0 0 22px}
 .link{background:none;border:0;color:var(--faint);padding:4px 0 0;cursor:pointer;font:inherit;text-decoration:underline}
@@ -493,7 +493,8 @@ NAV = (("", "Inbox", "inbox"), ("swipe", "Swipe", "swipe"), ("overview", "Overvi
 ICONS["swipe"] = '<path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM21 9l2 3-2 3M3 9l-2 3 2 3"/>'
 ICONS["chart"] = '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
 
-SAYSO_MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"> <path d="M14 8h30a10 10 0 0 1 10 10v16a10 10 0 0 1-10 10H30l-11 9v-9h-5A10 10 0 0 1 4 34V18A10 10 0 0 1 14 8z" fill="#e8653b"/> <path d="M19 27l8 8 16-17" fill="none" stroke="#27212d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
+from sayso.brand import mark_svg as _mark_svg  # noqa: E402  (one mark for every surface)
+SAYSO_MARK = _mark_svg("s-mark")
 SAYSO_ICON = __import__("urllib.parse").parse.quote(SAYSO_MARK.replace('aria-hidden="true"', ''))
 RO_TEXT = "Read-only · cannot send, charge or merge"
 CON_TEXT = "Signed in as an operator"

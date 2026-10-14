@@ -256,15 +256,15 @@ def web_votes_for(ctx, rec: dict) -> dict[str, str]:
 
 # -- web -------------------------------------------------------------------------------
 
-LOGIN_CSS = """body{margin:0;min-height:100vh;display:grid;place-items:center;background:#27212d;
-font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1d2433}
-form{background:#fffdf8;padding:32px 30px;border-radius:14px;width:min(360px,90vw);box-shadow:0 20px 60px #0006}
-h1{font-size:20px;margin:0 0 4px}p{color:#5b6478;margin:0 0 18px;font-size:13.5px}
+LOGIN_CSS = """body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f7f7f5;
+font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18181b}
+form{background:#fff;padding:32px 30px;border-radius:10px;width:min(360px,90vw);border:1px solid #e6e5e1;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+h1{font-size:20px;margin:0 0 4px}p{color:#5f5f68;margin:0 0 18px;font-size:13.5px}
 label{display:block;font-size:13px;font-weight:600;margin:12px 0 5px}
-input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #cfd5e3;border-radius:8px;font:inherit}
-button{margin-top:18px;width:100%;padding:11px;border:0;border-radius:8px;background:#e8653b;color:#fff;
+input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d4d3ce;border-radius:6px;font:inherit}
+button{margin-top:18px;width:100%;padding:11px;border:0;border-radius:6px;background:#b8461c;color:#fff;
 font-weight:600;font:inherit;cursor:pointer}.err{color:#c92a2a;font-size:13px;margin-top:10px}
-.logo{width:44px;height:44px;margin-bottom:10px}.logo svg{width:44px;height:44px;display:block}"""
+.logo{width:40px;height:37px;margin-bottom:12px}.logo svg{width:40px;height:37px;display:block}"""
 
 
 def login_page(error: str = "") -> str:
