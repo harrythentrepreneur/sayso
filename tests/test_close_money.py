@@ -336,16 +336,17 @@ class LockTests(Base):
     def test_run_waits_for_a_busy_lock_instead_of_skipping(self):
         from sayso import cli
         lock = self.ctx.paths.locks / "close.run"
-        released = threading.Event()
+        held, released = threading.Event(), threading.Event()
 
         def hold():
             with single_flight(lock) as mine:
                 self.assertTrue(mine)
+                held.set()
                 time.sleep(0.6)
             released.set()
         t = threading.Thread(target=hold)
         t.start()
-        time.sleep(0.1)
+        self.assertTrue(held.wait(10), "holder never took the lock")   # not a fixed sleep: flaky under load
         ran = cli.run_job_locked(self.ctx, "close", lambda ctx: {"ran": True}, wait_seconds=5)
         t.join()
         self.assertTrue(released.is_set())
