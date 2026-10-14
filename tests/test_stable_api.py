@@ -89,6 +89,11 @@ class CompatibilityRules(unittest.TestCase):
         was = {"kind": "exception", "bases": ["builtins.RuntimeError", "builtins.Exception"]}
         self.assertFalse(stable_api.compatible(was, {"kind": "exception", "bases": ["builtins.Exception"]}))
 
+    def test_identifier_constants_keep_value_design_tokens_do_not(self):
+        self.assertEqual(stable_api.shape("open"), {"kind": "value", "type": "str", "value": "open"})
+        self.assertEqual(stable_api.shape("Awaiting approval"), {"kind": "value", "type": "str", "value": "Awaiting approval"})
+        self.assertEqual(stable_api.shape('"Inter",system-ui,sans-serif'), {"kind": "value", "type": "str"})
+
     def test_real_removal_is_reported(self):
         recorded = {"names": {"sayso.store.no_such_name": _f()}}
         self.assertIn("REMOVED", stable_api.drift(recorded)[0])

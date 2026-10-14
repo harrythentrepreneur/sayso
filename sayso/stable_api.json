@@ -1332,8 +1332,7 @@
   },
   "sayso.brand.TEXT_FONT": {
    "kind": "value",
-   "type": "str",
-   "value": "\"Nunito\",system-ui,sans-serif"
+   "type": "str"
   },
   "sayso.brand.TOKENS": {
    "keys": [
