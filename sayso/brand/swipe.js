@@ -160,9 +160,33 @@
   deck.classList.add("is-live");
   cards().forEach(bind);
   restack();
-  // Small screens: bring the deck up so the top card's Yes / No are in reach without scrolling.
-  var first = top();
-  if (first && first.getBoundingClientRect().bottom > window.innerHeight && window.scrollY === 0) {
-    window.scrollTo(0, Math.max(0, deck.getBoundingClientRect().top + window.scrollY - 8));
+  // Small screens: bring the deck into view under any sticky header, then let the card's text area give up
+  // height until the top card's Yes / No fit. Never runs if the user has already scrolled.
+  fit();
+
+  function stickyBottom() {
+    var b = 0;
+    Array.prototype.forEach.call(document.querySelectorAll("body *"), function (el) {
+      var p = getComputedStyle(el).position;
+      if (p !== "sticky" && p !== "fixed") return;
+      if (deck.contains(el) || el.contains(deck)) return;
+      var r = el.getBoundingClientRect();
+      if (r.top <= 1 && r.bottom > b && r.height < window.innerHeight / 2) b = r.bottom;
+    });
+    return b;
+  }
+
+  function fit() {
+    var first = top();
+    if (!first || window.scrollY !== 0 || first.getBoundingClientRect().bottom <= window.innerHeight) return;
+    var head = stickyBottom();
+    var y = deck.getBoundingClientRect().top + window.scrollY - head - 8;
+    if (y > 0) window.scrollTo(0, y);
+    var over = first.getBoundingClientRect().bottom - window.innerHeight + 8;
+    if (over > 0) {
+      deck.querySelectorAll(".s-card-body").forEach(function (b) {
+        b.style.maxHeight = Math.max(96, b.clientHeight - over) + "px";
+      });
+    }
   }
 })();

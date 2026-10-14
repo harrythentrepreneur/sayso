@@ -45,7 +45,7 @@ def css() -> str:
         "position:relative;max-width:560px;margin:0 auto;overflow-x:clip}"
         ".s-deck-top{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px;"
         "color:var(--sw-soft);font-size:14px}"
-        ".s-deck-stack{position:relative;display:grid}"
+        ".s-deck-stack{position:relative;display:grid;isolation:isolate;z-index:0}"
         ".s-deck.is-live .s-deck-stack>.s-card-swipe{grid-area:1/1}"
         ".s-card-swipe{position:relative;background:var(--sw-card);border:1px solid var(--sw-line2);"
         "border-radius:var(--radius,18px);padding:18px 18px 14px;margin:0 0 14px;color:var(--sw-ink2);"
