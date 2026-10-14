@@ -18,6 +18,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -101,7 +102,9 @@ def shape(obj) -> dict:
             isinstance(obj, (list, tuple, frozenset, set)) and all(isinstance(x, (str, int)) for x in obj)):
         value = sorted(obj) if isinstance(obj, (set, frozenset)) else list(obj) if isinstance(obj, (list, tuple)) else obj
         return {"kind": "value", "type": type(obj).__name__, "value": value}
-    if isinstance(obj, str) and len(obj) <= 64:        # vote states, stage names: hosts compare against them
+    if isinstance(obj, str) and re.fullmatch(r"[\w\- :.]{1,64}", obj):
+        # vote states, stage names: hosts compare against them. CSS, fonts and other
+        # design tokens are not identifiers, so changing them is not a break.
         return {"kind": "value", "type": "str", "value": obj}
     if isinstance(obj, dict):                           # a host looks entries up by key
         return {"kind": "value", "type": "dict", "keys": sorted(map(str, obj))}
