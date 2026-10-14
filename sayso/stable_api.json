@@ -1324,8 +1324,7 @@
   },
   "sayso.brand.FONTS": {
    "keys": [
-    "fredoka",
-    "nunito"
+    "inter"
    ],
    "kind": "value",
    "type": "dict"
@@ -1336,6 +1335,9 @@
   },
   "sayso.brand.TOKENS": {
    "keys": [
+    "accent",
+    "accent-hover",
+    "accent-soft",
     "bg",
     "bg2",
     "card",
@@ -1344,6 +1346,7 @@
     "coral-ink",
     "danger",
     "faint",
+    "info",
     "ink",
     "ink2",
     "learn",
