@@ -379,7 +379,7 @@ margin-top:4px;line-height:1.2}.metric .h{font-size:12.5px;color:var(--faint);ma
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
 .panel{border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}.panel h3{margin:0 0 4px;font-size:14px;
 color:var(--ink);font-weight:650}.panel .ph{font-size:12.5px;color:var(--faint);margin-bottom:16px}
-.chart{width:100%;height:auto;display:block}.chart rect.b{fill:var(--accent)}.chart rect.b.no2{fill:#d4695f}.chart.yn rect.b:not(.no2):not(.z){fill:#5aa878}.chart rect.b.z{fill:var(--line)}
+.chart{width:100%;max-width:640px;height:auto;display:block}.chart rect.b{fill:var(--accent)}.chart rect.b.no2{fill:#d4695f}.chart.yn rect.b:not(.no2):not(.z){fill:#5aa878}.chart rect.b.z{fill:var(--line)}
 .chart text{fill:var(--mute);font-size:12px}.chart line{stroke:var(--line2)}
 .hb{display:grid;grid-template-columns:minmax(90px,38%) 1fr 40px;gap:10px;align-items:center;font-size:13px;margin:7px 0}
 .hb .l{color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb .t{height:8px;border-radius:99px;
