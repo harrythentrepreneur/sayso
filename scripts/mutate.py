@@ -438,6 +438,19 @@ MUTATIONS = [
     ('regressions: non-boolean setting accepted', 'sayso/config.py',
      '    if not isinstance(policy.qa_regression_set, bool):',
      '    if False:'),
+    ("stable api: a removed name passes", "scripts/stable_api.py",
+     '            problems.append(f"{name}: REMOVED ({got[\'error\']})")',
+     '            pass'),
+    ("stable api: a new required parameter passes", "scripts/stable_api.py",
+     "    return all(p[2] for p in now if p[0] not in old)", "    return True"),
+    ("stable api: a renamed parameter passes", "scripts/stable_api.py",
+     "        if name not in new:\n            return False", "        if name not in new:\n            continue"),
+    ("stable api: a positional reorder passes", "scripts/stable_api.py",
+     "    if new_pos[:len(old_pos)] != old_pos:\n        return False", "    if False:\n        return False"),
+    ("stable api: a removed dict key passes", "scripts/stable_api.py",
+     "set(was[\"keys\"]) <= set(now.get(\"keys\", ()))", "True"),
+    ("stable api: a removed class method passes", "scripts/stable_api.py",
+     "            return got is not None and sig_compatible(v, got)", "            return True"),
 ]
 
 

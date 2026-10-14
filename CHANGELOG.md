@@ -4,6 +4,10 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Stable API: `sayso/stable_api.json` lists the 99 names Sayso Cloud builds on, and
+  `tests/test_stable_api.py` fails when a change would break one (removed, renamed, reordered, a new
+  required parameter, a changed constant). Additions stay free. See CONTRIBUTING "Stable API".
+- CI: the seeded-fault harness matches the held-draft guard again (main had been red since `f5ba3f6`).
 - QA answers are read the way CommonMark shows them (zero dependencies): a fence opens only with 3+
   backticks or tildes at most 3 spaces in, closes only with the same character and at least as many,
   and runs to the end when unclosed; list items, block quotes and HTML blocks are modelled too. A PASS

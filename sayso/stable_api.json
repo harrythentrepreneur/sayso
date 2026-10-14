@@ -1,0 +1,3072 @@
+{
+ "about": "Names a downstream host builds on. Changing one is a breaking change: re-record with `python scripts/stable_api.py --write` and say so in the PR.",
+ "names": {
+  "sayso.adapters.base.Drafter": {
+   "init": [
+    [
+     "args",
+     "VAR_POSITIONAL",
+     false
+    ],
+    [
+     "kwargs",
+     "VAR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "args",
+      "VAR_POSITIONAL",
+      false
+     ],
+     [
+      "kwargs",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "draft": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "case",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "thread",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.base.Helpdesk": {
+   "init": [
+    [
+     "args",
+     "VAR_POSITIONAL",
+     false
+    ],
+    [
+     "kwargs",
+     "VAR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "args",
+      "VAR_POSITIONAL",
+      false
+     ],
+     [
+      "kwargs",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "fetch_inbound": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "cursor",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_inbound_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_sent_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "send_reply": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipient",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_readback": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body_sha",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.base.InboundMessage": {
+   "init": [
+    [
+     "message_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "ticket",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "sender",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "recipients",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "subject",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "received_at",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "sender",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipients",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "received_at",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.base.Mailbox": {
+   "init": [
+    [
+     "args",
+     "VAR_POSITIONAL",
+     false
+    ],
+    [
+     "kwargs",
+     "VAR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "args",
+      "VAR_POSITIONAL",
+      false
+     ],
+     [
+      "kwargs",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_copies": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.base.MoneyReceipt": {
+   "init": [
+    [
+     "kind",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "provider_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "amount",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "currency",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "status",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "details",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "kind",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "provider_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "amount",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "currency",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "status",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "details",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.base.Payments": {
+   "init": [
+    [
+     "args",
+     "VAR_POSITIONAL",
+     false
+    ],
+    [
+     "kwargs",
+     "VAR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "args",
+      "VAR_POSITIONAL",
+      false
+     ],
+     [
+      "kwargs",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "cancel_subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_refunds": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "refund": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "amount",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "currency",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.base.SentRecord": {
+   "init": [
+    [
+     "ticket",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "recipient",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "sender",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "subject",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body_sha",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "message_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "status",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipient",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "sender",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body_sha",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "status",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.fake.FakeBoard": {
+   "init": [
+    [
+     "world",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "world",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "alert": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "close_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "ensure_card": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "title",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "first_message",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tags",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "get_tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_activity": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "message_authors": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "messages": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "notify": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mention",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "open_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "question",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "post": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "set_tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tags",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.fake.World": {
+   "init": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "clock",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "customer_writes": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "sender",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "subject",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "body",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "ticket",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "to",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "fault": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "name",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "next_id": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "prefix",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "once": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "make",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "operator_posts": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "user_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "operator_votes": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "user_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "answer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "save": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.http.Client": {
+   "init": [
+    [
+     "base",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "headers",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "max_retries",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "base",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "headers",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "sleep",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "max_retries",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "request": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "method",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "json_body",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "form",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "query",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "extra_headers",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.http.HttpError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.reference.DiscordForumBoard": {
+   "init": [
+    [
+     "section",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "alert": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "chunks": [
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "limit",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "close_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "ensure_card": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "title",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "first_message",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tags",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "get_tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_activity": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "message_authors": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "messages": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "notify": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mention",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "open_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "question",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "post": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "set_tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tags",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.brand.FONTS": {
+   "keys": [
+    "fredoka",
+    "nunito"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.brand.TEXT_FONT": {
+   "kind": "value",
+   "type": "str",
+   "value": "\"Nunito\",system-ui,sans-serif"
+  },
+  "sayso.brand.TOKENS": {
+   "keys": [
+    "bg",
+    "bg2",
+    "card",
+    "card2",
+    "coral",
+    "coral-ink",
+    "danger",
+    "faint",
+    "ink",
+    "ink2",
+    "learn",
+    "line",
+    "line2",
+    "pill",
+    "radius",
+    "radius-sm",
+    "send",
+    "soft",
+    "warn"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.brand.css": {
+   "kind": "function",
+   "signature": []
+  },
+  "sayso.brand.font_bytes": {
+   "kind": "function",
+   "signature": [
+    [
+     "family",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.brand.font_faces": {
+   "kind": "function",
+   "signature": [
+    [
+     "prefix",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.brand.mark_svg": {
+   "kind": "function",
+   "signature": [
+    [
+     "css_class",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.brand.swipe.DECK_CSP": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.brand.swipe.SWIPE_HEADER": {
+   "kind": "value",
+   "type": "str",
+   "value": "X-Sayso-Swipe"
+  },
+  "sayso.brand.swipe.card_form": {
+   "kind": "function",
+   "signature": [
+    [
+     "action",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "csrf",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "key",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "fingerprint",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "question",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "who",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "body_html",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "yes_label",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "no_label",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "yes_hint",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "no_hint",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "extra_fields",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.brand.swipe.css": {
+   "kind": "function",
+   "signature": []
+  },
+  "sayso.brand.swipe.deck": {
+   "kind": "function",
+   "signature": [
+    [
+     "cards",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "script_url",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "done_html",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.brand.swipe.is_swipe": {
+   "kind": "function",
+   "signature": [
+    [
+     "headers",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.brand.swipe.script_bytes": {
+   "kind": "function",
+   "signature": []
+  },
+  "sayso.cases.load": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.cases.move": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "card_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "to",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "waiting",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.cases.update": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "case_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "fields",
+     "VAR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.config.Config": {
+   "init": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "slug",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "name",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "mode",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "support_address",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "own_addresses",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "operators",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "state_dir",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "labels",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "sections",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "policy",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "jobs",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "plugins",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "slug",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "name",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mode",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "support_address",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "own_addresses",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "operators",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "state_dir",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "labels",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "sections",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "policy",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "jobs",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "plugins",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "live": "property",
+    "section": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "name",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.config.ConfigError": {
+   "bases": [
+    "builtins.ValueError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.config.load": {
+   "kind": "function",
+   "signature": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.config.parse": {
+   "kind": "function",
+   "signature": [
+    [
+     "raw",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.console.ConsoleError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.console.record_web_vote": {
+   "kind": "function",
+   "signature": [
+    [
+     "config",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "journal",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "user",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "key",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "answer",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "fingerprint",
+     "KEYWORD_ONLY",
+     false
+    ]
+   ]
+  },
+  "sayso.console.web_votes_path": {
+   "kind": "function",
+   "signature": [
+    [
+     "config",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.CSS": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.dashboard.EVENT_TONE": {
+   "keys": [
+    "alert",
+    "case_opened",
+    "mail_appended",
+    "send_attempt",
+    "vote_approved",
+    "vote_declined",
+    "vote_done",
+    "vote_expired",
+    "vote_opened",
+    "vote_void"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.dashboard.ICONS": {
+   "keys": [
+    "audit",
+    "board",
+    "chart",
+    "check",
+    "grid",
+    "health",
+    "inbox",
+    "lock",
+    "mail",
+    "money",
+    "pause",
+    "swipe"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.dashboard.KIND_LABEL": {
+   "keys": [
+    "close",
+    "merge",
+    "money",
+    "reply"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.dashboard.Snapshot": {
+   "init": [
+    [
+     "config",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "board_reader",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "now",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "config",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "board_reader",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "now",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "as_json": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "card_messages": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "draft_text": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "vote",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "health": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "money_rows": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "open_votes": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "stage": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.dashboard._at": {
+   "kind": "function",
+   "signature": [
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard._hours": {
+   "kind": "function",
+   "signature": [
+    [
+     "h",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard._median": {
+   "kind": "function",
+   "signature": [
+    [
+     "values",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.ago": {
+   "kind": "function",
+   "signature": [
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "ref",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.avatar": {
+   "kind": "function",
+   "signature": [
+    [
+     "addr",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.bar_chart": {
+   "kind": "function",
+   "signature": [
+    [
+     "series",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "w",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "h",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "second",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.dashboard.daily": {
+   "kind": "function",
+   "signature": [
+    [
+     "s",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "dates",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "days",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.dashboard.decision_times": {
+   "kind": "function",
+   "signature": [
+    [
+     "s",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.event_text": {
+   "kind": "function",
+   "signature": [
+    [
+     "s",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "j",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.exec_pill": {
+   "kind": "function",
+   "signature": [
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.first_decisions": {
+   "kind": "function",
+   "signature": [
+    [
+     "s",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.message_html": {
+   "kind": "function",
+   "signature": [
+    [
+     "text",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.money_text": {
+   "kind": "function",
+   "signature": [
+    [
+     "spec",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.pill": {
+   "kind": "function",
+   "signature": [
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "label",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.dashboard.ref_time": {
+   "kind": "function",
+   "signature": [
+    [
+     "s",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.stage_pill": {
+   "kind": "function",
+   "signature": [
+    [
+     "stage",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.dashboard.when": {
+   "kind": "function",
+   "signature": [
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.decisions.DecisionError": {
+   "bases": [
+    "builtins.ValueError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.decisions.parse": {
+   "kind": "function",
+   "signature": [
+    [
+     "text",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.jobs.JOBS": {
+   "keys": [
+    "close",
+    "dev",
+    "draft",
+    "health",
+    "intake",
+    "money",
+    "qa",
+    "reconcile",
+    "release",
+    "sender",
+    "stall",
+    "votes"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.jobs.ORDER": {
+   "kind": "value",
+   "type": "tuple",
+   "value": [
+    "intake",
+    "votes",
+    "release",
+    "money",
+    "sender",
+    "dev",
+    "qa",
+    "draft",
+    "close",
+    "reconcile",
+    "stall",
+    "health"
+   ]
+  },
+  "sayso.jobs.draft.run": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.jobs.intake.run": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.jobs.money_job.request": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "case_key",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "spec",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "subject",
+     "KEYWORD_ONLY",
+     false
+    ]
+   ]
+  },
+  "sayso.jobs.sender.check_sendable": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "case_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "case",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "recipient",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "assume_money",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.jobs.sender.run": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.jobs.tally.run": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.money.CANCEL_FIELDS": {
+   "kind": "value",
+   "type": "frozenset",
+   "value": [
+    "action",
+    "customer",
+    "subscription"
+   ]
+  },
+  "sayso.money.MoneySpecError": {
+   "bases": [
+    "builtins.ValueError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.money.REFUND_FIELDS": {
+   "kind": "value",
+   "type": "frozenset",
+   "value": [
+    "action",
+    "amount",
+    "charge",
+    "currency",
+    "customer"
+   ]
+  },
+  "sayso.money.validate": {
+   "kind": "function",
+   "signature": [
+    [
+     "spec",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "max_minor",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "currencies",
+     "KEYWORD_ONLY",
+     false
+    ]
+   ]
+  },
+  "sayso.runtime.Clock": {
+   "init": [],
+   "kind": "class",
+   "members": {
+    "now": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.runtime.Context": {
+   "init": [
+    [
+     "config",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "board",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "helpdesk",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "mailbox",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "payments",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "codehost",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "drafter",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "dev_runner",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "qa_runner",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "world",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "plugins",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "config",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "clock",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "board",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "helpdesk",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mailbox",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "payments",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "codehost",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "drafter",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "dev_runner",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "qa_runner",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "world",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "plugins",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "alert": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "beat": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "job",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "result",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "notify": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mention",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "paused": "property",
+    "require_running": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.runtime.FixedClock": {
+   "init": [
+    [
+     "start",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "start",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "advance": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "delta",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "now": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.runtime.Journal": {
+   "init": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "clock",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "append": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "event",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "fields",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "read": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.runtime.Paths": {
+   "init": [
+    [
+     "root",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "root",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "attempts": "property",
+    "cases": "property",
+    "cursors": "property",
+    "drafts": "property",
+    "fake_world": "property",
+    "heartbeats": "property",
+    "journal": "property",
+    "locks": "property",
+    "pause_flag": "property",
+    "receipts": "property",
+    "votes": "property"
+   }
+  },
+  "sayso.runtime.Paused": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.runtime.build": {
+   "kind": "function",
+   "signature": [
+    [
+     "config",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.safety.Refused": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.safety.check_no_payment_identifiers": {
+   "kind": "function",
+   "signature": [
+    [
+     "text",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.safety.money_claims": {
+   "kind": "function",
+   "signature": [
+    [
+     "text",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.stages.AWAITING": {
+   "kind": "value",
+   "type": "str",
+   "value": "Awaiting approval"
+  },
+  "sayso.stages.stage_of": {
+   "kind": "function",
+   "signature": [
+    [
+     "tags",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.store.CorruptState": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.store.Journal": {
+   "init": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "clock",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "append": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "event",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "fields",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "read": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.store.LockTimeout": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.store.load_json": {
+   "kind": "function",
+   "signature": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "default",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.store.locked": {
+   "kind": "function",
+   "signature": [
+    [
+     "paths",
+     "VAR_POSITIONAL",
+     false
+    ],
+    [
+     "timeout",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.store.save_json": {
+   "kind": "function",
+   "signature": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.store.single_flight": {
+   "kind": "function",
+   "signature": [
+    [
+     "path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.votes.DONE": {
+   "kind": "value",
+   "type": "str",
+   "value": "done"
+  },
+  "sayso.votes.OPEN": {
+   "kind": "value",
+   "type": "str",
+   "value": "open"
+  },
+  "sayso.votes.VOID": {
+   "kind": "value",
+   "type": "str",
+   "value": "void"
+  },
+  "sayso.votes.VoteError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.votes.load": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.votes.open_vote": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "key",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "kind",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "case_key",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "card_id",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "subject",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "question",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "identity",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "material",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "spec",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.votes.set_status": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "status",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "fields",
+     "VAR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.votes.still_bound": {
+   "kind": "function",
+   "signature": [
+    [
+     "rec",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "material",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  }
+ }
+}

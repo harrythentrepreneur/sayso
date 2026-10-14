@@ -46,6 +46,28 @@ it that way unless a maintainer agrees to add one.
 - **Adapters** follow [docs/ADAPTERS.md](docs/ADAPTERS.md): honour idempotency
   keys, prove effects by read-back, and raise on anything unexpected.
 
+## Stable API (what hosts build on)
+
+Sayso Cloud, the hosted product, installs this package at a pinned commit and
+builds on the names listed in `sayso/stable_api.json` (99 today: the job order,
+`runtime.Context`, `store.locked`, the vote and console calls, the swipe deck
+and others). `tests/test_stable_api.py` fails if a change removes one, renames
+or reorders a parameter, adds a required one, or changes a constant's value.
+Adding things is always fine: a new optional parameter, a new method, a new key.
+
+If you mean to change a listed name:
+
+1. Run `python3 scripts/stable_api.py --write` to re-record it.
+2. Say so in the PR ("stable API: `votes.open_vote` gains required `tenant`").
+3. Expect the `sayso-cloud/compat` status on your PR head to say whether
+   Sayso Cloud still passes its own suite against your change. It is posted
+   by the maintainers' checker for branches in this repo (not forks); the
+   status carries only a pass/fail line, never Cloud code.
+
+Hosting-only behaviour (sign-in, tenancy, vaults, billing) belongs in the host,
+not here. A fix that every self-hoster would want belongs here first; hosts
+receive it by moving their pin.
+
 ## Pull request checklist
 
 The PR template repeats this list.
@@ -53,6 +75,7 @@ The PR template repeats this list.
 - [ ] `python3 -m unittest discover -s tests -t .` passes
 - [ ] `python3 scripts/mutate.py` prints `MUTATION VERDICT: PASS`
 - [ ] `python3 -m sayso.cli demo` prints `DEMO PASS`
+- [ ] `python3 scripts/stable_api.py` prints `STABLE API: OK` (or the PR says which listed name changes)
 - [ ] Docs and CHANGELOG are updated
 - [ ] No secrets, customer data or live ids
 
