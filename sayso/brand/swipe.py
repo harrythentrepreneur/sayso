@@ -53,7 +53,7 @@ def css() -> str:
         "transform-origin:50% 80%;touch-action:pan-y;user-select:none;-webkit-user-select:none}"
         ".s-deck.is-live .s-card-swipe{margin:0}"
         ".s-deck.is-live .s-card-swipe:not(.is-top){pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,.12)}"
-        ".s-deck.is-live .s-card-swipe:not(.is-top)>*{visibility:hidden}"
+        ".s-deck.is-live .s-card-swipe:not(.is-top):not(.is-next)>*{visibility:hidden}"
         ".s-card-swipe.is-dragging{cursor:grabbing;transition:none}"
         ".s-card-swipe.is-yes{box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 3px rgba(47,220,138,calc(var(--glow,0)*.9))}"
         ".s-card-swipe.is-no{box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 3px rgba(160,151,164,calc(var(--glow,0)*.9))}"

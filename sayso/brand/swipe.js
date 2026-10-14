@@ -32,6 +32,7 @@
     cs.forEach(function (c, i) {
       c.style.zIndex = String(100 - i);
       c.classList.toggle("is-top", i === 0);
+      c.classList.toggle("is-next", i === 1);
       c.setAttribute("aria-hidden", i === 0 ? "false" : "true");
       if (!c.classList.contains("is-dragging")) {
         c.style.transform = i === 0 ? "" : "translateY(" + Math.min(i, 2) * 10 + "px) scale(" + (1 - Math.min(i, 2) * 0.04) + ")";
@@ -99,7 +100,7 @@
         return;
       }
       card.classList.add("is-gone");
-      card.classList.remove("is-top", "is-yes", "is-no");
+      card.classList.remove("is-top", "is-next", "is-yes", "is-no");
       card.hidden = true;
       say(answer === "yes" ? "Yes counted. It acts on the next run, with every safety check."
                            : "No counted. Nothing is sent.");
