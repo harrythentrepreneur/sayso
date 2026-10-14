@@ -56,8 +56,8 @@ svg{flex:none}
 .msg.g{margin-top:17px}
 .msg:hover{background:rgba(0,0,0,.08)}
 .msg.g:hover .tools{display:flex}.tools{display:none;position:absolute;right:16px;top:-14px;background:var(--elev);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px;color:var(--sub)}.tools span{width:30px;height:30px;display:grid;place-items:center;border-radius:6px}.tools span:hover{background:#2b2b30}
-.msg .av{position:absolute;left:16px;top:4px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#2b1d18}
-.msg .av svg{width:30px;height:28px}
+.msg .av{position:absolute;left:16px;top:4px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#fff}
+.msg .av svg{width:26px;height:24px}
 .nm{display:flex;align-items:baseline;gap:6px}
 .nm b{color:var(--strong);font-weight:500}
 .app{background:var(--blurple);color:#fff;font-size:10px;font-weight:600;height:15px;line-height:15px;padding:0 4px;border-radius:4px;align-self:center;display:inline-flex;align-items:center;gap:2px}
@@ -67,7 +67,7 @@ svg{flex:none}
 .msg strong{color:var(--strong);font-weight:600}
 .msg code{font-family:"gg mono",Consolas,Menlo,monospace;font-size:.85em;background:#2b2d31;border:1px solid #3f4147;border-radius:4px;padding:0 3px}
 .quote{border-left:4px solid #4e5058;padding-left:12px;margin:4px 0;color:var(--text);white-space:pre-wrap}
-.card{max-width:520px;margin-top:6px;background:var(--poll);border:1px solid var(--border);border-left:4px solid #ff7a4d;border-radius:4px;padding:10px 14px;font-size:14.5px}
+.card{max-width:520px;margin-top:6px;background:var(--poll);border:1px solid var(--border);border-left:4px solid #b8461c;border-radius:4px;padding:10px 14px;font-size:14.5px}
 .card .k{font-size:14px;font-weight:600;color:var(--strong)}
 .card .v{color:var(--text);font-weight:400}
 .card .et{font-weight:600;color:var(--strong);margin-bottom:2px}
@@ -108,7 +108,7 @@ svg{flex:none}
 @keyframes pop{from{background:rgba(88,101,242,.12)}to{background:transparent}}
 .ping{background:rgba(250,168,26,.08);border-left:2px solid #f0b232}
 .mention{background:rgba(88,101,242,.3);color:#c9cdfb;border-radius:3px;padding:0 2px;font-weight:500}
-.hint{display:inline-block;margin:6px 0 2px;z-index:9;background:#ff7a4d;color:#1a0f0a;font-weight:700;font-size:13px;padding:8px 12px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.45);animation:bob 1.6s ease-in-out infinite}
+.hint{display:inline-block;margin:6px 0 2px;z-index:9;background:#b8461c;color:#fff;font-weight:600;font-size:13px;padding:7px 11px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 @keyframes bob{50%{transform:translateY(-4px)}}
 @media (max-width:900px){.win{grid-template-columns:72px 1fr}.side{display:none}}
 @media (max-width:560px){.win{display:flex;flex-direction:column}.main{flex:1}.rail{display:none}.title{display:none}.search,.chh .rt .hide{display:none}
@@ -117,7 +117,7 @@ svg{flex:none}
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute"><defs>
- <symbol id="buddy" viewBox="0 0 120 110"><path d="M26 8h64a22 22 0 0 1 22 22v34a22 22 0 0 1-22 22H58l-22 18v-18H26A22 22 0 0 1 4 64V30A22 22 0 0 1 26 8z" fill="#ff7a4d"/><ellipse cx="42" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><ellipse cx="76" cy="44" rx="6.5" ry="8.5" fill="#24161c"/><circle cx="44.5" cy="40.5" r="2.4" fill="#fff"/><circle cx="78.5" cy="40.5" r="2.4" fill="#fff"/><path d="M49 60q10 9 20 0" fill="none" stroke="#24161c" stroke-width="4.5" stroke-linecap="round"/></symbol>
+ <symbol id="buddy" viewBox="0 0 120 110"><path d="M24 8h72a20 20 0 0 1 20 20v38a20 20 0 0 1-20 20H60l-24 20V86H24A20 20 0 0 1 4 66V28A20 20 0 0 1 24 8z" fill="#ff7a4d"/><path d="M36 47l15 15 33-33" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></symbol>
  <symbol id="forum" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3.5V13a2 2 0 0 1-2-2V4zm17 4h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2v3l-4-3h-6a2 2 0 0 1-2-2v-1h7a4 4 0 0 0 4-4V8z"/></symbol>
  <symbol id="bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6zm-2 17a2 2 0 0 0 4 0h-4z"/></symbol>
  <symbol id="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M15 2l7 7-3 1-4 4 1 5-2 2-4-5-5 5-1-1 5-5-5-4 2-2 5 1 4-4z"/></symbol>
