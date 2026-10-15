@@ -532,7 +532,16 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .wrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:7px 0;border-top:1px solid var(--line2);
 font-size:13px;color:var(--ink2)!important}.wrow:hover{text-decoration:none!important;background:#fafaf8}
 .wt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
-.grid2>.sa-panel{margin:0}@media (max-width:860px){.wgrid{grid-template-columns:1fr}}
+.grid2>.sa-panel{margin:0}
+.hstate{display:flex;flex-direction:column;gap:4px;background:var(--card,#fff);border:1px solid var(--line);border-left:3px solid var(--send);
+border-radius:10px;padding:14px 16px;margin:0 0 16px;font-size:14px;color:var(--ink)}.hstate.bad{border-left-color:var(--danger)}
+.hstate.warn{border-left-color:var(--warn)}.hstate.neutral{border-left-color:var(--line2)}.hstate .sa-faint{font-size:12.5px}
+.hjobs{list-style:none;margin:0;padding:0;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px}
+.hjob{display:grid;grid-template-columns:28px minmax(0,1fr) 150px;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:13.5px}
+.hjob:first-child{border-top:0}.hn{color:var(--faint);font-variant-numeric:tabular-nums;padding-top:1px}
+.hh b{color:var(--ink)}.hjob .res{font-size:12px;color:var(--faint);margin-top:2px;word-break:break-word}
+.hwhen{text-align:right;font-size:12.5px}.hfix{margin-top:8px;background:#fdecec;border-radius:6px;padding:8px 10px;color:var(--ink2)}
+@media (max-width:860px){.hjob{grid-template-columns:22px minmax(0,1fr)}.hwhen{grid-column:2;text-align:left}}@media (max-width:860px){.wgrid{grid-template-columns:1fr}}
 @media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;background:var(--card,#fff);
 padding:10px 0;z-index:2}.act button{flex:1 1 40%;min-height:44px}}
 """
@@ -1403,28 +1412,79 @@ def render_money(s: Snapshot, products: list[str], view: str = "") -> str:
     return page("Refunds", body, products, slug, "money", snap=s)
 
 
+JOB_TITLE = {"intake": "Read new email", "votes": "Count decisions", "release": "Merge approved fixes",
+             "money": "Run approved refunds", "sender": "Send approved replies", "dev": "Start fix runs",
+             "qa": "Check fixes", "draft": "Write drafts", "close": "Close finished cases",
+             "reconcile": "Compare sent with approved", "stall": "Find stalled cases", "health": "Self-check"}
+JOB_FIX = {
+    "intake": "Check the mailbox and helpdesk settings. New email waits in the mailbox and is read on the next run.",
+    "votes": "Nothing is sent while this is stale. Check the board adapter, then run it once by hand.",
+    "release": "No merge happens while this is stale. Check the code host token.",
+    "money": "A refund is never repeated; check the payment provider before you act by hand.",
+    "sender": "Approved replies wait. Check the mailbox/helpdesk send settings.",
+    "dev": "Dev cards wait for a run. Check the dev runner.",
+    "qa": "Fixes wait for QA. Check the QA runner.",
+    "draft": "Cases wait for a draft; nothing is sent without one. Check the drafter.",
+    "close": "Quiet cases stay open a little longer. No customer impact.",
+    "reconcile": "Drift reports are late. It never repairs anything on its own.",
+    "stall": "Stall reminders are late.",
+    "health": "Nothing is watching the other jobs. Check the timers.",
+}
+
+
 def render_health(s: Snapshot, products: list[str]) -> str:
-    ref = ref_time(s)
+    from sayso.brand import app as A
+    from sayso.jobs import ORDER
+    slug, ref = s.config.slug, ref_time(s)
+    rows = {h["job"]: h for h in s.health()}
+    order = [j for j in ORDER if j in rows] + [j for j in rows if j not in ORDER]
+    ran = [rows[j] for j in order if rows[j]["state"] != "never"]
+    stale = [h for h in ran if h["state"] == "stale"]
+    if s.paused:
+        state, tone, line = "Paused", "warn", f"Jobs that act are stopped: {s.pause_reason or 'no reason given'}."
+    elif stale:
+        state, tone, line = ("Needs attention", "bad",
+                             f"{len(stale)} job{'s' if len(stale) != 1 else ''} missed {'their' if len(stale) != 1 else 'its'} "
+                             "last runs. What to do is next to each one.")
+    elif not ran:
+        state, tone, line = "Not started", "neutral", "No job has run yet. Install the timers or run `sayso tick` once."
+    else:
+        state, tone, line = "Running", "good", f"{len(ran)} jobs ran on time."
+    last = max((h["at"] for h in ran), default="")
     jobs = ""
-    for h in s.health():
-        tone = TONE.get(h["state"], "grey")
-        last = f"last run {ago(h['at'], ref)}" if h["at"] else "not run yet"
-        jobs += (f"<div class=job><span class='led t-{tone}'></span><div><b>{e(h['job'])}</b><div>{pill(h['state'])}"
-                 f"</div></div><div><div class=mute>{e(JOB_HINT.get(h['job'], ''))}</div>"
-                 f"<div class=res>{e(h['result'])[:160]}</div></div><div class=faint style='text-align:right'>"
-                 f"{last if h['at'] else ''}</div></div>")
+    for i, j in enumerate(order, 1):
+        h = rows[j]
+        badge = {"ok": A.badge("On time", "good"), "stale": A.badge("Stale", "bad"),
+                 "never": A.badge("Not run", "neutral")}.get(h["state"], A.badge(h["state"]))
+        every = s.config.jobs.get(j)
+        fix = ""
+        if h["state"] == "stale":
+            fix = (f"<div class=hfix><b>What to do:</b> {e(JOB_FIX.get(j, 'Check this job.'))} Run it once by hand with "
+                   f"<code>sayso run {e(j)} --config &lt;file&gt;</code> and read its log with "
+                   f"<code>journalctl --user -u sayso-{e(slug)}-{e(j)}</code>.</div>")
+        jobs += (f"<li class=hjob><span class=hn>{i}</span><div class=hmain><div class=hh><b>{e(JOB_TITLE.get(j, j))}</b>"
+                 f" <code class=raw>{e(j)}</code> {badge}</div><div class=mute>{e(JOB_HINT.get(j, ''))}</div>"
+                 f"<div class=res>{e(str(h['result'])[:160])}</div>{fix}</div>"
+                 f"<div class=hwhen>{A.reltime(h['at'], ref, long=True, suffix=' ago') if h['at'] else '<span class=sa-faint>\u2014</span>'}"
+                 f"<div class=sa-faint>every {e(A.long_age(every) if every else '?')}</div></div></li>")
     alerts = [j for j in s.journal if j.get("event") == "alert"][-20:][::-1]
-    arows = "".join(f"<tr><td class=faint style='white-space:nowrap'>{e(when(a.get('at')))}</td>"
-                    f"<td>{e(a.get('text'))}</td></tr>" for a in alerts)
-    state = pill("paused") if s.paused else pill("running")
-    body = (f"{_paused_banner(s)}"
-            + head("Health", f"Loop is {state} &nbsp;· a job is stale after three missed intervals.",
-                   crumb=e(s.config.name))
-            + ((_console_form(s, "resume", "Resume the loop", "yes") if s.paused else
+    arows = [[A.reltime(a.get("at"), ref, long=True, suffix=" ago"), e(a.get("text"))] for a in alerts]
+    control = ((_console_form(s, "resume", "Resume the loop", "yes") if s.paused else
                 _console_form(s, "pause", "Pause everything that acts", "no")) if s.console else "")
-            + f"<div class=jobs>{jobs}</div><h2>Recent alerts <span class=c>{len(alerts)}</span></h2>"
-            f"<table>{arows or '<tr><td class=faint>No alerts. The loop alerts instead of guessing.</td></tr>'}</table>")
-    return page("Health", body, products, s.config.slug, "health", snap=s)
+    body = (f"{_paused_banner(s)}"
+            + A.header("Health", "Is the loop reading, drafting and sending for this product?",
+                       eyebrow_html=e(s.config.name))
+            + f"<div class='hstate {tone}'><div>{A.badge(state, tone)} <span>{e(line)}</span></div>"
+              f"<div class=sa-faint>Last run {A.reltime(last, ref, long=True, suffix=' ago') if last else 'never'} \u00b7 "
+              f"a job is stale after three missed intervals</div></div>"
+            + control
+            + f"<h2>Jobs <span class=c>in the order they run</span></h2><ol class=hjobs>{jobs}</ol>"
+            + f"<h2>Recent alerts <span class=c>{len(alerts)}</span></h2>"
+            + A.table([("When", ""), ("Alert", "")], arows,
+                      empty_html=A.empty("No alerts", "The loop alerts instead of guessing. Alerts appear here and on "
+                                         "the board's alerts channel."))
+            + f"<p class=sa-src>Machine-readable: <a href='/api/{e(slug)}.json'>/api/{e(slug)}.json</a></p>")
+    return page("Health", body, products, slug, "health", snap=s)
 
 
 def render_audit(s: Snapshot, products: list[str], query: dict | None = None) -> str:

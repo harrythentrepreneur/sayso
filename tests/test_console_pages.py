@@ -131,6 +131,23 @@ class ConsolePagesTests(unittest.TestCase):
         self.assertIn("Time waiting on you", main)
         self.assertIn("Not measured yet", main)
 
+    # -- health -----------------------------------------------------------------------------------
+    def test_health_jobs_in_run_order_and_fix_text_when_stale(self):
+        from sayso.jobs import ORDER
+        from datetime import timedelta
+        s = self.snap()
+        _, _, body = self.get("/p/demo/health")
+        main = body[body.index("<main>"):]
+        names = re.findall(r"<code class=raw>(\w+)</code>", main)
+        self.assertEqual(names, [j for j in ORDER if j in names])
+        self.assertIn("Running", main)
+        self.assertNotIn("What to do", main)
+        later = dashboard.Snapshot(self.config, now=A.parse(max(h["at"] for h in s.health() if h["at"])) + timedelta(days=1))
+        page = dashboard.render_health(later, self.products)
+        self.assertIn("Needs attention", page)
+        self.assertIn("What to do:", page)
+        self.assertIn("journalctl --user -u sayso-demo-intake", page)
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]
