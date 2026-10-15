@@ -488,8 +488,39 @@ nav a{white-space:nowrap;padding:6px 8px}main{padding:24px 18px 48px}h1{font-siz
 .item-body,.item-foot,.act,.ballots{padding-left:0}.meta{display:none}}
 """
 
-NAV = (("", "Inbox", "inbox"), ("swipe", "Swipe", "swipe"), ("overview", "Overview", "chart"), ("board", "Cases", "board"),
-       ("money", "Money", "money"), ("health", "Health", "health"), ("audit", "Audit log", "audit"))
+NAV = (("", "Decisions", "check"), ("board", "Inbox", "inbox"), ("money", "Refunds", "money"),
+       ("overview", "Insights", "chart"), ("health", "Health", "health"), ("audit", "Audit log", "audit"))
+NAV_GROUPS = {"": "", "health": "Admin"}        # daily work first (no label), then admin, drawn lighter
+NAV_ALIAS = {"swipe": "", "case": "board"}      # Swipe is a mode of Decisions; a case lives under Inbox
+
+# Page craft shared with Sayso Cloud (sayso.brand.app) plus the shell. Added AFTER CSS, so CSS (a name hosts
+# import and edit) keeps every rule it had.
+SHELL_CSS = """
+body{background:var(--bg,#f7f7f5)}main{max-width:none;padding:28px 40px 72px}
+.demo-strip{grid-column:1/-1;display:flex;align-items:center;gap:10px;background:#18181b;color:#fff;font-size:13px;
+padding:7px 18px;position:sticky;top:0;z-index:6}.demo-strip b{background:#fff;color:#18181b;border-radius:4px;padding:0 7px;
+font-size:11.5px}
+body.has-strip{grid-template-rows:auto 1fr}body.has-strip aside{top:34px;height:calc(100vh - 34px)}
+.navgroup{display:flex;flex-direction:column;gap:1px}.navgroup+.navgroup{margin-top:14px}
+.navgroup.admin a{color:var(--faint)}.navgroup.admin a.on{color:var(--ink)}
+.acct{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+.acct summary{list-style:none;display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;
+color:var(--ink);font-weight:600;font-size:14px}.acct summary::-webkit-details-marker{display:none}
+.acct summary:hover{background:var(--hover)}.acct summary small{display:block;font-weight:400;color:var(--faint);font-size:12px}
+.acct .menu{padding:6px 8px 2px;font-size:13px;color:var(--mute)}.acct .menu .link{padding:6px 0}
+details.acct:not([open]) .menu{display:none}
+@media (max-width:860px){main{padding:20px 16px 48px}body.has-strip aside{top:0;height:auto}
+.demo-strip{position:static;font-size:12px;padding:6px 14px}.navgroup{flex-direction:row;flex-wrap:nowrap}
+.navgroup+.navgroup{margin-top:0}aside nav,aside>div:has(nav){overflow-x:auto;scrollbar-width:none;max-width:100%}
+aside nav{flex-wrap:nowrap!important}.acct{display:none}}
+"""
+
+
+def _page_css() -> str:
+    from sayso import brand
+    from sayso.brand import app as brand_app
+    root = ";".join(f"--{k}:{v}" for k, v in brand.TOKENS.items())
+    return f":root{{{root};--font-text:{brand.TEXT_FONT};--font-mono:{brand.MONO_FONT}}}" + brand_app.css() + SHELL_CSS
 ICONS["swipe"] = '<path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM21 9l2 3-2 3M3 9l-2 3 2 3"/>'
 ICONS["chart"] = '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
 
@@ -506,31 +537,45 @@ def page(title: str, body: str, products: list[str], current: str | None, tab: s
     nav = ""
     if current:
         waiting = len(snap.open_votes()) if snap is not None else 0
+        here = NAV_ALIAS.get(tab, tab)
+        groups: list[tuple[str, list[str]]] = []
         for name, label, ic in NAV:
-            if name == "swipe" and not getattr(snap, "console", None):
-                continue  # the read-only dashboard cannot vote, so it has no swipe deck
+            if name in NAV_GROUPS:
+                groups.append((NAV_GROUPS[name], []))
             href = f"/p/{e(current)}/{name}" if name else f"/p/{e(current)}/"
             badge = f'<span class=n>{waiting}</span>' if name == "" and waiting else ""
             if name == "health" and snap is not None and any(h["state"] == "stale" for h in snap.health()):
                 badge = "<span class=n title='a job is stale' style='color:var(--red)'>●</span>"
-            nav += f'<a class="{"on" if tab == name else ""}" href="{href}">{icon(ic)}{label}{badge}</a>'
-        nav = f'<div><nav>{nav}</nav></div>'
+            cur = ' aria-current="page"' if here == name else ""
+            groups[-1][1].append(f'<a class="{"on" if here == name else ""}" href="{href}"{cur}>{icon(ic)}{label}{badge}</a>')
+        nav = "<div><nav aria-label='Pages'>" + "".join(
+            f"<div class='navgroup{' admin' if g else ''}'>{f'<div class=navlabel>{e(g)}</div>' if g else ''}{''.join(a)}</div>"
+            for g, a in groups) + "</nav></div>"
     prods = "".join(f'<a class="{"on" if p == current else ""}" href="/p/{e(p)}/"><span class=dot></span>{e(p)}</a>'
                     for p in products)
     mode = getattr(snap, "label", None) or "Live view"
     con = getattr(snap, "console", None)
     stamp = f"<br>{e(when(snap.now.isoformat()))}" if snap is not None and mode != "Live view" else ""
+    demo = snap is not None and not snap.config.live
+    strip = ("<div class=demo-strip role=note><b>Dry run</b><span>Fake adapters: nothing is sent to anyone and no money "
+             "moves.</span></div>" if demo else "")
+    if con:
+        foot = (f"<details class=acct><summary>{avatar(con['user'])}<span>{e(con['user'])}<small>Operator · {e(mode)}"
+                f"</small></span></summary><div class=menu>Votes count for the exact version shown."
+                f"<form method=post action=/logout><input type=hidden name=csrf value='{e(con['csrf'])}'>"
+                f"<button class=link>Sign out</button></form></div></details></aside>")
+    else:
+        foot = f"<div class=side-foot>{icon('lock')}<span><b>Read-only</b>{e(mode)}{stamp}</span></div></aside>"
     return (f"<!doctype html><html lang=en><head><meta charset=utf-8>"
             f"<meta name=viewport content='width=device-width,initial-scale=1'><meta name=robots content=noindex>"
-            f"<title>{e(title)} · Sayso</title><link rel=icon href='data:image/svg+xml,{SAYSO_ICON}'><style>{CSS}</style></head><body>"
+            f"<title>{e(title)} · Sayso</title><link rel=icon href='data:image/svg+xml,{SAYSO_ICON}'>"
+            f"<style>{CSS}{_page_css()}</style></head><body{' class=has-strip' if strip else ''}>{strip}"
             f"<aside><a class=brand href='/'><span class=logo>{SAYSO_MARK}</span><span>Sayso"
             f"<small>nothing goes out without your say-so</small></span></a>{nav}"
-            f"<div><div class=navlabel>Products</div><div class=prod>"
-            f"<a class='{'on' if current is None else ''}' href='/'>{icon('grid')}All products</a>{prods}</div></div>"
-            + (f"<div class=side-foot>{avatar(con['user'])}<span><b>{e(con['user'])}</b>Operator · {e(mode)}"
-               f"<form method=post action=/logout><input type=hidden name=csrf value='{e(con['csrf'])}'>"
-               f"<button class=link>Sign out</button></form></span></div></aside>" if con else
-               f"<div class=side-foot>{icon('lock')}<span><b>Read-only</b>{e(mode)}{stamp}</span></div></aside>")
+            + (f"<div><div class=navlabel>Products</div><div class=prod>"
+               f"<a class='{'on' if current is None else ''}' href='/'>{icon('grid')}All products</a>{prods}</div></div>"
+               if len(products) > 1 or current is None else "")
+            + foot
             + f"<main>{body.replace(RO_TEXT, (CON_TEXT if con.get('can_vote', True) else VIEW_TEXT)) if con else body}"
             f"</main></body></html>")
 
