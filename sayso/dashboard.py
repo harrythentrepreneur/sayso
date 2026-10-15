@@ -531,7 +531,16 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .qgroup{font-size:13px;color:var(--soft);font-weight:600;margin:26px 0 8px}.qgroup:first-of-type{margin-top:6px}
 .item.dec{background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:0 0 12px}
 .item.dec:first-of-type{border-top:1px solid var(--line)}.qflags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.qamt{font-size:15px}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
+.qamt{font-size:15px}.tickf{margin:0}
+.queue{display:block;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;margin:0 0 18px;overflow:hidden}
+.qhead{display:flex;gap:10px;align-items:baseline;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--faint)}
+.qhead b{color:var(--ink);font-size:14px}
+main a.qrow{display:grid;grid-template-columns:28px minmax(0,1fr) 110px 110px 56px;gap:12px;align-items:center;padding:9px 14px;
+border-top:1px solid var(--line2);color:var(--ink2);font-size:13.5px}main a.qrow:hover{background:#fafaf8;text-decoration:none}
+.qhead+.qrow{border-top:0}.qw{display:flex;gap:10px;min-width:0}.qw b{color:var(--ink);font-weight:600;white-space:nowrap}
+.qw span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--soft)}.qk{font-size:12.5px;color:var(--soft)}
+.qa,.qt{text-align:right;font-size:12.5px;color:var(--faint)}.item.dec{scroll-margin-top:16px}.item.dec:target{outline:2px solid var(--accent)}
+@media (max-width:860px){main a.qrow{grid-template-columns:28px minmax(0,1fr) auto}.qk,.qa{display:none}.qw{flex-direction:column;gap:0}}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
 .item.dec .item-body .sa-trust{margin-top:12px}
 .ib-who{display:flex;gap:10px;align-items:flex-start;min-width:0}.ib-who>div{min-width:0}
 .inbox .sa-cell-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62ch}
@@ -545,9 +554,12 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .case{grid-template-columns:minmax(0,1fr) minmax(320px,400px)}.cnotes{margin-top:24px}
 .sa-tile-v .v{display:inline}.ins .sa-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:640px){.ins .sa-tiles{grid-template-columns:1fr 1fr}}
-main a.sa-tab,main a.sa-seg a,main .sa-seg a,main a.sa-rowlink,main a.wrow,main a.sa-btn{color:inherit}
-main .sa-tab{color:var(--soft)}main .sa-tab.on{color:var(--ink)}main .sa-seg a{color:var(--ink2)}
-main a.sa-btn.ghost{color:var(--ink)}main a.sa-btn:not(.ghost){color:#fff}
+main a.sa-rowlink:not(#_),main a.wrow:not(#_),main a.qrow:not(#_){color:inherit}
+main a.sa-tab:not(#_){color:var(--soft)}main a.sa-tab.on:not(#_){color:var(--ink)}
+main .sa-seg a:not(#_){color:var(--ink2)}main .sa-seg a.on:not(#_){color:var(--ink)}
+main a.sa-btn.ghost:not(#_){color:var(--ink)}main a.sa-btn:not(.ghost):not(#_){color:#fff}
+.brand small{text-wrap:balance}.tr-done .sa-cell-t{color:var(--soft);font-weight:500}
+.hjob.ok .hbadge{display:none}.hjob{padding:10px 16px}.hjob .mute{font-size:13px}
 .demo-strip b{white-space:nowrap}.eyebrow b{color:var(--ink)}
 @media (min-width:861px){body{background:linear-gradient(to right,var(--side) 244px,var(--line) 244px,var(--line) 245px,var(--bg) 245px)}}.wgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
 .wrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:7px 0;border-top:1px solid var(--line2);
@@ -1132,6 +1144,17 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
             f"{A.trust_line(str(v.get('fingerprint') or ''), version=_version_of(v))}</div>"
             f"{_ballots_html(s, v)}{_vote_form(s, v)}<div class=item-foot><span>Case: {e(rec.get('title'))}</span>"
             f"<a href='/p/{e(slug)}/case/{e(v.get('case_key'))}'>Open case →</a></div></article>")
+    if items:
+        qrows = "".join(
+            f"<a class=qrow href='#d-{e(v.get('key'))}'>{avatar(s.cases.get(v.get('case_key'), {}).get('customer'))}"
+            f"<span class=qw><b>{e(s.cases.get(v.get('case_key'), {}).get('customer') or '')}</b>"
+            f"<span>{e(s.cases.get(v.get('case_key'), {}).get('title') or v.get('subject'))}</span></span>"
+            f"<span class=qk>{e(_kind_label(v))}</span>"
+            f"<span class=qa>{A.money((v.get('spec') or {}).get('amount'), (v.get('spec') or {}).get('currency')) if v.get('kind') == 'money' and (v.get('spec') or {}).get('action') == 'refund' else ''}</span>"
+            f"<span class=qt>{A.reltime(v.get('opened_at'), ref)}</span></a>" for v, _ in items)
+        body_items = (f"<div class=queue role=navigation aria-label='Queue'><div class=qhead><b>Queue</b><span>{len(items)} waiting \u00b7 "
+                      f"{'money and billing first, then repeat contacts, then oldest' if sort == 'priority' else sort + ' first'}"
+                      f"</span></div>{qrows}</div>" + body_items)
     if not body_items:
         body_items = A.empty("Nothing waiting for your say-so",
                              "New reply drafts, refunds, merges and close requests appear here as the loop opens them.")
@@ -1145,6 +1168,10 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
     if s.console and s.console.get("can_vote", True) and n:
         actions = (A.segmented([("List", base, True), ("Review one by one", f"/p/{slug}/swipe", False)], label="Mode")
                    + actions)
+    if s.console and s.console.get("can_tick"):
+        actions = (f"<form class=tickf method=post action='/p/{e(slug)}/tick'><input type=hidden name=csrf "
+                   f"value='{e(s.console['csrf'])}'><button class='sa-btn ghost sm' title='Dry-run products only'>"
+                   f"Run the loop once</button></form>" + actions)
     note = ""
     if items:
         note = (f"<div class=note>{icon('lock')}<span>Your Yes counts only for the exact version shown. If it changes "
@@ -1155,8 +1182,6 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
     body = (f"{_paused_banner(s)}"
             + A.header("Decisions", sub, actions_html=actions, eyebrow_html=e(s.config.name))
             + note
-            + (_console_form(s, "tick", "Run the loop once (dry-run only)", "ghost") if s.console and
-               s.console.get("can_tick") else "")
             + body_items)
     return page(s.config.name, body, products, slug, "", snap=s)
 
@@ -1205,14 +1230,17 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
         fl = flags(s, rec)
         if any(v.get("kind") == "money" for v in open_votes if v.get("case_key") == key):
             fl = [("warn", "Money")] + [f for f in fl if f[1] != "Billing"]
-        badges = (A.badge(f"{n_open} to decide", "warn") if n_open else stage_pill(st)) + "".join(
+        badges = (A.badge(f"Needs you \u00b7 {n_open} decision{'s' if n_open != 1 else ''}", "warn") if n_open else
+                  A.badge("Closed", "neutral") if st == stages.DONE else
+                  A.badge(st, "bad") if st in (stages.BLOCKED, "unreadable") else A.badge(st, "neutral")) + "".join(
             " " + A.badge(lbl, tone) for tone, lbl in fl)
         cells = [f"<div class=ib-who>{avatar(rec.get('customer'))}<div><div class=sa-cell-t>{e(rec.get('title'))}</div>"
                  f"<div class=sa-cell-s>{e(rec.get('customer'))} \u00b7 {e(_preview(s, rec))}</div></div></div>",
                  f"<div class=ib-flags>{badges}</div>",
                  e(rec.get("ticket") or "\u2014"),
                  A.reltime(rec.get("last_inbound") or rec.get("created_at"), ref)]
-        row = {"cells": cells, "href": f"/p/{slug}/case/{key}"}
+        row = {"cells": cells, "href": f"/p/{slug}/case/{key}", "cls": "tr-done" if st == stages.DONE else "",
+               "rank": 0 if n_open else (2 if st == stages.DONE else 1)}
         rows_by_view[""].append(row)
         rows_by_view[_inbox_view(s, rec, n_open)].append(row)
     base = f"/p/{slug}/board"
@@ -1221,7 +1249,7 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
     finder = A.search(base, q, placeholder="Name, subject or ticket", keep={"view": view}) if s.console else (
         f"<span class=sa-faint>Search: add <code>?q=</code> to the address</span>" if not q else
         f"<span class=sa-faint>Showing matches for \u201c{e(q)}\u201d \u00b7 <a href='{e(A.qs(base, view=view))}'>clear</a></span>")
-    rows = rows_by_view[view]
+    rows = sorted(rows_by_view[view], key=lambda r: r["rank"])   # stable: newest email first inside each rank
     empty = A.empty("No cases match" if needle else "No cases here yet",
                     "Try another word or clear the search." if needle else
                     "Each customer email opens one case per problem. They appear here as intake reads the mailbox.")
@@ -1233,8 +1261,8 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
                  f"unreadable, never guessed.</p>")
     total = len(rows_by_view[""])
     body = (f"{_paused_banner(s)}"
-            + A.header("Inbox", f"{total} case{'s' if total != 1 else ''} \u00b7 one per customer per problem, newest email "
-                       "first", eyebrow_html=e(s.config.name))
+            + A.header("Inbox", f"{total} case{'s' if total != 1 else ''} \u00b7 one per customer per problem; cases that need you "
+                       "first, then newest email", eyebrow_html=e(s.config.name))
             + f"<div class=sa-bar>{tabs}{finder}</div>{table}{extra}")
     return page("Inbox", body, products, slug, "board", snap=s)
 
@@ -1513,8 +1541,9 @@ def render_health(s: Snapshot, products: list[str]) -> str:
             fix = (f"<div class=hfix><b>What to do:</b> {e(JOB_FIX.get(j, 'Check this job.'))} Run it once by hand with "
                    f"<code>sayso run {e(j)} --config &lt;file&gt;</code> and read its log with "
                    f"<code>journalctl --user -u sayso-{e(slug)}-{e(j)}</code>.</div>")
-        jobs += (f"<li class=hjob><span class=hn>{i}</span><div class=hmain><div class=hh><b>{e(JOB_TITLE.get(j, j))}</b>"
-                 f" <code class=raw>{e(j)}</code> {badge}</div><div class=mute>{e(JOB_HINT.get(j, ''))}</div>"
+        jobs += (f"<li class='hjob {e(h['state'])}'><span class=hn>{i}</span><div class=hmain><div class=hh>"
+                 f"<b>{e(JOB_TITLE.get(j, j))}</b> <code class=raw>{e(j)}</code> <span class=hbadge>{badge}</span></div>"
+                 f"<div class=mute>{e(JOB_HINT.get(j, ''))}</div>"
                  f"<div class=res>{e(job_summary(h['result'])[:200])}</div>"
                  f"<details class=hraw><summary>Raw result</summary><pre>{e(str(h['result'])[:600])}</pre></details>{fix}</div>"
                  f"<div class=hwhen>{A.reltime(h['at'], ref, long=True, suffix=' ago') if h['at'] else '<span class=sa-faint>\u2014</span>'}"
