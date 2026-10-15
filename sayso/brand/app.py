@@ -291,6 +291,7 @@ def css() -> str:
 
 
 _CSS = """
+.sa-search button,.sa-search input{font-family:inherit}
 .sa-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .sa-faint{color:var(--faint)}.sa-ic{width:16px;height:16px;flex:none}
 .sa-ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 22px}
@@ -341,7 +342,7 @@ display:inline-flex;align-items:center}
 .sa-search{display:flex;gap:6px;align-items:center;margin:6px 0}
 .sa-search-f{display:flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:var(--radius-sm);
 background:var(--card);padding:0 10px;min-height:34px;color:var(--faint)}
-.sa-search-f input{border:0;outline:0;background:none;font:400 14px var(--font-text);color:var(--ink);width:200px;min-height:32px}
+.sa-search-f input{border:0;outline:0;background:none;font:400 14px var(--font-text,inherit);color:var(--ink);width:200px;min-height:32px}
 .sa-search-f:focus-within{outline:2px solid var(--accent);outline-offset:1px}
 .sa-table-w{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden}
 .sa-table{width:100%;border-collapse:collapse;table-layout:auto}

@@ -509,6 +509,7 @@ NAV_ALIAS = {"swipe": "", "case": "board"}      # Swipe is a mode of Decisions; 
 # import and edit) keeps every rule it had.
 SHELL_CSS = """
 body{background:var(--bg,#f7f7f5)}main{max-width:none;padding:28px 40px 72px}
+button,input,select{font:inherit}
 .demo-strip{grid-column:1/-1;display:flex;align-items:center;gap:10px;background:#18181b;color:#fff;font-size:13px;
 padding:7px 18px;position:sticky;top:0;z-index:6}.demo-strip b{background:#fff;color:#18181b;border-radius:4px;padding:0 7px;
 font-size:11.5px}
@@ -1259,7 +1260,8 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
                  f"<div class=ib-flags>{badges}</div>",
                  A.reltime(rec.get("last_inbound") or rec.get("created_at"), ref)]
         row = {"cells": cells, "href": f"/p/{slug}/case/{key}", "cls": "tr-done" if st == stages.DONE else "",
-               "rank": 0 if n_open else (2 if st == stages.DONE else 1)}
+               "rank": (0 if any(v.get("kind") == "money" for v in open_votes if v.get("case_key") == key) else 1) if n_open
+               else (3 if st == stages.DONE else 2)}
         rows_by_view[""].append(row)
         rows_by_view[_inbox_view(s, rec, n_open)].append(row)
     base = f"/p/{slug}/board"
@@ -1280,8 +1282,8 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
                  f"unreadable, never guessed.</p>")
     total = len(rows_by_view[""])
     body = (f"{_paused_banner(s)}"
-            + A.header("Inbox", f"{total} case{'s' if total != 1 else ''} \u00b7 one per customer per problem; cases that need you "
-                       "first, then newest email", eyebrow_html=e(s.config.name))
+            + A.header("Inbox", f"{total} case{'s' if total != 1 else ''} \u00b7 money first, then other cases that need you, then "
+                       "newest email", eyebrow_html=e(s.config.name))
             + f"<div class=sa-bar>{tabs}{finder}</div>{table}{extra}")
     return page("Inbox", body, products, slug, "board", snap=s)
 
@@ -1667,7 +1669,7 @@ def render_audit(s: Snapshot, products: list[str], query: dict | None = None) ->
             cur_day = day
         at = _at(j.get("at"))
         ev = str(j.get("event"))
-        tone = {"sends": "good", "alerts": "bad"}.get(AUDIT_OF.get(ev, ""), "neutral")
+        tone = "bad" if ev == "alert" else ("good" if AUDIT_OF.get(ev) == "sends" else "neutral")
         fp = str(v.get("fingerprint") or "")
         lock = (f"<div class=sa-cell-s>{e(_version_of(v))} \u00b7 fingerprint <code title='{e(fp)}'>{e(fp[:12])}"
                 f"\u2026</code></div>" if fp and (ev.startswith("vote_") or ev == "web_vote") else "")
@@ -1684,7 +1686,7 @@ def render_audit(s: Snapshot, products: list[str], query: dict | None = None) ->
             + (f"<dt>Case</dt><dd><a href='/p/{e(slug)}/case/{e(c)}'>Open case \u2192</a></dd>" if c else "")
             + (f"<dt>Fingerprint</dt><dd><code>{e(fp)}</code></dd>" if fp else "")
             + f"</dl><pre>{e(json.dumps(fields, sort_keys=True, indent=1, default=str)[:2000])}</pre></div></details>")
-    listing = (("<div class=alog><div class=ahead><span>Time</span><span>Actor</span><span>Event</span>"
+    listing = (("<div class=alog><div class=ahead><span>Time (UTC)</span><span>Actor</span><span>Event</span>"
                 "<span>What happened</span><span>Case</span></div>" + "".join(parts) + "</div>") if shown else
                A.empty("No events match", "Clear a filter to see more. Every email, vote, send and refund the loop "
                        "records lands here."))
@@ -1692,7 +1694,8 @@ def render_audit(s: Snapshot, products: list[str], query: dict | None = None) ->
             if len(rows) > AUDIT_CAP else
             f"<p class=sa-src>{len(rows)} of {len(s.journal)} events, newest first, from the append-only journal "
             f"(<code>journal.jsonl</code>). Times in UTC.</p>")
-    export = f"<a class='sa-btn ghost sm' href='{e(A.qs(base + '.csv', **q))}'>Export CSV</a>"
+    export = (f"<a class='sa-btn ghost sm' href='{e(A.qs(base + '.csv', **q))}' title='Every matching line, no cap'>"
+              f"Export {len(rows)} event{'s' if len(rows) != 1 else ''} (CSV)</a>")
     body = (A.header("Audit log", "Every email, decision, send and refund the loop recorded, with the exact version "
                      "each Yes approved.", actions_html=export, eyebrow_html=e(s.config.name))
             + f"<div class=sa-bar>{tabs}{finder}</div>{filt}{listing}{more}")
@@ -1730,7 +1733,9 @@ align-items:start}.ahead{font-size:12.5px;color:var(--soft);background:var(--car
 font-size:12.5px;color:var(--soft)}.aday b{color:var(--ink);font-weight:600}
 details.arow{margin:0;border-bottom:1px solid var(--line2)}.arow>summary{list-style:none;cursor:pointer;font-size:13.5px;
 color:var(--ink2)}.arow>summary::-webkit-details-marker{display:none}.arow>summary:hover{background:#fafaf8}
-.at{font-variant-numeric:tabular-nums;color:var(--soft)}.aa,.ac{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at{font-variant-numeric:tabular-nums;color:var(--soft);position:relative;padding-left:14px}
+.at:before{content:'▸';position:absolute;left:0;color:var(--faint);font-size:11px}
+details[open].arow .at:before{content:'▾'}.aa,.ac{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .adetail{padding:4px 14px 14px 104px}details.arow:not([open]) .adetail{display:none}
 @media (max-width:860px){.ahead{display:none}.arow>summary{grid-template-columns:64px minmax(0,1fr);gap:4px 10px}
 .arow>summary .aa,.arow>summary .ae,.arow>summary .aw,.arow>summary .ac{grid-column:2}.adetail{padding:4px 14px 14px}}
