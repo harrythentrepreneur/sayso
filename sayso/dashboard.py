@@ -532,6 +532,9 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .item.dec{background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:0 0 12px}
 .item.dec:first-of-type{border-top:1px solid var(--line)}.qflags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .qamt{font-size:15px}.tickf{margin:0}
+@media (min-width:1180px){.dsplit{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:20px;align-items:start}
+.dsplit .queue{position:sticky;top:46px;margin:0}main a.qrow{grid-template-columns:28px minmax(0,1fr) 56px}
+.dsplit .qk,.dsplit .qa{display:none}.dsplit .qw{flex-direction:column;gap:0}.dcards .qgroup:first-child{margin-top:0}}
 .queue{display:block;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;margin:0 0 18px;overflow:hidden}
 .qhead{display:flex;gap:10px;align-items:baseline;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--faint)}
 .qhead b{color:var(--ink);font-size:14px}
@@ -938,8 +941,12 @@ def _decision_material(s: Snapshot, v: dict, rec: dict) -> str:
         cur = ", ".join(s.config.policy.currencies).upper()
         ids = "".join(f"<dt>{lbl}</dt><dd><code>{e(sp[k])}</code></dd>" for lbl, k in
                       (("Charge", "charge"), ("Subscription", "subscription"), ("Customer", "customer")) if sp.get(k))
-        return (f"<div class=amount><span class=big>{e(money_text(sp))}</span>"
-                + (f"<span class=faint>refund cap {cap / 100:.2f} {e(cur)}</span>" if cap else "") + "</div>"
+        from sayso.brand import app as A
+        amt = (A.money(sp.get("amount"), sp.get("currency")) if sp.get("action") == "refund" and sp.get("amount") is not None
+               else e(money_text(sp)))
+        return (f"<div class=amount><span class=big>{'Refund ' if sp.get('action') == 'refund' else ''}{amt}</span>"
+                + (f"<span class=faint>of a {A.money_plain(cap, (s.config.policy.currencies or ('usd',))[0])} cap per "
+                   f"refund</span>" if cap else "") + "</div>"
                 + (f"<dl class=kv>{ids}</dl>" if ids else "")
                 + f"<details><summary>Exact spec being voted on</summary>"
                 f"<pre>{e(json.dumps(sp, indent=1, sort_keys=True))}</pre></details>")
@@ -1152,9 +1159,9 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
             f"<span class=qk>{e(_kind_label(v))}</span>"
             f"<span class=qa>{A.money((v.get('spec') or {}).get('amount'), (v.get('spec') or {}).get('currency')) if v.get('kind') == 'money' and (v.get('spec') or {}).get('action') == 'refund' else ''}</span>"
             f"<span class=qt>{A.reltime(v.get('opened_at'), ref)}</span></a>" for v, _ in items)
-        body_items = (f"<div class=queue role=navigation aria-label='Queue'><div class=qhead><b>Queue</b><span>{len(items)} waiting \u00b7 "
+        body_items = (f"<div class=dsplit><div class=queue role=navigation aria-label='Queue'><div class=qhead><b>Queue</b><span>{len(items)} waiting \u00b7 "
                       f"{'money and billing first, then repeat contacts, then oldest' if sort == 'priority' else sort + ' first'}"
-                      f"</span></div>{qrows}</div>" + body_items)
+                      f"</span></div>{qrows}</div><div class=dcards>" + body_items + "</div></div>")
     if not body_items:
         body_items = A.empty("Nothing waiting for your say-so",
                              "New reply drafts, refunds, merges and close requests appear here as the loop opens them.")
