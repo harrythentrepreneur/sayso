@@ -521,6 +521,13 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .ib-who{display:flex;gap:10px;align-items:flex-start;min-width:0}.ib-who>div{min-width:0}
 .inbox .sa-cell-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62ch}
 .ib-flags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cv{background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:0 0 12px}
+.cv-h{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13.5px}.cv-h b{color:var(--ink)}
+.cv-h .sa-faint{margin-left:auto;font-size:12.5px}.cv .msg{max-width:72ch}
+.cdec{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--card,#fff);margin-bottom:10px}
+.cdec-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;color:var(--ink)}
+.cdec .act{padding-left:0}.cdec .ballots{padding-left:0}.props{max-width:420px}
+.case{grid-template-columns:minmax(0,1fr) minmax(320px,400px)}.cnotes{margin-top:24px}
 @media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;background:var(--card,#fff);
 padding:10px 0;z-index:2}.act button{flex:1 1 40%;min-height:44px}}
 """
@@ -1127,24 +1134,60 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
     return page("Inbox", body, products, slug, "board", snap=s)
 
 
+def _mail_parts(text: str) -> tuple[dict, str]:
+    """A '**Customer wrote**' card message -> (headers, body). Headers are shown as text, never as markup."""
+    raw = str(text).split("\n", 1)[-1] if str(text).startswith("**") else str(text)
+    head_txt, _, body = raw.partition("\n\n")
+    heads = {}
+    for line in head_txt.splitlines():
+        k, sep, v = line.partition(": ")
+        if sep and k in ("From", "To", "Date", "Subject"):
+            heads[k] = v
+    return (heads, body) if heads else ({}, raw)
+
+
 def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
+    from sayso.brand import app as A
     rec = s.cases.get(key)
     if rec is None:
         return None
     slug, ref = s.config.slug, ref_time(s)
     msgs = s.card_messages(rec["card_id"])
-    first = (f"<div class='msg cust'>{message_html(msgs[0]).split('</div>', 1)[-1] if msgs[0].startswith('**') else e(msgs[0])}</div>" if msgs
-             else "<p class=faint>Read the card on the board.</p>")
+    convo = ""
+    for m in msgs:
+        if str(m).startswith("**Customer wrote**"):
+            h, body_txt = _mail_parts(m)
+            convo += (f"<div class='cv cust'><div class=cv-h>{avatar(rec.get('customer'))}<b>{e(h.get('From') or rec.get('customer'))}"
+                      f"</b><span class=sa-faint>{A.reltime(h.get('Date'), ref, long=True, suffix=' ago')}</span></div>"
+                      f"<div class='msg'>{e(body_txt.strip())}</div>"
+                      + (f"<details><summary>Email headers</summary><dl class=kv>"
+                         + "".join(f"<dt>{e(k)}</dt><dd>{e(v)}</dd>" for k, v in h.items()) + "</dl></details>" if h else "")
+                      + "</div>")
+    if not convo:
+        convo = "<p class=faint>The customer's email is on the board card.</p>"
+    notes = [m for m in msgs[1:] if not str(m).startswith("**Customer wrote**")]
+    notes_html = "".join(f"<div class=ev><span class='dot'></span><div class=body><div class=msg>{message_html(m)}</div>"
+                         f"</div></div>" for m in notes)
     events = [j for j in s.journal if j.get("case_key") == key or str(j.get("key", "")).find(key) >= 0]
     timeline = "".join(
         f"<div class=ev><span class='dot t-{EVENT_TONE.get(j.get('event'), 'grey')}'></span><div class=body>"
-        f"<div>{e(event_text(s, j))}</div><div class=when>{e(when(j.get('at')))}</div></div></div>"
+        f"<div>{e(event_text(s, j))}</div><div class=when>{A.reltime(j.get('at'), ref, long=True, suffix=' ago')} \u00b7 "
+        f"{e(when(j.get('at')))}</div></div></div>"
         for j in events) or "<p class=faint>No events yet.</p>"
-    rest = "".join(f"<div class=ev><span class='dot'></span><div class=body><div class=msg>{message_html(m)}</div>"
-                   f"</div></div>" for m in msgs[1:])
+    # decision panel: every open vote on this case, with its material, the lock and the buttons
+    panel = ""
+    for v in s.open_votes():
+        if v.get("case_key") != key:
+            continue
+        panel += (f"<div class=cdec><div class=cdec-h><b>{e(_kind_label(v))}</b>{wait_badges(s, v, ref)}</div>"
+                  f"<div class=q>{e(v.get('question'))}</div>{_decision_material(s, v, rec)}"
+                  f"{A.trust_line(str(v.get('fingerprint') or ''), version=_version_of(v))}"
+                  f"{_ballots_html(s, v)}{_vote_form(s, v)}</div>")
+    if not panel:
+        panel = "<p class=faint style='margin:0;font-size:13px'>Nothing waiting on this case.</p>"
     vrows = ""
     for vk, v in sorted(s.votes.items(), key=lambda kv: kv[1].get("opened_at", "")):
-        if v.get("case_key") != key:
+        if v.get("case_key") != key or v.get("status") == "open":
             continue
         att = s.attempts.get(vk, {})
         who = operator(s, v.get("decided_by"))
@@ -1176,6 +1219,12 @@ def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
                              f"<code>{e(r.get('message_id'))}</code></div></div>")
             except ValueError:
                 receipts += f"<pre>{e(p.read_text(encoding='utf-8'))}</pre>"
+    for vk, att in s.attempts.items():
+        if s.votes.get(vk, {}).get("case_key") == key and s.votes[vk].get("kind") == "money":
+            rc = att.get("receipt") or {}
+            receipts += (f"<div style='margin-bottom:8px'>{exec_pill(att.get('status'))}<div class=faint "
+                         f"style='font-size:12px;margin-top:2px'>Refund {A.money(rc.get('amount'), rc.get('currency'))}"
+                         f" · <code>{e(rc.get('provider_id'))}</code></div></div>")
     props = (f"<dl style='margin:0'><div class=prop><dt>Stage</dt><dd>{stage_pill(s.stage(rec['card_id']))}</dd></div>"
              f"<div class=prop><dt>Customer</dt><dd>{e(rec.get('customer'))}</dd></div>"
              f"<div class=prop><dt>Type</dt><dd>{e(rec.get('kind'))}</dd></div>"
@@ -1183,18 +1232,19 @@ def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
              f"<div class=prop><dt>Opened</dt><dd>{e(when(rec.get('created_at')))}</dd></div>"
              f"<div class=prop><dt>Case key</dt><dd><code>{e(key)}</code></dd></div></dl>")
     none = "<p class=faint style='margin:0;font-size:13px'>None</p>"
+    chips = "".join(" " + A.badge(lbl, tone) for tone, lbl in flags(s, rec))
     body = (f"{_paused_banner(s)}"
-            + head(str(rec.get("title")), "",
-                   crumb=f"<a href='/p/{e(slug)}/board'>Cases</a> / {e(rec.get('ticket') or key)}")
+            + A.header(str(rec.get("title")), f"{rec.get('customer') or ''}",
+                       eyebrow_html=f"<a href='/p/{e(slug)}/board'>Inbox</a> / {e(rec.get('ticket') or key)}",
+                       meta_html=stage_pill(s.stage(rec["card_id"])) + chips)
             + "<div class=case><div class=thread>"
-            f"<h2>Customer wrote</h2>{first}"
-            f"<h2>Card thread <span class=c>{max(len(msgs) - 1, 0)}</span></h2>"
-            f"{rest or '<p class=faint>No further messages.</p>'}"
-            f"<h2>Timeline</h2>{timeline}</div>"
-            f"<div class=props><h3 style='margin-top:0'>Properties</h3>{props}<h3>Votes</h3>{vrows or none}"
-            + "".join(_vote_form(s, v) for v in s.open_votes() if v.get("case_key") == key)
-            + f"<h3>Send receipts</h3>{receipts or none}<h3>Drafts</h3>{drafts or none}</div></div>")
-    return page(str(rec.get("title")), body, products, slug, "board", snap=s)
+            f"<h2>Customer wrote</h2>{convo}"
+            f"<h2>Timeline</h2>{timeline}"
+            f"<details class=cnotes><summary>Board thread <span class=c>{len(notes)}</span></summary>"
+            f"{notes_html or '<p class=faint>No further messages.</p>'}</details></div>"
+            f"<div class=props><h3 style='margin-top:0'>Decision</h3>{panel}<h3>Receipts</h3>{receipts or none}"
+            f"<h3>Properties</h3>{props}<h3>Votes</h3>{vrows or none}<h3>Drafts</h3>{drafts or none}</div></div>")
+    return page(str(rec.get("title")), body, products, slug, "case", snap=s)
 
 
 def render_money(s: Snapshot, products: list[str], view: str = "") -> str:

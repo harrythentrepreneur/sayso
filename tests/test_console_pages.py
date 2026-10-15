@@ -83,6 +83,28 @@ class ConsolePagesTests(unittest.TestCase):
         row = [r for r in body.split("<tr") if "Charged after I cancelled" in r][0]
         self.assertIn(">Money<", row)
 
+    # -- case -------------------------------------------------------------------------------------
+    def test_case_conversation_first_then_decision_panel_with_lock(self):
+        s = self.snap()
+        key = next(k for k, r in s.cases.items() if r["customer"] == "lee@customer.test")
+        _, _, body = self.get(f"/p/demo/case/{key}")
+        main = body[body.index("<main>"):]
+        self.assertLess(main.index("Customer wrote"), main.index("<h3 style='margin-top:0'>Decision"))
+        self.assertIn("Say-so lock", main)
+        self.assertIn("&lt;b&gt;Please fix&lt;/b&gt;", main)          # customer HTML stays text
+        self.assertNotIn("<b>Please fix</b>", main)
+        self.assertIn("Email headers", main)
+        self.assertIn("aria-current=\"page\"", body.split("Inbox</a>")[0][-300:] + body)  # Inbox highlighted
+
+    def test_case_receipts_show_provider_refund(self):
+        s = self.snap()
+        key = next(k for k, r in s.cases.items() if s.attempts and any(
+            s.votes.get(vk, {}).get("case_key") == k and s.votes[vk]["kind"] == "money" for vk in s.attempts))
+        _, _, body = self.get(f"/p/demo/case/{key}")
+        self.assertIn("VERIFIED_WITH_PROVIDER", body)
+        self.assertIn("$19.00", body)
+        self.assertIn("re_19", body)
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]
