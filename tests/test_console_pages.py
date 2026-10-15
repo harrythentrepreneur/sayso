@@ -169,7 +169,20 @@ class ConsolePagesTests(unittest.TestCase):
         self.assertEqual(dashboard._csv_cell("@x"), "'@x")
         _, _, only = self.get("/p/demo/audit.csv?kind=alerts")
         self.assertEqual(len(list(csv.reader(io.StringIO(only)))), 1 + sum(
-            1 for j in self.snap().journal if j.get("event") == "alert"))
+            1 for j in self.snap().journal if j.get("event") in ("alert", "notice")))
+
+    def test_job_summary_in_words(self):
+        self.assertEqual(dashboard.job_summary("{'opened': 1, 'appended': 0, 'held': []}"), "1 opened")
+        self.assertEqual(dashboard.job_summary("{}"), "Nothing to do")
+        self.assertEqual(dashboard.job_summary("{'stale': ['intake'], 'paused': False}"), "stale: intake")
+        self.assertEqual(dashboard.job_summary("0 findings"), "0 findings")
+        self.assertEqual(dashboard.job_summary("{__import__('os')}"), "{__import__('os')}")   # never evaluated
+
+    def test_every_audit_line_has_a_category_and_words(self):
+        s = self.snap()
+        for j in s.journal:
+            self.assertIn(j["event"], dashboard.AUDIT_OF, j["event"])
+            self.assertNotEqual(dashboard.event_text(s, j), j["event"])
 
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")

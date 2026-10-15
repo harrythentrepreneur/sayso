@@ -180,7 +180,8 @@ JOB_HINT = {"intake": "Turns new email into cards", "draft": "Writes reply draft
             "sender": "Sends approved replies, then proves them", "money": "Runs approved refunds, then proves them",
             "dev": "Starts one coding run per dev card", "release": "Merges the exact approved PR head",
             "close": "Asks to close quiet cases", "reconcile": "Reports drift, never repairs",
-            "health": "Watches the other jobs"}
+            "health": "Watches the other jobs", "qa": "Checks a fix on its exact head before a merge vote",
+            "stall": "Reminds about cases and votes that stopped moving"}
 
 ICONS = {
     "inbox": '<path d="M3 13h5l1.5 2.5h5L16 13h5M5 5h14l2 8v6H3v-6z"/>',
@@ -327,6 +328,17 @@ def event_text(s: "Snapshot", j: dict) -> str:
         return f"{kind} done"
     if ev == "alert":
         return f"Alert · {j.get('text', '')}"
+    if ev == "notice":
+        inner = key[len("vote:"):] if key.startswith("vote:") else key
+        k2 = KIND_LABEL.get(inner.split(":")[0], inner.split(":")[0]) if inner else "decision"
+        who = operator(s, j.get("mention")) if j.get("mention") else "any operator"
+        return f"Notified {who} in the alerts channel · {k2} waiting"
+    if ev == "web_vote":
+        return f"{'Yes' if j.get('answer') == 'yes' else 'No'} recorded in the console by {j.get('by', '')}"
+    if ev in ("paused", "resumed"):
+        return f"Loop {ev}" + (f" · {j.get('reason') or j.get('by')}" if (j.get("reason") or j.get("by")) else "")
+    if ev == "console_tick":
+        return f"Dry-run pass started from the console by {j.get('by', '')}"
     return str(ev)
 
 
@@ -531,7 +543,8 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .cdec-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;color:var(--ink)}
 .cdec .act{padding-left:0}.cdec .ballots{padding-left:0}.props{max-width:420px}
 .case{grid-template-columns:minmax(0,1fr) minmax(320px,400px)}.cnotes{margin-top:24px}
-.sa-tile-v .v{display:inline}
+.sa-tile-v .v{display:inline}.ins .sa-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:640px){.ins .sa-tiles{grid-template-columns:1fr 1fr}}
 main a.sa-tab,main a.sa-seg a,main .sa-seg a,main a.sa-rowlink,main a.wrow,main a.sa-btn{color:inherit}
 main .sa-tab{color:var(--soft)}main .sa-tab.on{color:var(--ink)}main .sa-seg a{color:var(--ink2)}
 main a.sa-btn.ghost{color:var(--ink)}main a.sa-btn:not(.ghost){color:#fff}
@@ -548,7 +561,8 @@ border-radius:10px;padding:14px 16px;margin:0 0 16px;font-size:14px;color:var(--
 .hjob{display:grid;grid-template-columns:28px minmax(0,1fr) 150px;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:13.5px}
 .hjob:first-child{border-top:0}.hn{color:var(--faint);font-variant-numeric:tabular-nums;padding-top:1px}
 .hh b{color:var(--ink)}.hjob .res{font-size:12px;color:var(--faint);margin-top:2px;word-break:break-word}
-.hwhen{text-align:right;font-size:12.5px}.hfix{margin-top:8px;background:#fdecec;border-radius:6px;padding:8px 10px;color:var(--ink2)}
+.hwhen{text-align:right;font-size:12.5px}.hraw{margin-top:2px}.hraw summary{font-size:12px}
+details.hraw:not([open]) pre{display:none}.hjob .res{color:var(--ink2);font-size:12.5px}.hfix{margin-top:8px;background:#fdecec;border-radius:6px;padding:8px 10px;color:var(--ink2)}
 @media (max-width:860px){.hjob{grid-template-columns:22px minmax(0,1fr)}.hwhen{grid-column:2;text-align:left}}@media (max-width:860px){.wgrid{grid-template-columns:1fr}}
 @media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;top:auto;background:var(--card,#fff);
 padding:10px 0;z-index:2;box-shadow:0 -6px 12px -10px rgba(0,0,0,.25)}.act button{flex:1 1 40%;min-height:44px}
@@ -879,17 +893,19 @@ def render_overview(s: Snapshot, products: list[str], days: str = "") -> str:
     body = (f"{_paused_banner(s)}{alert}"
             + A.header("Insights", f"Last {n_days} days to {ref.strftime('%d %b %Y')} (UTC). Every number is read from "
                        "this product's records.", actions_html=periods, eyebrow_html=e(s.config.name))
-            + tiles + wait_panel
+            + f"<div class=ins>{tiles}</div>" + wait_panel
             + "<div class=grid2 style='margin-top:16px'>"
             + A.panel("New cases", ch_new + A.source("case records, by the day each case opened"), sub=f"Per day, last {n_days} days")
             + A.panel("Decisions made", ch_dec + A.source("decision journal; a decision counts once, at its first answer"),
                       sub=f"Per day, last {n_days} days \u00b7 green Yes, red No")
             + A.panel("Decision outcomes", A.hbars(outcome_rows, total=sum(status.values()) or 1)
-                      + A.source("vote records, by current status"), sub=f"All {sum(status.values())} decisions")
+                      + A.source("vote records, by current status"), sub=f"All {sum(status.values())} decisions (votes) by where they are now, all time")
             + A.panel("Cases by flag", A.hbars(flag_counts.most_common(), total=len(live) or 1)
                       + A.source("Inbox flags; a case can carry more than one"), sub=f"% of {len(live)} cases")
             + A.panel("Who decided", A.hbars(who.most_common(6)) if who else "<p class=sa-faint>No decision yet.</p>",
                       sub="Every recorded decider, all time")
+            + A.panel("Scope", "<p class=sa-faint style='margin:0;font-size:13px'>The period buttons change the KPI "
+                      "tiles and the two daily charts. Outcomes, flags and deciders count all time.</p>")
             + "</div>"
             "<p class=notmeasured>Not measured yet, so not shown: AI cost per case, first reply time in business hours "
             "and customer satisfaction. The core does not record them.</p>")
@@ -1384,7 +1400,12 @@ def render_money(s: Snapshot, products: list[str], view: str = "") -> str:
                       "<span class=sa-faint>Not run</span>")
         who = operator(s, r["decided_by"])
         decision = (f"<div>{e(who)}</div><div class=sa-cell-s>{A.reltime(vote.get('decided_at'), ref, long=True, suffix=' ago')}</div>"
-                    if who else f"<div class=sa-faint>Opened {A.reltime(vote.get('opened_at'), ref, long=True, suffix=' ago')}</div>")
+                    if who else
+                    f"<div>Awaiting a Yes</div><div class=sa-cell-s>opened {A.reltime(vote.get('opened_at'), ref, long=True, suffix=' ago')}</div>"
+                    if r["vote"] == "open" else
+                    f"<div class=sa-faint>{e(status[0])}</div>")
+        if r["execution"] in ("-", None, "") and r["vote"] == "open":
+            check_html = A.badge("Pending", "neutral", title="Runs once after a Yes, then is checked with the provider")
         what = ("Refund" if sp.get("action") == "refund" else
                 "Cancel subscription" if sp.get("action") == "cancel_subscription" else str(sp.get("action", "")))
         rows.append({"cells": [
@@ -1397,12 +1418,12 @@ def render_money(s: Snapshot, products: list[str], view: str = "") -> str:
         A.tile("Waiting for a decision", A.money(sums["waiting"], cur), hot=bool(sums["waiting"]),
                note=f"{waiting_n} request{'s' if waiting_n != 1 else ''}",
                link_html=f"<a href='/p/{e(slug)}/'>Review in Decisions</a>" if waiting_n else ""),
-        A.tile("Refunded and verified", A.money(sums["verified"], cur),
-               source="Read back from the payment provider after it ran"),
-        A.tile("Declined or not run", A.money(sums["declined"], cur), source="Declined, voided or expired votes"),
-        A.tile("Refund cap", A.money(p.refund_max_minor, cur) if p.refund_max_minor else e("None set"),
-               source=f"Per refund, from the settings file. Larger requests are refused. Currencies: "
-                      f"{', '.join(c.upper() for c in p.currencies) or 'none'}"),
+        A.tile("Refunded and verified", A.money(sums["verified"], cur), note=f"{counts['done']} refunded",
+               source="Read back from the payment provider"),
+        A.tile("Declined or not run", A.money(sums["declined"], cur), note=f"{counts['declined']} not run",
+               source="Declined, voided or expired votes"),
+        A.tile("Refund cap (setting)", A.money(p.refund_max_minor, cur) if p.refund_max_minor else e("None set"),
+               note="Per refund; larger requests are refused", source="policy.refund_max_minor in the settings file"),
     ])
     base = f"/p/{slug}/money"
     tabs = A.tabs([(lbl, A.qs(base, view=k), counts[k], k == view) for k, lbl in MONEY_VIEWS], label="Status")
@@ -1439,6 +1460,29 @@ JOB_FIX = {
 }
 
 
+def job_summary(result: Any) -> str:
+    """A heartbeat result in words: '1 opened, 3 open' from "{'opened': 1, 'open': 3, 'held': []}". Zero and empty
+    values are left out; nothing left reads 'Nothing to do'. Unparseable text is shown as it is."""
+    import ast
+    text = str(result or "").strip()
+    try:
+        data = ast.literal_eval(text) if text.startswith("{") else None
+    except (ValueError, SyntaxError):
+        data = None
+    if not isinstance(data, dict):
+        return text or "Nothing recorded"
+    parts = []
+    for k, v in data.items():
+        if isinstance(v, bool):
+            if v:
+                parts.append(k.replace("_", " "))
+        elif isinstance(v, (int, float)) and v:
+            parts.append(f"{v:g} {k.replace('_', ' ')}")
+        elif isinstance(v, (list, tuple, set)) and v:
+            parts.append(f"{k.replace('_', ' ')}: {', '.join(str(x) for x in list(v)[:6])}" + (" \u2026" if len(v) > 6 else ""))
+    return ", ".join(parts) if parts else "Nothing to do"
+
+
 def render_health(s: Snapshot, products: list[str]) -> str:
     from sayso.brand import app as A
     from sayso.jobs import ORDER
@@ -1471,7 +1515,8 @@ def render_health(s: Snapshot, products: list[str]) -> str:
                    f"<code>journalctl --user -u sayso-{e(slug)}-{e(j)}</code>.</div>")
         jobs += (f"<li class=hjob><span class=hn>{i}</span><div class=hmain><div class=hh><b>{e(JOB_TITLE.get(j, j))}</b>"
                  f" <code class=raw>{e(j)}</code> {badge}</div><div class=mute>{e(JOB_HINT.get(j, ''))}</div>"
-                 f"<div class=res>{e(str(h['result'])[:160])}</div>{fix}</div>"
+                 f"<div class=res>{e(job_summary(h['result'])[:200])}</div>"
+                 f"<details class=hraw><summary>Raw result</summary><pre>{e(str(h['result'])[:600])}</pre></details>{fix}</div>"
                  f"<div class=hwhen>{A.reltime(h['at'], ref, long=True, suffix=' ago') if h['at'] else '<span class=sa-faint>\u2014</span>'}"
                  f"<div class=sa-faint>every {e(A.long_age(every) if every else '?')}</div></div></li>")
     alerts = [j for j in s.journal if j.get("event") == "alert"][-20:][::-1]
@@ -1495,11 +1540,11 @@ def render_health(s: Snapshot, products: list[str]) -> str:
 
 
 AUDIT_KINDS = (("", "All events"), ("decisions", "Decisions"), ("sends", "Sends & refunds"), ("cases", "Cases"),
-               ("alerts", "Alerts"), ("console", "Console"))
+               ("alerts", "Alerts & notices"), ("console", "Console"))
 AUDIT_OF = {"vote_opened": "decisions", "vote_approved": "decisions", "vote_declined": "decisions",
             "vote_void": "decisions", "vote_expired": "decisions", "vote_policy_approved": "decisions",
             "web_vote": "decisions", "vote_done": "sends", "send_attempt": "sends", "case_opened": "cases",
-            "mail_appended": "cases", "alert": "alerts", "paused": "console", "resumed": "console",
+            "mail_appended": "cases", "alert": "alerts", "notice": "alerts", "paused": "console", "resumed": "console",
             "console_tick": "console"}
 AUDIT_CAP = 500
 
