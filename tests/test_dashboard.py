@@ -115,8 +115,9 @@ class DashboardTests(unittest.TestCase):
     def test_money_shows_provider_verification(self):
         _, body, _ = self.get("/p/demo/money")
         self.assertIn("VERIFIED_WITH_PROVIDER", body)
-        self.assertIn("refund 19.00 USD", body)
-        self.assertIn("refund 29.00 USD", body)
+        self.assertIn("<b>$19.00</b> <span class=sa-cur>USD</span>", body)   # verified refund, formatted amount
+        self.assertIn("<b>$29.00</b> <span class=sa-cur>USD</span>", body)   # waiting refund
+        self.assertIn("Verified with provider", body)
 
     def test_pause_is_visible(self):
         flag = self.state / "PAUSED"

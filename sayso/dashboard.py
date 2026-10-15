@@ -1247,36 +1247,87 @@ def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
     return page(str(rec.get("title")), body, products, slug, "case", snap=s)
 
 
+MONEY_VIEWS = (("", "All"), ("waiting", "Waiting"), ("done", "Refunded"), ("declined", "Declined"))
+PROVIDER_CHECK = {"VERIFIED_WITH_PROVIDER": ("Verified with provider", "good"), "UNVERIFIED": ("Not verified", "bad"),
+                  "pending": ("Running", "warn")}
+
+
+def _money_view(r: dict) -> str:
+    if r["vote"] == "open":
+        return "waiting"
+    if r["vote"] in ("approved", "done"):
+        return "done"
+    return "declined"
+
+
 def render_money(s: Snapshot, products: list[str], view: str = "") -> str:
-    rows = ""
-    verified = awaiting = 0
-    for r in s.money_rows():
+    from sayso.brand import app as A
+    slug, ref = s.config.slug, ref_time(s)
+    view = view if view in dict(MONEY_VIEWS) else ""
+    p = s.config.policy
+    cur = (p.currencies[0] if p.currencies else "usd")
+    all_rows = s.money_rows()
+    sums = {"waiting": 0, "verified": 0, "declined": 0}
+    counts = {k: 0 for k, _ in MONEY_VIEWS}
+    rows = []
+    for r in all_rows:
         sp = r["spec"]
         amt = sp.get("amount", 0) if sp.get("action") == "refund" else 0
-        if r["execution"] == "VERIFIED_WITH_PROVIDER":
-            verified += amt
+        v_view = _money_view(r)
+        counts[""] += 1
+        counts[v_view] += 1
         if r["vote"] == "open":
-            awaiting += amt
+            sums["waiting"] += amt
+        if r["execution"] == "VERIFIED_WITH_PROVIDER":
+            sums["verified"] += amt
+        if r["vote"] in ("declined", "void", "expired"):
+            sums["declined"] += amt
+        if view and v_view != view:
+            continue
         rec = s.cases.get(r["case_key"], {})
-        rows += (f"<tr><td><div style='display:flex;gap:10px;align-items:flex-start'>{avatar(rec.get('customer'))}"
-                 f"<div><a href='/p/{e(s.config.slug)}/case/{e(r['case_key'])}'>{e(r['subject'])}</a>"
-                 f"<div class=faint style='font-size:12px'>{e(rec.get('customer'))}</div></div></div></td>"
-                 f"<td><b>{e(money_text(sp))}</b></td><td>{pill(r['vote'])}</td><td>{exec_pill(r['execution'])}</td>"
-                 f"<td>{e(operator(s, r['decided_by'])) or '<span class=faint>—</span>'}</td></tr>")
-    p = s.config.policy
-    cur = e(", ".join(p.currencies).upper() or "-")
-    metrics = (_metric("Refunded · verified", f"{verified / 100:.2f}", f"{cur} · read back from the provider")
-               + _metric("Awaiting a Yes", f"{awaiting / 100:.2f}", cur, hot=bool(awaiting))
-               + _metric("Refund cap", f"{p.refund_max_minor / 100:.2f}", "larger refunds are refused")
-               + _metric("Currencies", cur, "others are refused"))
-    body = (f"{_paused_banner(s)}" + head("Money", "Refunds and cancellations run only on a Yes, then are verified "
-                                          "with the payment provider.", crumb=e(s.config.name))
-            + f"<div class=metrics>{metrics}</div><h2>Requests</h2>"
-            f"<table><colgroup><col style='width:32%'><col style='width:40%'><col style='width:10%'><col style='width:10%'>"
-            f"<col style='width:8%'></colgroup><tr><th>Case</th><th>Action</th><th>Vote</th><th>Provider check</th>"
-            f"<th>Decided by</th></tr>"
-            f"{rows or '<tr><td colspan=5 class=faint>No money requests yet.</td></tr>'}</table>")
-    return page("Money", body, products, s.config.slug, "money", snap=s)
+        vote = s.votes.get(r["key"], {})
+        status = {"open": ("Waiting", "warn"), "approved": ("Approved", "neutral"), "done": ("Refunded", "good"),
+                  "declined": ("Declined", "neutral"), "void": ("Voided", "neutral"),
+                  "expired": ("Expired", "neutral")}.get(r["vote"], (str(r["vote"]), "neutral"))
+        check = PROVIDER_CHECK.get(r["execution"])
+        check_html = (A.badge(check[0], check[1], title=r["execution"]) if check else
+                      "<span class=sa-faint>Runs after approval</span>" if r["vote"] == "open" else
+                      "<span class=sa-faint>Not run</span>")
+        who = operator(s, r["decided_by"])
+        decision = (f"<div>{e(who)}</div><div class=sa-cell-s>{A.reltime(vote.get('decided_at'), ref, long=True, suffix=' ago')}</div>"
+                    if who else f"<div class=sa-faint>Opened {A.reltime(vote.get('opened_at'), ref, long=True, suffix=' ago')}</div>")
+        what = ("Refund" if sp.get("action") == "refund" else
+                "Cancel subscription" if sp.get("action") == "cancel_subscription" else str(sp.get("action", "")))
+        rows.append({"cells": [
+            f"<div class=sa-cell-t>{e(rec.get('customer') or '\u2014')}</div><div class=sa-cell-s>{e(r['subject'])}</div>",
+            f"<div>{e(what)}</div><div class=sa-cell-s><code>{e(sp.get('charge') or sp.get('subscription') or '')}</code></div>",
+            A.money(amt, sp.get("currency")) if amt else "<span class=sa-faint>\u2014</span>",
+            A.badge(*status), decision, check_html], "href": f"/p/{slug}/case/{r['case_key']}"})
+    waiting_n = counts["waiting"]
+    tiles = A.tiles([
+        A.tile("Waiting for a decision", A.money(sums["waiting"], cur), hot=bool(sums["waiting"]),
+               note=f"{waiting_n} request{'s' if waiting_n != 1 else ''}",
+               link_html=f"<a href='/p/{e(slug)}/'>Review in Decisions</a>" if waiting_n else ""),
+        A.tile("Refunded and verified", A.money(sums["verified"], cur),
+               source="Read back from the payment provider after it ran"),
+        A.tile("Declined or not run", A.money(sums["declined"], cur), source="Declined, voided or expired votes"),
+        A.tile("Refund cap", A.money(p.refund_max_minor, cur) if p.refund_max_minor else e("None set"),
+               source=f"Per refund, from the settings file. Larger requests are refused. Currencies: "
+                      f"{', '.join(c.upper() for c in p.currencies) or 'none'}"),
+    ])
+    base = f"/p/{slug}/money"
+    tabs = A.tabs([(lbl, A.qs(base, view=k), counts[k], k == view) for k, lbl in MONEY_VIEWS], label="Status")
+    table = A.table([("Customer", ""), ("Action", ""), ("Amount", "num"), ("Status", ""), ("Decision", ""),
+                     ("Provider check", "")], rows, caption="Refunds",
+                    empty_html=A.empty("No refunds here", "A refund appears when a draft or an operator asks for one. "
+                                       "It runs only after a Yes, once, and is then checked with the payment provider."))
+    body = (f"{_paused_banner(s)}"
+            + A.header("Refunds", "Every refund waits for a person's Yes, runs once, then is checked with the payment "
+                       "provider.", eyebrow_html=e(s.config.name))
+            + tiles + f"<div class=sa-bar>{tabs}</div>{table}"
+            + f"<p class=sa-src>{counts['']} request{'s' if counts[''] != 1 else ''} \u00b7 from the vote and attempt "
+              f"records in this product's state folder.</p>")
+    return page("Refunds", body, products, slug, "money", snap=s)
 
 
 def render_health(s: Snapshot, products: list[str]) -> str:
