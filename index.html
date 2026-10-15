@@ -161,9 +161,42 @@ h1,h2{text-wrap:balance}
 .faq a{color:var(--accent)!important}
 .final{text-align:center}
 .final h2{font-size:clamp(32px,4.2vw,48px);letter-spacing:-.03em}
-.final p{max-width:32rem;margin:14px auto 26px;font-size:18px}
+.final p{max-width:32rem;margin:14px auto 26px;font-size:18px;text-wrap:balance;color:var(--ink2)}
 .note{display:none;margin-top:14px;font-weight:500;color:var(--warn)}
 footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;border-top:1px solid var(--line)}
+
+/* marketing v2 (15 Oct 2026): proof, problem, comparison, brand stills. Evidence: market teardown of 9 leaders. */
+.hero{position:relative;isolation:isolate}
+.hero::before{content:"";position:absolute;right:-6%;top:6%;width:46%;height:88%;z-index:-1;border-radius:24px;background:radial-gradient(closest-side,rgba(255,122,77,.16),rgba(255,122,77,0))}
+.hero .lede{max-width:32rem}
+.hero .iphone{box-shadow:0 30px 70px -20px rgba(60,30,10,.45),0 0 0 1px rgba(16,16,20,.08)}
+.hint{box-shadow:0 6px 18px -6px rgba(16,16,20,.18)}
+@media (min-width:761px){.hint.l{transform:translateX(-24px)}.hint.r{transform:translateX(24px)}}
+@media (max-width:900px){.hero::before{display:none}}
+.proof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0 0}
+.proof div{background:var(--card);padding:22px 20px}
+.proof b{display:block;font:650 34px/1.1 var(--font);letter-spacing:-.03em;color:var(--ink);margin-bottom:6px}
+.proof span{color:var(--soft);font-size:14.5px;line-height:1.45;display:block}
+.proof-src{font-size:13.5px;color:var(--soft);margin:12px 0 0;text-align:center}
+@media (min-width:640px){.proof{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#proof{padding:48px 0 24px}
+.probs{display:grid;grid-template-columns:1fr;gap:14px}
+.probs>div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px}
+.probs h3{font-size:17px;margin:0 0 8px}.probs p{font-size:15.5px;margin:0}
+@media (min-width:900px){.probs{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+.cmp-wrap{overflow-x:auto;border-radius:10px}
+.cmp{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:15px}
+.cmp th,.cmp td{padding:14px 16px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+.cmp thead th{border-top:0;font:600 12.5px var(--font);letter-spacing:.05em;text-transform:uppercase;color:var(--soft);background:#fbfbfa}
+.cmp tbody th{font-weight:600;color:var(--ink);width:22%}.cmp td{width:33%}.cmp td.us{width:45%}
+@media (max-width:640px){.cmp thead{display:none}.cmp,.cmp tbody,.cmp tr,.cmp th,.cmp td{display:block;width:auto!important}.cmp tr{border-top:1px solid var(--line);padding:14px 16px}.cmp tr:first-child{border-top:0}.cmp th,.cmp td{border:0;padding:0}.cmp tbody th{margin-bottom:8px}.cmp td{font-size:14px;color:var(--soft);margin-bottom:8px}.cmp td::before{content:'Autonomous agents: ';font-weight:600}.cmp td.us{padding:10px 12px;border-radius:8px;color:var(--ink2);font-size:15px}.cmp td.us::before{content:'Sayso: ';color:var(--accent);font-weight:650}}
+.cmp td.us{background:#fdf6f2}.cmp td.us b{color:var(--ink);font-weight:650}
+.cmp thead th.us{color:var(--accent);background:#fbefe8}
+.cmp-note{font-size:13.5px;color:var(--ink2);margin:12px 0 0}
+.final{position:relative;isolation:isolate;overflow:hidden}
+.final::before{content:"";position:absolute;top:0;bottom:0;left:-140px;right:0;z-index:-1;background:linear-gradient(90deg,rgba(247,247,245,0) 22%,rgba(247,247,245,.9) 44%),url(img/brand/close-bell.webp) left center/cover no-repeat}
+@media (min-width:761px){.final .wrap{padding-left:34%}}
+@media (max-width:760px){.final::before{background:linear-gradient(rgba(247,247,245,.88),rgba(247,247,245,.94)),url(img/brand/close-bell.webp) center/cover no-repeat}}
 </style>
 </head>
 <body>
@@ -175,7 +208,7 @@ footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;bo
 
 <nav class="nav" id="nav"><div class="wrap">
   <a class="brand" href="#"><svg><use href="#buddy"/></svg>sayso</a>
-  <div class="links"><a href="#how">How it works</a><a href="#ways">Pricing</a><a href="#safe">Safety</a><a href="#next">Coming next</a><a href="#faq">FAQ</a></div>
+  <div class="links"><a href="#how">How it works</a><a href="#compare">Why Sayso</a><a href="#ways">Pricing</a><a href="#safe">Safety</a><a href="#next">Coming next</a><a href="#faq">FAQ</a></div>
   <a class="btn sm" href="https://sayso.omo.sh">Start free trial</a>
 </div></nav>
 
@@ -196,6 +229,20 @@ footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;bo
   </div>
 </header>
 
+
+<section id="proof"><div class="wrap">
+ <div class="proof"><div><b>212</b><span>support cases handled</span></div><div><b>0</b><span>duplicate sends (40 emails sent)</span></div><div><b>16 / 16</b><span>refunds and cancels verified in Stripe</span></div><div><b>29 min</b><span>median time to a person's decision</span></div></div>
+ <p class="proof-src">Sayso on PhonicsMaker's real support inbox, a two-person edtech company, 20 Sep to 8 Oct 2026.</p>
+</div></section>
+
+<section id="problem"><div class="wrap">
+ <div class="head"><span class="eyebrow">The problem</span><h2>An AI that answers on its own is an AI that promises on your behalf.</h2><p>AI support is quick. But a wrong answer, a made-up policy or a refund to the wrong person is now your mistake, sent in your name.</p></div>
+ <div class="probs">
+  <div><h3>It speaks for you</h3><p>In 2024 a tribunal held Air Canada liable for a refund policy its website chatbot made up. What an AI tells your customer is your promise.</p></div>
+  <div><h3>It moves money</h3><p>Refunds and cancellations are the replies that cost the most when they are wrong. An agent that can issue them alone can issue the wrong one.</p></div>
+  <div><h3>It is billed per answer</h3><p>Leading AI agents charge per resolution, about $0.90 to $2.00 each. The more it answers alone, the more you pay.</p></div>
+ </div>
+</div></section>
 <section id="how" class="alt">
   <div class="wrap">
     <div class="head c"><span class="eyebrow">How it works today</span><h2>Four steps. A person decides at the one that matters.</h2><p>This is what runs today, in the hosted web app and in Discord.</p></div>
@@ -225,7 +272,7 @@ footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;bo
     <div class="steps">
       <div class="step"><span class="n">Step 1</span><h3>Read the card</h3><p>The question at the top, the customer's own words, and the reply Sayso wrote. Scroll up for earlier emails.</p>
         <div class="shot"><div class="iphone"><div class="scr"><img src="img/ui/ph-card.webp" alt="A Sayso card asking: Refund $49.00 and send this reply?" loading="lazy"></div></div></div></div>
-      <div class="step"><span class="n">Step 2</span><h3>Swipe to decide</h3><p>Right sends it. Left skips it. The next card slides in, with no pop-ups in the way. <b>Live today</b> in the web app, on any phone.</p>
+      <div class="step"><span class="n">Step 2</span><h3>Swipe to decide</h3><p>Right sends it. Left declines it. The next card slides in, with no pop-ups in the way. <b>Live today</b> in the web app, on any phone.</p>
         <div class="shot"><div class="iphone"><div class="scr"><img src="img/ui/ph-swipe.webp" alt="A card being swiped right with a SEND stamp" loading="lazy"></div></div></div></div>
       <div class="step"><span class="n">Or</span><h3>Or revise it</h3><p>Tap Revise: "Warmer", "Shorter", or your own words, and Sayso rewrites it. Today you edit the draft text yourself.</p>
         <div class="shot bottom"><div class="iphone"><div class="scr"><img src="img/ui/ph-revise.webp" alt="The Revise sheet with quick options" loading="lazy"></div></div></div></div>
@@ -294,7 +341,7 @@ footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;bo
   <line x1="62" x2="308" y1="140" y2="140" stroke="#f4f4f2"/>
   <g transform="translate(62,158)">
     <circle cx="13" cy="13" r="13" fill="#5f5f68" fill-opacity=".13"/><path d="M8.5 8.5l9 9M17.5 8.5l-9 9" stroke="#5f5f68" stroke-width="2.4" stroke-linecap="round"/>
-    <text class="h" x="40" y="12">Skip</text><text class="b" x="40" y="31">Not this one, or not now</text>
+    <text class="h" x="40" y="12">Decline</text><text class="b" x="40" y="31">Not this one, or not now</text>
   </g>
   <line x1="62" x2="308" y1="218" y2="218" stroke="#f4f4f2"/>
   <g transform="translate(62,236)">
@@ -359,6 +406,19 @@ footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;bo
   </div>
 </section>
 
+
+<section id="compare"><div class="wrap">
+ <div class="head"><span class="eyebrow">Why Sayso</span><h2>Most AI support acts first. Sayso asks first.</h2><p>The leading AI agents are built to resolve tickets without a person. Sayso is built for teams who want the speed of AI and still want to own every word.</p></div>
+ <div class="cmp-wrap"><table class="cmp"><thead><tr><th></th><th>Autonomous AI agents</th><th class="us">Sayso</th></tr></thead><tbody>
+  <tr><th scope="row">Who decides what the customer is told</th><td>By default, the AI answers on its own</td><td class="us"><b>A person, every time.</b> Approval covers the exact text.</td></tr>
+  <tr><th scope="row">Refunds</th><td>Handled by the agent within its rules</td><td class="us"><b>You approve each one.</b> A cap you set also blocks any large amount.</td></tr>
+  <tr><th scope="row">How you pay</th><td>About $0.90 to $2.00 per resolution</td><td class="us"><b>Free to self-host, or $49 a month hosted.</b> Plus your own AI usage, billed by your provider.</td></tr>
+  <tr><th scope="row">Proof it happened</th><td>A resolution rate in the vendor's dashboard</td><td class="us"><b>Every action is checked</b> against your Sent folder and Stripe.</td></tr>
+  <tr><th scope="row">The code</th><td>Closed source</td><td class="us"><b>Open source core.</b> Apache-2.0.</td></tr>
+  <tr><th scope="row">At 3 a.m.</th><td>Answers straight away</td><td class="us"><b>Waits for you.</b> Drafts are ready; nothing goes out until a person says Yes.</td></tr>
+ </tbody></table></div>
+ <p class="cmp-note">Per-resolution prices as published by Intercom Fin ($0.99), Gorgias (about $0.90 to $1.27) and Zendesk (about $1.50 to $2.00), in US dollars, October 2026.</p>
+</div></section>
 <section id="safe" class="alt">
   <div class="wrap">
     <div class="head c"><span class="eyebrow">Safe by default</span><h2>Friendly on the outside. Strict on the inside.</h2></div>
@@ -402,7 +462,7 @@ footer{padding:34px 0 48px;text-align:center;color:var(--soft);font-size:14px;bo
   <div class="wrap">
     <svg style="width:84px;height:77px;margin:0 auto 14px;display:block"><use href="#buddy"/></svg>
     <h2>Nothing goes out without your say-so.</h2>
-    <p>Start a 14-day trial of hosted Sayso, or run the open-source version on your own server.</p>
+    <p>Start a 14-day trial of hosted Sayso, or run the <span style="white-space:nowrap">open-source</span> version on your own server.</p>
     <a class="btn" href="https://sayso.omo.sh">Try it hosted →</a> <a class="btn ghost" href="https://github.com/harrythentrepreneur/sayso" target="_blank" rel="noopener">Self-host free</a>
     <p style="margin-top:14px;font-size:14px;color:var(--soft)">Hosted from $29 a month for founding teams · open source under Apache-2.0</p>
   </div>
