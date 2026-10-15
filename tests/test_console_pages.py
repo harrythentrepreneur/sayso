@@ -154,7 +154,7 @@ class ConsolePagesTests(unittest.TestCase):
         main = body[body.index("<main>"):]
         self.assertIn("class=aday", main)
         self.assertIn("fingerprint <code", main)
-        self.assertIn("Export CSV", main)
+        self.assertIn("(CSV)</a>", main)
         _, _, body = self.get("/p/demo/audit?kind=sends")
         self.assertNotIn(">Case opened<", body)
         self.assertIn(">Vote done<", body)
