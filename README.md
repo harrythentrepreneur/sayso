@@ -63,16 +63,16 @@ Sayso takes the middle path:
 ## In production
 
 Sayso runs customer support for [PhonicsMaker](https://phonicsmaker.com), a
-two-person edtech company. From 20 September to 8 October 2026 it handled
-**212 cases from 140 customers**:
+two-person edtech company. From 20 September to 14 October 2026 it handled
+**245 cases from 156 customers**:
 
 | | |
 |---|---|
-| Support decisions made | **265** |
-| Median time to a human Yes or No | **29 minutes** |
-| Customer emails sent / duplicates | **40 / 0** |
-| Refunds and cancellations checked against Stripe | **16 / 16** |
-| Approvals cancelled automatically because something changed first | **39** |
+| Support decisions made | **375** |
+| Median time to a human Yes or No | **31 minutes** |
+| Customer emails sent / duplicates | **56 / 0** |
+| Refunds, cancellations and voids checked against Stripe | **33 / 33** |
+| Approvals cancelled automatically because something changed first | **55** |
 
 One founder approved almost all of them from a phone.
 
