@@ -184,6 +184,13 @@ class ConsolePagesTests(unittest.TestCase):
             self.assertIn(j["event"], dashboard.AUDIT_OF, j["event"])
             self.assertNotEqual(dashboard.event_text(s, j), j["event"])
 
+    def test_vote_buttons_are_never_sticky(self):
+        # A sticky vote bar covers its own card's title as the card scrolls in (QA r1 M1). The buttons stay in
+        # the flow, after the material they approve; the CSP allows no script to toggle stickiness.
+        css = dashboard.CSS + dashboard._page_css()
+        for rule in re.findall(r"([^{}]*\.act[^{}]*)\{([^}]*)\}", css):
+            self.assertNotIn("sticky", rule[1], rule[0])
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]
