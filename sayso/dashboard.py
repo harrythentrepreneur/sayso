@@ -524,7 +524,8 @@ details.acct:not([open]) .menu{display:none}
 @media (max-width:860px){body{grid-template-columns:minmax(0,1fr)}main{padding:20px 16px 48px;min-width:0}
 aside{min-width:0;max-width:100vw}aside>div{min-width:0}body.has-strip aside{top:0;height:auto}
 aside nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px;
--webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent);padding-right:28px}.navgroup .navlabel{display:none}
+-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent);padding-right:28px}
+aside nav a{min-height:44px}.navgroup .navlabel{display:none}
 .sa-ph-a{min-width:0}.sa-ph-a .sa-seg{max-width:100%;overflow-x:auto}.alog{overflow:hidden}.aw,.aa,.ac{min-width:0}
 .demo-strip{position:static;font-size:12px;padding:6px 14px}.navgroup{flex-direction:row;flex-wrap:nowrap}
 .navgroup+.navgroup{margin-top:0}aside nav,aside>div:has(nav){overflow-x:auto;scrollbar-width:none;max-width:100%}
@@ -547,7 +548,7 @@ border-top:1px solid var(--line2);color:var(--ink2);font-size:13.5px}main a.qrow
 @media (max-width:860px){main .queue a.qrow{grid-template-columns:28px minmax(0,1fr) auto}.qk,.qa{display:none}.qw{flex-direction:column;gap:0}}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
 .item.dec .item-body .sa-trust{margin-top:12px}
 .ib-who{display:flex;gap:10px;align-items:flex-start;min-width:0}.ib-who>div{min-width:0}
-.inbox .sa-cell-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62ch}
+.inbox .sa-cell-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90ch}
 .ib-flags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .cv{background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:0 0 12px}
 .cv-h{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13.5px}.cv-h b{color:var(--ink)}
@@ -1246,14 +1247,16 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
         fl = flags(s, rec)
         if any(v.get("kind") == "money" for v in open_votes if v.get("case_key") == key):
             fl = [("warn", "Money")] + [f for f in fl if f[1] != "Billing"]
-        badges = (A.badge(f"Needs you \u00b7 {n_open} decision{'s' if n_open != 1 else ''}", "warn") if n_open else
+        kinds = [_kind_label(v) for v in open_votes if v.get("case_key") == key]
+        badges = (A.badge("Needs you \u00b7 " + " + ".join(dict.fromkeys(kinds)), "warn",
+                          title=f"{n_open} decision{'s' if n_open != 1 else ''} waiting") if n_open else
                   A.badge("Closed", "neutral") if st == stages.DONE else
                   A.badge(st, "bad") if st in (stages.BLOCKED, "unreadable") else A.badge(st, "neutral")) + "".join(
             " " + A.badge(lbl, tone) for tone, lbl in fl)
         cells = [f"<div class=ib-who>{avatar(rec.get('customer'))}<div><div class=sa-cell-t>{e(rec.get('title'))}</div>"
-                 f"<div class=sa-cell-s>{e(rec.get('customer'))} \u00b7 {e(_preview(s, rec))}</div></div></div>",
+                 f"<div class=sa-cell-s>{e(rec.get('customer'))}{(' \u00b7 ' + e(rec.get('ticket'))) if rec.get('ticket') else ''}"
+                 f" \u00b7 {e(_preview(s, rec))}</div></div></div>",
                  f"<div class=ib-flags>{badges}</div>",
-                 e(rec.get("ticket") or "\u2014"),
                  A.reltime(rec.get("last_inbound") or rec.get("created_at"), ref)]
         row = {"cells": cells, "href": f"/p/{slug}/case/{key}", "cls": "tr-done" if st == stages.DONE else "",
                "rank": 0 if n_open else (2 if st == stages.DONE else 1)}
@@ -1269,7 +1272,7 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
     empty = A.empty("No cases match" if needle else "No cases here yet",
                     "Try another word or clear the search." if needle else
                     "Each customer email opens one case per problem. They appear here as intake reads the mailbox.")
-    table = A.table([("Case", ""), ("Status", ""), ("Ticket", ""), ("Last email", "num")], rows, empty_html=empty,
+    table = A.table([("Case", ""), ("Status", ""), ("Last email", "num")], rows, empty_html=empty,
                     caption="Cases", cls="inbox")
     extra = ""
     if unread:
