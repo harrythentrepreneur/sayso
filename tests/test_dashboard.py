@@ -82,8 +82,10 @@ class DashboardTests(unittest.TestCase):
 
     def test_board_places_cards_by_live_stage(self):
         _, body, _ = self.get("/p/demo/board")
-        self.assertIn("Awaiting approval · 3", body)
-        self.assertIn("Done · 1", body)
+        # the stage comes from the board (live tags), and the status tabs count what the board says
+        self.assertIn("Waiting on you<span class='sa-n'>3</span>", body)
+        self.assertIn("Closed<span class='sa-n'>1</span>", body)
+        self.assertIn("All<span class='sa-n'>4</span>", body)
 
     def test_case_page_leads_with_customer_words_and_shows_proof(self):
         cases = json.loads((self.state / "cases.json").read_text())

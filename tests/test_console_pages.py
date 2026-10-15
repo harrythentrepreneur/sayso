@@ -65,6 +65,24 @@ class ConsolePagesTests(unittest.TestCase):
         near = ref + timedelta(hours=s.config.policy.vote_expiry_hours - 3)
         self.assertIn("Expires in 3 h", dashboard.wait_badges(s, v, near))
 
+    # -- inbox ------------------------------------------------------------------------------------
+    def test_inbox_tabs_search_and_dense_rows(self):
+        _, _, body = self.get("/p/demo/board?view=waiting")
+        self.assertIn("<h1>Inbox</h1>", body)
+        self.assertIn("aria-current=page>Waiting on you", body)
+        _, _, body = self.get("/p/demo/board?q=dark+mode")
+        rows = body.split("<tbody>")[1]
+        self.assertIn("Feature request: dark mode", rows)
+        self.assertNotIn("Charged after I cancelled", rows)
+        self.assertRegex(body, r"<time datetime='[^']+' title='\d\d \w{3} \d{4}, \d\d:\d\d UTC'>")
+        _, _, body = self.get("/p/demo/board?q=zzzz-nothing")
+        self.assertIn("No cases match", body)
+
+    def test_inbox_money_flag(self):
+        _, _, body = self.get("/p/demo/board")
+        row = [r for r in body.split("<tr") if "Charged after I cancelled" in r][0]
+        self.assertIn(">Money<", row)
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]
