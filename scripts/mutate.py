@@ -440,6 +440,10 @@ MUTATIONS = [
     ('regressions: non-boolean setting accepted', 'sayso/config.py',
      '    if not isinstance(policy.qa_regression_set, bool):',
      '    if False:'),
+    ("qa: indented code read as a paragraph (killed by the CommonMark cross-check, which CI runs with markdown-it-py)",
+     "sayso/jobs/qa.py",
+     '        if _indent(rest) > 3:\n            leaf = "para" if para else "code"',
+     '        if False:\n            leaf = "para" if para else "code"'),
     ("stable api: a removed name passes", "scripts/stable_api.py",
      '            problems.append(f"{name}: REMOVED ({got[\'error\']})")',
      '            pass'),
@@ -463,23 +467,22 @@ EQUIVALENT = [
     ("no-reply: settled card redrafted (since f5ba3f6 every no-reply hold also sets held_draft, and a settled close leaves In support, so the stage and held_draft guards already stop the redraft)", "sayso/jobs/draft.py",
      "        if not rec.get(\"needs_draft\") and (rec.get(\"draft_version\") or rec.get(\"no_reply_asked_for\")\n",
      "        if not rec.get(\"needs_draft\") and (rec.get(\"draft_version\")\n"),
-    ("qa: indented code read as a paragraph (the second, loose read in _plain_mask already lets any block "
-     "start interrupt it, and 4+ space fences/HTML are refused by their own indent checks)",
-     "sayso/jobs/qa.py",
-     '        if _indent(rest) > 3:\n            leaf = "para" if para else "code"',
-     '        if False:\n            leaf = "para" if para else "code"'),
     ("close: asked twice (votes.open_vote is idempotent by key, so no second poll opens)",
      "sayso/jobs/close.py",
      "if vkey in all_votes or votes.live_for_case(ctx, key):", "if votes.live_for_case(ctx, key):"),
 ]
 
 
-def run_suite(where: Path) -> subprocess.CompletedProcess:
-    return subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", "."],
+def run_suite(where: Path, *, failfast: bool = False) -> subprocess.CompletedProcess:
+    """failfast is for mutants only: a mutant needs ONE red test to be killed, so the run
+    stops at the first failure. The baseline and equivalents always run in full."""
+    return subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", ".",
+                           *(["-f"] if failfast else [])],
                           cwd=where, capture_output=True, text=True, timeout=600)
 
 
-def _one(tmp: str, base: Path, i: int, rel: str, old: str, new: str) -> tuple[str, str | None]:
+def _one(tmp: str, base: Path, i: int, rel: str, old: str, new: str,
+         failfast: bool = True) -> tuple[str, str | None]:
     """Apply one mutation in its OWN scratch copy and run the suite.
     Returns ("stale", n) | ("killed", first failing line) | ("survived", None)."""
     work = Path(tmp) / f"work-{i}"
@@ -490,7 +493,7 @@ def _one(tmp: str, base: Path, i: int, rel: str, old: str, new: str) -> tuple[st
         if text.count(old) != 1:
             return "stale", str(text.count(old))
         path.write_text(text.replace(old, new))
-        result = run_suite(work)
+        result = run_suite(work, failfast=failfast)
         if result.returncode != 0:
             return "killed", next((ln for ln in result.stderr.splitlines() if ln.startswith(("FAIL:", "ERROR:"))), "?")
         return "survived", None
@@ -516,7 +519,7 @@ def main() -> int:
         print(f"baseline green; {len(MUTATIONS)} mutations + {len(EQUIVALENT)} equivalents on {jobs} workers", flush=True)
         everything = [(n, r, o, w, False) for n, r, o, w in MUTATIONS] + [(n, r, o, w, True) for n, r, o, w in EQUIVALENT]
         with ThreadPoolExecutor(max_workers=jobs) as pool:
-            futures = [pool.submit(_one, tmp, base, i, r, o, w) for i, (_, r, o, w, _) in enumerate(everything)]
+            futures = [pool.submit(_one, tmp, base, i, r, o, w, not eq) for i, (_, r, o, w, eq) in enumerate(everything)]
             results = [f.result() for f in futures]          # report in list order, whatever finished first
         killed, survived = 0, []
         for (name, _, _, _, equivalent), (outcome, detail) in zip(everything, results):
