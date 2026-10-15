@@ -31,6 +31,9 @@ jobs:
           export UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/uv-python"
           uv --version >/dev/null 2>&1 || pip install -q uv
           uv venv -q -p ${{ matrix.python }} "$RUNNER_TEMP/venv"
+          # Test-only: the CommonMark cross-check in tests/test_qa_markdown.py skips without it,
+          # and one seeded fault is killed only by that check. sayso itself stays zero-dependency.
+          VIRTUAL_ENV="$RUNNER_TEMP/venv" uv pip install -q markdown-it-py==3.0.0
           echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
       - name: Word list present (privacy masking reads /usr/share/dict/words)
         run: test -s /usr/share/dict/words && python --version
