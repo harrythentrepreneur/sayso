@@ -40,6 +40,11 @@ for both, and for what is coming next.
 </p>
 
 <p align="center">
+  <img src="assets/readme-console-decisions.png" alt="The Sayso console Decisions page: a queue on the left, a refund decision on the right with its say-so lock and Approve refund / Decline buttons" width="100%">
+  <br><sub>The console's Decisions page (<code>sayso dashboard --demo</code>, demo data).</sub>
+</p>
+
+<p align="center">
   <a href="assets/sayso-demo-video.mp4"><img src="assets/sayso-demo-discord.gif" alt="Sayso in Discord: a customer email becomes a case, Sayso checks Stripe, drafts the reply and asks for a Yes. One tap and the refund is made, the reply is sent once and proven." width="100%"></a>
   <br><sub>Sayso in a Discord workspace (demo team, made-up customer). <a href="assets/sayso-demo-video.mp4">Watch with sound (MP4, 31 s)</a>. Slack support is on the roadmap.</sub>
 </p>
@@ -165,7 +170,9 @@ steps on every change. When you are ready for real systems, follow
 - **Money behind a vote.** Capped, limited to listed currencies, read back from the provider.
 - **Dev hand-off with QA.** A bounded coding run opens a PR, independent QA checks that head, the merge is pinned to it.
 - **Quiet close.** After N quiet days a close vote opens; any new email from the customer voids it.
-- **Web console.** Inbox, overview, cases, money, health and audit log. Operators can sign in and vote from a phone.
+- **Web console.** Decisions (a priority queue, each Yes locked to one exact version), Inbox, Refunds, Insights,
+  Health and an Audit log with CSV export: the same pages as Sayso Cloud, minus billing and team admin.
+  Operators can sign in and vote from a phone; `sayso dashboard --demo` shows it read-only with demo data.
 - **Swipe to decide.** The console's Swipe tab shows one decision at a time: drag right for Yes, left for No
   (arrow keys work too). A swipe sends the same fingerprinted vote as the Yes / No buttons, so every check
   still applies, and if the draft changed the card springs back and says why.
