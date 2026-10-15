@@ -4,6 +4,19 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Console and dashboard pages, ported from Sayso Cloud: a grouped sidebar (daily work, then Admin), a dry-run
+  strip and an account menu; **Decisions** as a priority queue (money and billing, repeat contacts, oldest) with
+  waiting and expiry badges and a say-so lock on every decision (what the Yes binds to plus its fingerprint),
+  labelled Approve & send / Approve refund / Decline; **Inbox** (was Cases) with status tabs, search and relative
+  times; the case page leads with the customer's email and a decision panel with receipts; **Refunds** (was
+  Money) with tiles, tabs and a provider-check column; **Insights** (was Overview) with sourced KPI tiles,
+  7/14/30-day periods, labelled chart axes and time waiting on you; **Health** with jobs in run order and what to
+  do when one is stale; **Audit log** with type tabs, day groups, row detail and `/p/<slug>/audit.csv`.
+  The dashboard stays read-only (no forms: filters are links, search is `?q=`). Routes are unchanged.
+- `sayso.brand.app`: the shared page parts (badge, KPI tile, tabs, search, stacked-on-phone table, relative time
+  with the exact time in `title`, money as `$12.00 USD`, the say-so lock line, axis chart). New names only;
+  `sayso.dashboard.CSS` and every name Sayso Cloud imports are unchanged.
+
 - Stable API: `sayso/stable_api.json` lists the 99 names Sayso Cloud builds on, and
   `tests/test_stable_api.py` fails when a change would break one (removed, renamed, reordered, a new
   required parameter, a changed constant). Additions stay free. See CONTRIBUTING "Stable API".
