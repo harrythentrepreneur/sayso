@@ -109,7 +109,7 @@ class ConsolePagesTests(unittest.TestCase):
     def test_refunds_tiles_tabs_and_provider_column(self):
         _, _, body = self.get("/p/demo/money")
         self.assertIn("<h1>Refunds</h1>", body)
-        tiles = body[body.index("sa-tiles"):body.index("sa-bar")]
+        main = body[body.index("<main>"):]; tiles = main[main.index("class=sa-tiles"):main.index("class=sa-bar")]
         self.assertIn("Waiting for a decision", tiles)
         self.assertIn("$29.00", tiles)
         self.assertIn("Refunded and verified", tiles)
