@@ -31,7 +31,7 @@ shipped.
 **Two ways to run it.** Self-host this repository for free (Apache-2.0), or use
 **[Sayso Cloud](https://sayso.omo.sh)**: the same core, hosted, with Gmail/IMAP,
 Stripe and your own AI key connected in the browser. $49 a month or $490 a year,
-14-day free trial. See the [website](https://harrythentrepreneur.github.io/sayso/)
+14-day free trial. See the [website](https://sayso.omo.sh)
 for both, and for what is coming next.
 
 <p align="center">
