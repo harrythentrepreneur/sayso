@@ -296,6 +296,8 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
             self.send_response(status)
             self.send_header("Content-Type", f"{ctype}; charset=utf-8")
             self.send_header("Content-Length", str(len(data)))
+            if ctype == "text/csv":
+                self.send_header("Content-Disposition", 'attachment; filename="sayso-audit.csv"')
             self.send_header("Content-Security-Policy", csp or
                              "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; form-action 'self'; "
                              "frame-ancestors 'none'; base-uri 'none'")

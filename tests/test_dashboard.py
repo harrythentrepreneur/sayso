@@ -56,7 +56,8 @@ class DashboardTests(unittest.TestCase):
 
     def all_pages(self):
         paths = ["/", "/p/demo/", "/p/demo/overview", "/p/demo/board", "/p/demo/money", "/p/demo/health", "/p/demo/audit",
-                 "/api/demo.json"]
+                 "/api/demo.json", "/p/demo/?sort=oldest", "/p/demo/board?view=waiting&q=lee", "/p/demo/money?view=done",
+                 "/p/demo/overview?days=30", "/p/demo/audit?kind=decisions", "/p/demo/audit.csv"]
         cases = json.loads((self.state / "cases.json").read_text())
         paths += [f"/p/demo/case/{k}" for k in cases]
         return paths

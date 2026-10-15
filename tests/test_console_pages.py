@@ -148,6 +148,29 @@ class ConsolePagesTests(unittest.TestCase):
         self.assertIn("What to do:", page)
         self.assertIn("journalctl --user -u sayso-demo-intake", page)
 
+    # -- audit ------------------------------------------------------------------------------------
+    def test_audit_day_groups_filters_and_fingerprints(self):
+        _, _, body = self.get("/p/demo/audit")
+        main = body[body.index("<main>"):]
+        self.assertIn("class=aday", main)
+        self.assertIn("fingerprint <code", main)
+        self.assertIn("Export CSV", main)
+        _, _, body = self.get("/p/demo/audit?kind=sends")
+        self.assertNotIn(">Case opened<", body)
+        self.assertIn(">Vote done<", body)
+
+    def test_audit_csv_has_every_line_and_is_spreadsheet_safe(self):
+        status, ctype, text = self.get("/p/demo/audit.csv")
+        self.assertEqual((status, ctype), (200, "text/csv"))
+        rows = list(csv.reader(io.StringIO(text)))
+        self.assertEqual(rows[0][0], "at_utc")
+        self.assertEqual(len(rows) - 1, len(self.snap().journal))
+        self.assertEqual(dashboard._csv_cell("=HYPERLINK(1)"), "'=HYPERLINK(1)")
+        self.assertEqual(dashboard._csv_cell("@x"), "'@x")
+        _, _, only = self.get("/p/demo/audit.csv?kind=alerts")
+        self.assertEqual(len(list(csv.reader(io.StringIO(only)))), 1 + sum(
+            1 for j in self.snap().journal if j.get("event") == "alert"))
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]

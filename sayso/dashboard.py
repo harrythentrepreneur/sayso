@@ -551,7 +551,8 @@ def _page_css() -> str:
     from sayso import brand
     from sayso.brand import app as brand_app
     root = ";".join(f"--{k}:{v}" for k, v in brand.TOKENS.items())
-    return f":root{{{root};--font-text:{brand.TEXT_FONT};--font-mono:{brand.MONO_FONT}}}" + brand_app.css() + SHELL_CSS
+    return (f":root{{{root};--font-text:{brand.TEXT_FONT};--font-mono:{brand.MONO_FONT}}}" + brand_app.css() + SHELL_CSS
+            + AUDIT_CSS)
 ICONS["swipe"] = '<path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM21 9l2 3-2 3M3 9l-2 3 2 3"/>'
 ICONS["chart"] = '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
 
@@ -1487,26 +1488,154 @@ def render_health(s: Snapshot, products: list[str]) -> str:
     return page("Health", body, products, slug, "health", snap=s)
 
 
+AUDIT_KINDS = (("", "All events"), ("decisions", "Decisions"), ("sends", "Sends & refunds"), ("cases", "Cases"),
+               ("alerts", "Alerts"), ("console", "Console"))
+AUDIT_OF = {"vote_opened": "decisions", "vote_approved": "decisions", "vote_declined": "decisions",
+            "vote_void": "decisions", "vote_expired": "decisions", "vote_policy_approved": "decisions",
+            "web_vote": "decisions", "vote_done": "sends", "send_attempt": "sends", "case_opened": "cases",
+            "mail_appended": "cases", "alert": "alerts", "paused": "console", "resumed": "console",
+            "console_tick": "console"}
+AUDIT_CAP = 500
+
+
+def _audit_case(s: Snapshot, j: dict) -> str | None:
+    case = j.get("case_key") or next((c for c in s.cases if c in str(j.get("key", ""))), None)
+    return case if case in s.cases else None
+
+
+def _audit_actor(s: Snapshot, j: dict) -> str:
+    who = j.get("decided_by") or j.get("by")
+    return str(who) if who else "Sayso"
+
+
+def _day(j: dict) -> str:
+    at = _at(j.get("at"))
+    return at.strftime("%a %d %b %Y") if at else "Unknown day"
+
+
+def audit_rows(s: Snapshot, query: dict | None = None) -> list[dict]:
+    """Journal lines, newest first, filtered by ?kind, ?case and ?q (actor, text, key or fingerprint)."""
+    q = query or {}
+    kind, case, needle = q.get("kind", ""), q.get("case", ""), str(q.get("q", "")).strip().lower()
+    out = []
+    for j in reversed(s.journal):
+        if kind and AUDIT_OF.get(str(j.get("event")), "") != kind:
+            continue
+        c = _audit_case(s, j)
+        if case and c != case:
+            continue
+        v = s.votes.get(str(j.get("key") or ""), {})
+        hay = " ".join([event_text(s, j), _audit_actor(s, j), str(j.get("key", "")), str(v.get("fingerprint", "")),
+                        str(s.cases.get(c, {}).get("title", "")) if c else ""]).lower()
+        if needle and needle not in hay:
+            continue
+        out.append({"j": j, "case": c, "vote": v})
+    return out
+
+
 def render_audit(s: Snapshot, products: list[str], query: dict | None = None) -> str:
-    rows = ""
-    for j in s.journal[-300:][::-1]:
-        fields = {k: v for k, v in j.items() if k not in ("at", "event")}
-        case = j.get("case_key") or next((c for c in s.cases if c in str(j.get("key", ""))), None)
-        link = (f"<a href='/p/{e(s.config.slug)}/case/{e(case)}'>{e(s.cases.get(case, {}).get('title', case))}</a>"
-                if case in s.cases else "<span class=faint>—</span>")
-        rows += (f"<tr><td class=faint style='white-space:nowrap'>{e(when(j.get('at')))}</td>"
-                 f"<td><span class='pill t-{EVENT_TONE.get(j.get('event'), 'grey')}'>{e(j.get('event'))}</span></td>"
-                 f"<td>{e(event_text(s, j))}<details><summary>raw</summary>"
-                 f"<pre>{e(json.dumps(fields, sort_keys=True, default=str))[:600]}</pre></details></td><td>{link}</td></tr>")
-    body = (head("Audit log", f"Newest first · last 300 of {len(s.journal)} events, from the append-only journal.",
-                 crumb=e(s.config.name))
-            + f"<table><tr><th>When</th><th>Event</th><th>What happened</th><th>Case</th></tr>"
-            f"{rows or '<tr><td colspan=4 class=faint>Empty.</td></tr>'}</table>")
-    return page("Audit", body, products, s.config.slug, "audit", snap=s)
+    from sayso.brand import app as A
+    slug = s.config.slug
+    q = {k: v for k, v in (query or {}).items() if k in ("kind", "case", "q")}
+    if q.get("kind") not in dict(AUDIT_KINDS):
+        q["kind"] = ""
+    rows = audit_rows(s, q)
+    shown = rows[:AUDIT_CAP]
+    base = f"/p/{slug}/audit"
+    counts = Counter(AUDIT_OF.get(str(j.get("event")), "") for j in s.journal)
+    tabs = A.tabs([(lbl, A.qs(base, kind=k, case=q.get("case"), q=q.get("q")),
+                    len(s.journal) if not k else counts.get(k, 0), q["kind"] == k) for k, lbl in AUDIT_KINDS],
+                  label="Event type")
+    finder = (A.search(base, q.get("q", ""), placeholder="Name, text, key or fingerprint",
+                       keep={"kind": q.get("kind"), "case": q.get("case")}) if s.console else "")
+    filt = ""
+    if q.get("case") or q.get("q"):
+        bits = []
+        if q.get("case"):
+            bits.append(f"case \u201c{e(s.cases.get(q['case'], {}).get('title', q['case']))}\u201d")
+        if q.get("q"):
+            bits.append(f"text \u201c{e(q['q'])}\u201d")
+        filt = (f"<p class=sa-src>Filtered by {' and '.join(bits)} \u00b7 <a href='{e(A.qs(base, kind=q['kind']))}'>"
+                f"clear</a></p>")
+    per_day = Counter(_day(r["j"]) for r in shown)
+    parts, cur_day = [], None
+    for r in shown:
+        j, v, c = r["j"], r["vote"], r["case"]
+        day = _day(j)
+        if day != cur_day:
+            n_day = per_day[day]
+            parts.append(f"<div class=aday><b>{e(day)}</b><span>{n_day} event{'s' if n_day != 1 else ''}</span></div>")
+            cur_day = day
+        at = _at(j.get("at"))
+        ev = str(j.get("event"))
+        tone = {"sends": "good", "alerts": "bad"}.get(AUDIT_OF.get(ev, ""), "neutral")
+        fp = str(v.get("fingerprint") or "")
+        lock = (f"<div class=sa-cell-s>{e(_version_of(v))} \u00b7 fingerprint <code title='{e(fp)}'>{e(fp[:12])}"
+                f"\u2026</code></div>" if fp and (ev.startswith("vote_") or ev == "web_vote") else "")
+        case_link = (f"<a href='{e(A.qs(base, case=c))}' title='Show only this case'>"
+                     f"{e(s.cases.get(c, {}).get('title', c))}</a>" if c else "<span class=sa-faint>\u2014</span>")
+        fields = {k: val for k, val in j.items() if k not in ("at", "event")}
+        parts.append(
+            f"<details class=arow><summary><span class=at><time datetime='{e(j.get('at'))}' title='{e(when(j.get('at')))}'>"
+            f"{e(at.strftime('%H:%M:%S') if at else j.get('at'))}</time></span>"
+            f"<span class=aa>{e(_audit_actor(s, j))}</span>"
+            f"<span class=ae>{A.badge(ev.replace('_', ' ').capitalize(), tone)}</span>"
+            f"<span class=aw>{e(event_text(s, j))}{lock}</span><span class=ac>{case_link}</span></summary>"
+            f"<div class=adetail><dl class=kv><dt>When</dt><dd>{e(when(j.get('at')))}</dd>"
+            + (f"<dt>Case</dt><dd><a href='/p/{e(slug)}/case/{e(c)}'>Open case \u2192</a></dd>" if c else "")
+            + (f"<dt>Fingerprint</dt><dd><code>{e(fp)}</code></dd>" if fp else "")
+            + f"</dl><pre>{e(json.dumps(fields, sort_keys=True, indent=1, default=str)[:2000])}</pre></div></details>")
+    listing = (("<div class=alog><div class=ahead><span>Time</span><span>Actor</span><span>Event</span>"
+                "<span>What happened</span><span>Case</span></div>" + "".join(parts) + "</div>") if shown else
+               A.empty("No events match", "Clear a filter to see more. Every email, vote, send and refund the loop "
+                       "records lands here."))
+    more = (f"<p class=sa-src>Showing the newest {AUDIT_CAP} of {len(rows)}. The CSV export has every matching line.</p>"
+            if len(rows) > AUDIT_CAP else
+            f"<p class=sa-src>{len(rows)} of {len(s.journal)} events, newest first, from the append-only journal "
+            f"(<code>journal.jsonl</code>). Times in UTC.</p>")
+    export = f"<a class='sa-btn ghost sm' href='{e(A.qs(base + '.csv', **q))}'>Export CSV</a>"
+    body = (A.header("Audit log", "Every email, decision, send and refund the loop recorded, with the exact version "
+                     "each Yes approved.", actions_html=export, eyebrow_html=e(s.config.name))
+            + f"<div class=sa-bar>{tabs}{finder}</div>{filt}{listing}{more}")
+    return page("Audit log", body, products, slug, "audit", snap=s)
+
+
+def _csv_cell(value) -> str:
+    """Spreadsheet-safe: a cell that starts like a formula gets a leading ' (CSV injection)."""
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
 def audit_csv(s: Snapshot, query: dict | None = None) -> str:
-    return ""
+    """Every matching journal line (no cap), same filters as the page."""
+    import csv
+    import io
+    q = {k: v for k, v in (query or {}).items() if k in ("kind", "case", "q")}
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["at_utc", "event", "actor", "what", "case_key", "case_title", "vote_key", "fingerprint", "fields_json"])
+    for r in audit_rows(s, q):
+        j, v, c = r["j"], r["vote"], r["case"]
+        fields = {k: val for k, val in j.items() if k not in ("at", "event")}
+        w.writerow([_csv_cell(x) for x in (j.get("at"), j.get("event"), _audit_actor(s, j), event_text(s, j), c or "",
+                                           s.cases.get(c, {}).get("title", "") if c else "", j.get("key", ""),
+                                           v.get("fingerprint", ""), json.dumps(fields, sort_keys=True, default=str))])
+    return buf.getvalue()
+
+
+AUDIT_CSS = """
+.alog{background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ahead,.arow>summary{display:grid;grid-template-columns:78px 130px 150px minmax(0,1fr) minmax(0,220px);gap:12px;padding:9px 14px;
+align-items:start}.ahead{font-size:12.5px;color:var(--soft);background:var(--card2,#f4f4f2);border-bottom:1px solid var(--line)}
+.aday{display:flex;justify-content:space-between;padding:7px 14px;background:#fafaf8;border-bottom:1px solid var(--line);
+font-size:12.5px;color:var(--soft)}.aday b{color:var(--ink);font-weight:600}
+details.arow{margin:0;border-bottom:1px solid var(--line2)}.arow>summary{list-style:none;cursor:pointer;font-size:13.5px;
+color:var(--ink2)}.arow>summary::-webkit-details-marker{display:none}.arow>summary:hover{background:#fafaf8}
+.at{font-variant-numeric:tabular-nums;color:var(--soft)}.aa,.ac{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adetail{padding:4px 14px 14px 104px}details.arow:not([open]) .adetail{display:none}
+@media (max-width:860px){.ahead{display:none}.arow>summary{grid-template-columns:64px minmax(0,1fr);gap:4px 10px}
+.arow>summary .aa,.arow>summary .ae,.arow>summary .aw,.arow>summary .ac{grid-column:2}.adetail{padding:4px 14px 14px}}
+"""
 
 
 # -- server ------------------------------------------------------------------------
@@ -1575,6 +1704,8 @@ def make_server(configs: list[Config], host: str = "127.0.0.1", port: int = 8765
             self.send_response(status)
             self.send_header("Content-Type", f"{ctype}; charset=utf-8")
             self.send_header("Content-Length", str(len(data)))
+            if ctype == "text/csv":
+                self.send_header("Content-Disposition", 'attachment; filename="sayso-audit.csv"')
             self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("X-Frame-Options", "DENY")
