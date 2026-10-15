@@ -518,6 +518,9 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .item.dec:first-of-type{border-top:1px solid var(--line)}.qflags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .qamt{font-size:15px}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
 .item.dec .item-body .sa-trust{margin-top:12px}
+.ib-who{display:flex;gap:10px;align-items:flex-start;min-width:0}.ib-who>div{min-width:0}
+.inbox .sa-cell-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62ch}
+.ib-flags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 @media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;background:var(--card,#fff);
 padding:10px 0;z-index:2}.act button{flex:1 1 40%;min-height:44px}}
 """
@@ -1049,35 +1052,79 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
 CASE_ORDER = (stages.AWAITING, stages.NEW, stages.IN_SUPPORT, stages.IN_DEV, stages.IN_QA, stages.BLOCKED, stages.DONE)
 
 
+INBOX_VIEWS = (("", "All"), ("waiting", "Waiting on you"), ("open", "In progress"), ("closed", "Closed"))
+
+
+def _inbox_view(s: Snapshot, rec: dict, n_open: int) -> str:
+    st = s.stage(rec["card_id"])
+    if n_open:
+        return "waiting"
+    return "closed" if st == stages.DONE else "open"
+
+
+def _preview(s: Snapshot, rec: dict) -> str:
+    msgs = customer_messages(s, rec)
+    if not msgs:
+        return ""
+    text = str(msgs[-1]).split("\n\n", 1)[-1]
+    flat = " ".join(text.split())
+    return flat[:140] + ("\u2026" if len(flat) > 140 else "")
+
+
 def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") -> str:
+    from sayso.brand import app as A
     slug, ref = s.config.slug, ref_time(s)
-    groups: dict[str, list[str]] = {st: [] for st in CASE_ORDER}
-    other = []
+    view = view if view in dict(INBOX_VIEWS) else ""
+    needle = q.strip().lower()
     open_votes = s.open_votes()
-    for key, rec in sorted(s.cases.items(), key=lambda kv: kv[1].get("created_at", ""), reverse=True):
+    rows_by_view: dict[str, list] = {k: [] for k, _ in INBOX_VIEWS}
+    unread = []
+    for key, rec in sorted(s.cases.items(), key=lambda kv: str(kv[1].get("last_inbound") or kv[1].get("created_at", "")),
+                           reverse=True):
         if not rec.get("card_id") or rec.get("folded_into"):
             continue
-        tags = s.tags(rec["card_id"])
+        n_open = sum(1 for v in open_votes if v.get("case_key") == key)
         st = s.stage(rec["card_id"])
-        extra = "".join(f"<span class='tag{' w' if t == stages.WAITING else ''}'>{e(t)}</span>" for t in tags if t != st)
-        n = sum(1 for v in open_votes if v.get("case_key") == key)
-        wbadge = f"<span class='tag w'>{n} to decide</span>" if n else ""
-        row = (f"<a class=row href='/p/{e(slug)}/case/{e(key)}'><div style='min-width:0'><div class=tt>"
-               f"{e(rec.get('title'))}</div>{f'<div class=tags>{wbadge}{extra}</div>' if (extra or wbadge) else ''}"
-               f"</div><div class=cu>{avatar(rec.get('customer'))}<span>{e(rec.get('customer'))}</span></div>"
-               f"<div class=kd>{e(rec.get('kind') or '')}</div><div class=ag>{ago(rec.get('created_at'), ref)}</div></a>")
-        (groups[st] if st in groups else other).append(row)
-    html_groups = "".join(
-        f"<details class='group{' empty' if not rows else ''}' aria-label=\"{e(st)} · {len(rows)}\""
-        f"{' open' if rows and st != stages.DONE else ''}><summary>{stage_pill(st)}<span class=count>{len(rows)}</span>"
-        f"<span class=hint>{e(STAGE_HINT.get(st, ''))}</span></summary><div class=rows>{''.join(rows)}</div></details>"
-        for st, rows in groups.items())
-    unread = (f"<h2>Unreadable</h2><div class=rows>{''.join(other)}</div>" if other else "")
-    total = sum(len(r) for r in groups.values())
-    body = (f"{_paused_banner(s)}" + head("Cases", f"{total} cases · one per customer per problem, grouped by stage.",
-                                          crumb=e(s.config.name))
-            + f"{html_groups}{unread}")
-    return page("Cases", body, products, slug, "board", snap=s)
+        if st == "unreadable":
+            unread.append((key, rec))
+        hay = " ".join(str(x) for x in (rec.get("title"), rec.get("customer"), rec.get("ticket"), key, _preview(s, rec)))
+        if needle and needle not in hay.lower():
+            continue
+        fl = flags(s, rec)
+        if any(v.get("kind") == "money" for v in open_votes if v.get("case_key") == key):
+            fl = [("warn", "Money")] + [f for f in fl if f[1] != "Billing"]
+        badges = (A.badge(f"{n_open} to decide", "warn") if n_open else stage_pill(st)) + "".join(
+            " " + A.badge(lbl, tone) for tone, lbl in fl)
+        cells = [f"<div class=ib-who>{avatar(rec.get('customer'))}<div><div class=sa-cell-t>{e(rec.get('title'))}</div>"
+                 f"<div class=sa-cell-s>{e(rec.get('customer'))} \u00b7 {e(_preview(s, rec))}</div></div></div>",
+                 f"<div class=ib-flags>{badges}</div>",
+                 e(rec.get("ticket") or "\u2014"),
+                 A.reltime(rec.get("last_inbound") or rec.get("created_at"), ref)]
+        row = {"cells": cells, "href": f"/p/{slug}/case/{key}"}
+        rows_by_view[""].append(row)
+        rows_by_view[_inbox_view(s, rec, n_open)].append(row)
+    base = f"/p/{slug}/board"
+    tabs = A.tabs([(lbl, A.qs(base, view=k, q=q), len(rows_by_view[k]), k == view) for k, lbl in INBOX_VIEWS],
+                  label="Status")
+    finder = A.search(base, q, placeholder="Name, subject or ticket", keep={"view": view}) if s.console else (
+        f"<span class=sa-faint>Search: add <code>?q=</code> to the address</span>" if not q else
+        f"<span class=sa-faint>Showing matches for \u201c{e(q)}\u201d \u00b7 <a href='{e(A.qs(base, view=view))}'>clear</a></span>")
+    rows = rows_by_view[view]
+    empty = A.empty("No cases match" if needle else "No cases here yet",
+                    "Try another word or clear the search." if needle else
+                    "Each customer email opens one case per problem. They appear here as intake reads the mailbox.")
+    table = A.table([("Case", ""), ("Status", ""), ("Ticket", ""), ("Last email", "num")], rows, empty_html=empty,
+                    caption="Cases", cls="inbox")
+    extra = ""
+    if unread:
+        extra = (f"<p class=sa-src>{len(unread)} case(s) have a stage the board could not read; they show as "
+                 f"unreadable, never guessed.</p>")
+    total = len(rows_by_view[""])
+    body = (f"{_paused_banner(s)}"
+            + A.header("Inbox", f"{total} case{'s' if total != 1 else ''} \u00b7 one per customer per problem, newest email "
+                       "first", eyebrow_html=e(s.config.name))
+            + f"<div class=sa-bar>{tabs}{finder}</div>{table}{extra}")
+    return page("Inbox", body, products, slug, "board", snap=s)
 
 
 def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
