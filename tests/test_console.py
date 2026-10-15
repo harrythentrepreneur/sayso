@@ -108,7 +108,7 @@ class ConsoleTests(unittest.TestCase):
     def test_web_yes_is_counted_by_tally_and_nothing_acts_in_the_request(self):
         _, cookie = self.login()
         _, _, html_text = self.page(cookie)
-        self.assertIn("Yes, approve", html_text)
+        self.assertIn("Approve &amp; send", html_text)
         v = self.open_vote()
         world_before = (self.config.state_dir / "fake-world.json").read_text()
         status, _, _ = self.req("POST", f"/p/{self.config.slug}/vote",
@@ -171,7 +171,7 @@ class ConsoleTests(unittest.TestCase):
             port, self.port = self.port, srv.server_address[1]
             _, cookie = self.login()
             _, _, html_text = self.page(cookie)
-            self.assertNotIn("Yes, approve", html_text)
+            self.assertNotIn("Approve &amp; send", html_text)
             self.assertIn("mirror of the live loop", html_text)
             v = self.open_vote()
             status, _, _ = self.req("POST", f"/p/{self.config.slug}/vote", {"csrf": self.csrf(html_text),

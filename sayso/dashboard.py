@@ -29,7 +29,7 @@ from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 from sayso import stages
 from sayso.config import Config
@@ -513,6 +513,13 @@ details.acct:not([open]) .menu{display:none}
 .demo-strip{position:static;font-size:12px;padding:6px 14px}.navgroup{flex-direction:row;flex-wrap:nowrap}
 .navgroup+.navgroup{margin-top:0}aside nav,aside>div:has(nav){overflow-x:auto;scrollbar-width:none;max-width:100%}
 aside nav{flex-wrap:nowrap!important}.acct{display:none}}
+.qgroup{font-size:13px;color:var(--soft);font-weight:600;margin:26px 0 8px}.qgroup:first-of-type{margin-top:6px}
+.item.dec{background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:0 0 12px}
+.item.dec:first-of-type{border-top:1px solid var(--line)}.qflags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.qamt{font-size:15px}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
+.item.dec .item-body .sa-trust{margin-top:12px}
+@media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;background:var(--card,#fff);
+padding:10px 0;z-index:2}.act button{flex:1 1 40%;min-height:44px}}
 """
 
 
@@ -730,7 +737,7 @@ OUTCOMES = (("Approved", ("approved", "done"), "c-green"), ("Declined", ("declin
             ("Waiting", ("open",), "c-amber"))
 
 
-def render_overview(s: Snapshot, products: list[str]) -> str:
+def render_overview(s: Snapshot, products: list[str], days: str = "") -> str:
     live = _live_cases(s)
     open_cases = sum(1 for _, r in live if s.stage(r["card_id"]) != stages.DONE)
     waiting = s.open_votes()
@@ -849,9 +856,10 @@ def _vote_form(s: Snapshot, v: dict) -> str:
               f"<input type=hidden name=key value='{e(v.get('key'))}'><input type=hidden name=fp "
               f"value='{e(v.get('fingerprint'))}'>")
     return (f"<form class=act method=post action='/p/{e(s.config.slug)}/vote'>{hidden}"
-            f"<button class=yes name=answer value=yes>Yes, approve</button>"
-            f"<button class=no name=answer value=no>No, decline</button>"
-            f"<span class=faint>Acts on the next run, with every safety check.</span></form>")
+            f"<button class=yes name=answer value=yes>{e(YES_LABEL.get(v.get('kind'), 'Approve'))}</button>"
+            f"<button class=no name=answer value=no>Decline</button>"
+            f"<span class=faint>Approves only the exact version shown here. Acts on the next run, with every "
+            f"safety check.</span></form>")
 
 
 def _console_form(s: Snapshot, action: str, label: str, cls: str = "") -> str:
@@ -881,8 +889,8 @@ def render_swipe(s: Snapshot, products: list[str]) -> str:
         label = KIND_LABEL.get(kind, kind)
         if kind == "money":
             label = "Refund" if (v.get("spec") or {}).get("action") == "refund" else "Money"
-        yes = {"reply": "Yes, send", "money": "Yes, do it", "close": "Yes, close"}.get(kind, "Yes, approve")
-        no = {"reply": "No, skip", "money": "No, don't", "close": "No, keep open"}.get(kind, "No, decline")
+        yes = YES_LABEL.get(kind, "Approve")
+        no = "Decline"
         cards.append(swipe.card_form(
             action=f"/p/{slug}/vote", csrf=s.console["csrf"], key=str(v.get("key")),
             fingerprint=str(v.get("fingerprint")), question=str(v.get("question") or v.get("subject") or label),
@@ -897,44 +905,151 @@ def render_swipe(s: Snapshot, products: list[str]) -> str:
     return page("Swipe", body, products, slug, "swipe", snap=s)
 
 
-def render_decisions(s: Snapshot, products: list[str]) -> str:
+MONEY_WORDS = re.compile(r"\b(refund|charged?|cancel(?:led|ed)?|invoice|billing|money back|chargeback)\b", re.I)
+REPEAT_WORDS = re.compile(r"\b(?:(?:second|third|fourth|fifth|\d+(?:st|nd|rd|th))\s+(?:time|request|email|message|attempt)"
+                          r"|(?:asking|writing|emailing|following up)\s+again|still\s+(?:waiting|no\b)"
+                          r"|no\s+(?:reply|response|answer)\s+(?:yet|from))\b", re.I)
+QUEUE_GROUPS = ("Money & billing", "Repeat contacts", "Everything else")
+YES_LABEL = {"reply": "Approve & send", "money": "Approve refund", "merge": "Approve merge", "close": "Approve close"}
+
+
+def customer_messages(s: "Snapshot", rec: dict) -> list[str]:
+    return [m for m in s.card_messages(rec.get("card_id", "")) if str(m).startswith("**Customer wrote**")]
+
+
+def flags(s: "Snapshot", rec: dict, v: dict | None = None) -> list[tuple[str, str]]:
+    """Triage hints read from what is recorded: a money vote, a billing topic, a customer who really wrote more
+    than once (or another case from the same address), or a subject with a real repeat phrase."""
+    out: list[tuple[str, str]] = []
+    title = str(rec.get("title") or (v or {}).get("subject") or "")
+    if v is not None and v.get("kind") == "money":
+        out.append(("warn", "Money"))
+    elif MONEY_WORDS.search(title):
+        out.append(("neutral", "Billing"))
+    n = len(customer_messages(s, rec)) if rec.get("card_id") else 0
+    who = str(rec.get("customer") or "").strip().lower()
+    others = sum(1 for r in s.cases.values() if who and str(r.get("customer") or "").strip().lower() == who
+                 and not r.get("folded_into"))
+    if n >= 2:
+        out.append(("warn", f"Wrote {n} times"))
+    elif others >= 2:
+        out.append(("warn", f"{others} cases"))
+    elif REPEAT_WORDS.search(title):
+        out.append(("warn", "Repeat contact"))
+    return out
+
+
+def queue_group(v: dict, fl: list[tuple[str, str]]) -> int:
+    if v.get("kind") == "money" or any(lbl in ("Money", "Billing") for _, lbl in fl):
+        return 0
+    if any(lbl.startswith("Wrote ") or lbl.endswith(" cases") or lbl == "Repeat contact" for _, lbl in fl):
+        return 1
+    return 2
+
+
+def queue(s: "Snapshot", sort: str = "priority") -> list[tuple[dict, list[tuple[str, str]]]]:
+    """Open votes in queue order. priority: money/billing, then repeat contacts, then oldest first in each."""
+    items = [(v, flags(s, s.cases.get(v.get("case_key"), {}), v)) for v in s.open_votes()]
+    if sort == "newest":
+        return sorted(items, key=lambda it: str(it[0].get("opened_at", "")), reverse=True)
+    if sort == "oldest":
+        return sorted(items, key=lambda it: str(it[0].get("opened_at", "")))
+    return sorted(items, key=lambda it: (queue_group(*it), str(it[0].get("opened_at", ""))))
+
+
+def wait_badges(s: "Snapshot", v: dict, ref: datetime) -> str:
+    """How long it has waited, and 'Expires in N h' once the policy's vote expiry is near (expiry is real)."""
+    from sayso.brand import app as A
+    at = _at(v.get("opened_at"))
+    if at is None:
+        return ""
+    secs = (ref - at).total_seconds()
+    tone = "warn" if secs >= 4 * 3600 else "neutral"
+    out = A.badge(f"Waiting {A.long_age(secs)}", tone, title=f"Opened {when(v.get('opened_at'))}")
+    left = s.config.policy.vote_expiry_hours * 3600 - secs
+    if 0 < left <= 12 * 3600:
+        out += " " + A.badge(f"Expires in {A.long_age(left)}", "bad",
+                             title=f"Votes nobody answers expire after {s.config.policy.vote_expiry_hours} h; nothing is done")
+    return out
+
+
+def _kind_label(v: dict) -> str:
+    kind = v.get("kind")
+    if kind == "money":
+        return "Refund" if (v.get("spec") or {}).get("action") == "refund" else "Money"
+    return KIND_LABEL.get(kind, str(kind))
+
+
+def _version_of(v: dict) -> str:
+    key = str(v.get("key") or "")
+    if v.get("kind") == "reply" and re.search(r":v\d+$", key):
+        return "version " + key.rsplit(":v", 1)[-1]
+    if v.get("kind") == "merge":
+        return "head " + str((v.get("spec") or {}).get("head", ""))[:12]
+    return "this exact request"
+
+
+def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -> str:
+    from sayso.brand import app as A
     slug, ref = s.config.slug, ref_time(s)
-    waiting = s.open_votes()
-    items = ""
-    for v in waiting:
+    sort = sort if sort in ("priority", "oldest", "newest") else "priority"
+    items = queue(s, sort)
+    base = f"/p/{slug}/"
+    body_items, last_group = "", None
+    for v, fl in items:
         rec = s.cases.get(v.get("case_key"), {})
-        kind = v.get("kind")
-        label = KIND_LABEL.get(kind, kind)
-        if kind == "money":
-            label = "Refund" if (v.get("spec") or {}).get("action") == "refund" else "Money"
-        items += (f"<article class=item><div class=item-head>{avatar(rec.get('customer'))}"
-                  f"<div class=who><div class=eyebrow><b>{e(label)}</b> · {e(rec.get('customer'))}</div>"
-                  f"<div class=title>{e(v.get('subject'))}</div><div class=q>{e(v.get('question'))}</div></div>"
-                  f"<div class=meta><span>{ago(v.get('opened_at'), ref)}</span></div></div>"
-                  f"<div class=item-body>{_decision_material(s, v, rec)}</div>"
-                  f"{_ballots_html(s, v)}{_vote_form(s, v)}<div class=item-foot><span>Case: {e(rec.get('title'))}</span>"
-                  f"<a href='/p/{e(slug)}/case/{e(v.get('case_key'))}'>Open case →</a></div></article>")
-    if not items:
-        items = ("<div class=empty><b>Inbox zero</b>Nothing is waiting for your say-so. "
-                 "New drafts, refunds and merges will appear here.</div>")
-    n = len(waiting)
+        g = queue_group(v, fl)
+        if sort == "priority" and g != last_group:
+            n_g = sum(1 for vv, ff in items if queue_group(vv, ff) == g)
+            body_items += f"<h2 class=qgroup>{e(QUEUE_GROUPS[g])} <span class=c>{n_g}</span></h2>"
+            last_group = g
+        chips = " ".join(A.badge(lbl, tone) for tone, lbl in fl)
+        sp = v.get("spec") or {}
+        amount = (f"<span class=qamt>{A.money(sp.get('amount'), sp.get('currency'))}</span>"
+                  if v.get("kind") == "money" and sp.get("action") == "refund" else "")
+        body_items += (
+            f"<article class='item dec' id='d-{e(v.get('key'))}'><div class=item-head>{avatar(rec.get('customer'))}"
+            f"<div class=who><div class=eyebrow><b>{e(_kind_label(v))}</b> · {e(rec.get('customer'))}</div>"
+            f"<div class=title>{e(v.get('subject'))}</div><div class=q>{e(v.get('question'))}</div>"
+            f"<div class=qflags>{wait_badges(s, v, ref)} {chips}</div></div>"
+            f"<div class=meta>{amount}<span>{ago(v.get('opened_at'), ref)}</span></div></div>"
+            f"<div class=item-body>{_decision_material(s, v, rec)}"
+            f"{A.trust_line(str(v.get('fingerprint') or ''), version=_version_of(v))}</div>"
+            f"{_ballots_html(s, v)}{_vote_form(s, v)}<div class=item-foot><span>Case: {e(rec.get('title'))}</span>"
+            f"<a href='/p/{e(slug)}/case/{e(v.get('case_key'))}'>Open case →</a></div></article>")
+    if not body_items:
+        body_items = A.empty("Nothing waiting for your say-so",
+                             "New reply drafts, refunds, merges and close requests appear here as the loop opens them.")
+    n = len(items)
+    money_n = sum(1 for v, _ in items if v.get("kind") == "money")
+    sub = (f"{n} waiting for your say-so" + (f" · {money_n} refund{'s' if money_n != 1 else ''}" if money_n else "")
+           if n else "Nothing waiting")
+    actions = A.segmented([(lbl, A.qs(base, sort=key if key != "priority" else ""), sort == key)
+                           for key, lbl in (("priority", "Priority"), ("oldest", "Oldest"), ("newest", "Newest"))],
+                          label="Sort")
+    if s.console and s.console.get("can_vote", True) and n:
+        actions = (A.segmented([("List", base, True), ("Review one by one", f"/p/{slug}/swipe", False)], label="Mode")
+                   + actions)
+    note = ""
+    if items:
+        note = (f"<div class=note>{icon('lock')}<span>Your Yes counts only for the exact version shown. If it changes "
+                f"before the loop runs, the vote is void and asked again. No approve-all: each Yes is its own.</span></div>"
+                if s.console else
+                f"<div class=note>{icon('lock')}<span>Approve or decline on the board poll. This page cannot approve, "
+                f"so nothing here can act by mistake.</span></div>")
     body = (f"{_paused_banner(s)}"
-            + head("Inbox", f"{n} decision{'s' if n != 1 else ''} waiting for your say-so" if n else
-                   "Nothing waiting", crumb=e(s.config.name))
-            + ((f"<div class=note>{icon('lock')}<span>Your Yes or No is recorded against the exact version shown. "
-                f"If it changes before the loop runs, the vote is void and asked again.</span></div>" if s.console else
-                f"<div class=note>{icon('lock')}<span>Approve or decline with Yes / No on the board poll. "
-                f"This page cannot approve, so nothing here can act by mistake.</span></div>") if waiting else "")
+            + A.header("Decisions", sub, actions_html=actions, eyebrow_html=e(s.config.name))
+            + note
             + (_console_form(s, "tick", "Run the loop once (dry-run only)", "ghost") if s.console and
                s.console.get("can_tick") else "")
-            + items)
+            + body_items)
     return page(s.config.name, body, products, slug, "", snap=s)
 
 
 CASE_ORDER = (stages.AWAITING, stages.NEW, stages.IN_SUPPORT, stages.IN_DEV, stages.IN_QA, stages.BLOCKED, stages.DONE)
 
 
-def render_board(s: Snapshot, products: list[str]) -> str:
+def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") -> str:
     slug, ref = s.config.slug, ref_time(s)
     groups: dict[str, list[str]] = {st: [] for st in CASE_ORDER}
     other = []
@@ -1035,7 +1150,7 @@ def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
     return page(str(rec.get("title")), body, products, slug, "board", snap=s)
 
 
-def render_money(s: Snapshot, products: list[str]) -> str:
+def render_money(s: Snapshot, products: list[str], view: str = "") -> str:
     rows = ""
     verified = awaiting = 0
     for r in s.money_rows():
@@ -1091,7 +1206,7 @@ def render_health(s: Snapshot, products: list[str]) -> str:
     return page("Health", body, products, s.config.slug, "health", snap=s)
 
 
-def render_audit(s: Snapshot, products: list[str]) -> str:
+def render_audit(s: Snapshot, products: list[str], query: dict | None = None) -> str:
     rows = ""
     for j in s.journal[-300:][::-1]:
         fields = {k: v for k, v in j.items() if k not in ("at", "event")}
@@ -1109,11 +1224,16 @@ def render_audit(s: Snapshot, products: list[str]) -> str:
     return page("Audit", body, products, s.config.slug, "audit", snap=s)
 
 
+def audit_csv(s: Snapshot, query: dict | None = None) -> str:
+    return ""
+
+
 # -- server ------------------------------------------------------------------------
 
 def route(path: str, snapshot_for: Callable[[str], Snapshot], products: list[str]) -> tuple[int, str, str]:
     """Return (status, content type, body) for one GET path."""
     parts = [unquote(p) for p in urlparse(path).path.split("/") if p]
+    query = {k: v[0][:200] for k, v in parse_qs(urlparse(path).query).items() if v}
     if not parts:
         return 200, "text/html", render_home({p: snapshot_for(p) for p in products})
     if parts[0] == "api" and len(parts) == 2 and parts[1].removesuffix(".json") in products:
@@ -1123,7 +1243,17 @@ def route(path: str, snapshot_for: Callable[[str], Snapshot], products: list[str
     s = snapshot_for(parts[1])
     tab = parts[2] if len(parts) > 2 else ""
     if tab == "" and len(parts) == 2:
-        return 200, "text/html", render_decisions(s, products)
+        return 200, "text/html", render_decisions(s, products, sort=query.get("sort", "priority"))
+    if tab == "board" and len(parts) == 3:
+        return 200, "text/html", render_board(s, products, view=query.get("view", ""), q=query.get("q", ""))
+    if tab == "money" and len(parts) == 3:
+        return 200, "text/html", render_money(s, products, view=query.get("view", ""))
+    if tab == "overview" and len(parts) == 3:
+        return 200, "text/html", render_overview(s, products, days=query.get("days", ""))
+    if tab == "audit" and len(parts) == 3:
+        return 200, "text/html", render_audit(s, products, query)
+    if tab == "audit.csv" and len(parts) == 3:
+        return 200, "text/csv", audit_csv(s, query)
     simple = {"board": render_board, "money": render_money, "health": render_health, "audit": render_audit,
               "overview": render_overview}
     if tab in simple and len(parts) == 3:
