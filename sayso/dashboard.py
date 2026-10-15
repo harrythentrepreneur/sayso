@@ -1042,6 +1042,9 @@ def render_swipe(s: Snapshot, products: list[str]) -> str:
     return page("Swipe", body, products, slug, "swipe", snap=s)
 
 
+DASH = "\u2014"
+NO_VALUE = "<span class=sa-faint>\u2014</span>"
+
 MONEY_WORDS = re.compile(r"\b(refund|charged?|cancel(?:led|ed)?|invoice|billing|money back|chargeback)\b", re.I)
 REPEAT_WORDS = re.compile(r"\b(?:(?:second|third|fourth|fifth|\d+(?:st|nd|rd|th))\s+(?:time|request|email|message|attempt)"
                           r"|(?:asking|writing|emailing|following up)\s+again|still\s+(?:waiting|no\b)"
@@ -1254,8 +1257,9 @@ def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") 
                   A.badge("Closed", "neutral") if st == stages.DONE else
                   A.badge(st, "bad") if st in (stages.BLOCKED, "unreadable") else A.badge(st, "neutral")) + "".join(
             " " + A.badge(lbl, tone) for tone, lbl in fl)
+        ticket = (" \u00b7 " + e(rec.get("ticket"))) if rec.get("ticket") else ""
         cells = [f"<div class=ib-who>{avatar(rec.get('customer'))}<div><div class=sa-cell-t>{e(rec.get('title'))}</div>"
-                 f"<div class=sa-cell-s>{e(rec.get('customer'))}{(' \u00b7 ' + e(rec.get('ticket'))) if rec.get('ticket') else ''}"
+                 f"<div class=sa-cell-s>{e(rec.get('customer'))}{ticket}"
                  f" \u00b7 {e(_preview(s, rec))}</div></div></div>",
                  f"<div class=ib-flags>{badges}</div>",
                  A.reltime(rec.get("last_inbound") or rec.get("created_at"), ref)]
@@ -1458,7 +1462,7 @@ def render_money(s: Snapshot, products: list[str], view: str = "") -> str:
         what = ("Refund" if sp.get("action") == "refund" else
                 "Cancel subscription" if sp.get("action") == "cancel_subscription" else str(sp.get("action", "")))
         rows.append({"cells": [
-            f"<div class=sa-cell-t>{e(rec.get('customer') or '\u2014')}</div><div class=sa-cell-s>{e(r['subject'])}</div>",
+            f"<div class=sa-cell-t>{e(rec.get('customer') or DASH)}</div><div class=sa-cell-s>{e(r['subject'])}</div>",
             f"<div>{e(what)}</div><div class=sa-cell-s><code>{e(sp.get('charge') or sp.get('subscription') or '')}</code></div>",
             A.money(amt, sp.get("currency")) if amt else "<span class=sa-faint>\u2014</span>",
             A.badge(*status), decision, check_html], "href": f"/p/{slug}/case/{r['case_key']}"})
@@ -1567,7 +1571,7 @@ def render_health(s: Snapshot, products: list[str]) -> str:
                  f"<div class=mute>{e(JOB_HINT.get(j, ''))}</div>"
                  f"<div class=res>{e(job_summary(h['result'])[:200])}</div>"
                  f"<details class=hraw><summary>Raw result</summary><pre>{e(str(h['result'])[:600])}</pre></details>{fix}</div>"
-                 f"<div class=hwhen>{A.reltime(h['at'], ref, long=True, suffix=' ago') if h['at'] else '<span class=sa-faint>\u2014</span>'}"
+                 f"<div class=hwhen>{A.reltime(h['at'], ref, long=True, suffix=' ago') if h['at'] else NO_VALUE}"
                  f"<div class=sa-faint>every {e(A.long_age(every) if every else '?')}</div></div></li>")
     alerts = [j for j in s.journal if j.get("event") == "alert"][-20:][::-1]
     arows = [[A.reltime(a.get("at"), ref, long=True, suffix=" ago"), e(a.get("text"))] for a in alerts]
