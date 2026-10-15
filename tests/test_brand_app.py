@@ -7,9 +7,12 @@ from sayso.brand import app
 
 class AppPartsTests(unittest.TestCase):
     def test_text_is_escaped(self):
-        for out in (app.badge("<b>x</b>"), app.header("<i>t</i>", "<s>"), app.empty("<a>", "<b>"),
-                    app.tile("<x>", app.e("<y>"), source="<z>"), app.trust_line("<fp>", version="<v>")):
-            self.assertNotRegex(out, r"<(b|i|s|a|x|y|z|fp|v)>")
+        bad = "<img src=x onerror=alert(1)>"
+        for out in (app.badge(bad), app.header(bad, bad, eyebrow_html=""), app.empty(bad, bad),
+                    app.tile(bad, app.e(bad), source=bad, note=bad), app.trust_line(bad, version=bad),
+                    app.tabs([(bad, bad, 1, True)]), app.search("/s", bad, placeholder=bad), app.source(bad),
+                    app.panel(bad, "", sub=bad), app.hbars([(bad, 1)]), app.axis_chart([(bad, 1)])):
+            self.assertNotIn("<img", out)
 
     def test_money_formats(self):
         self.assertEqual(app.money_plain(1200, "usd"), "$12.00 USD")
