@@ -509,7 +509,10 @@ color:var(--ink);font-weight:600;font-size:14px}.acct summary::-webkit-details-m
 .acct summary:hover{background:var(--hover)}.acct summary small{display:block;font-weight:400;color:var(--faint);font-size:12px}
 .acct .menu{padding:6px 8px 2px;font-size:13px;color:var(--mute)}.acct .menu .link{padding:6px 0}
 details.acct:not([open]) .menu{display:none}
-@media (max-width:860px){main{padding:20px 16px 48px}body.has-strip aside{top:0;height:auto}
+@media (max-width:860px){body{grid-template-columns:minmax(0,1fr)}main{padding:20px 16px 48px;min-width:0}
+aside{min-width:0;max-width:100vw}aside>div{min-width:0}body.has-strip aside{top:0;height:auto}
+aside nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px}.navgroup .navlabel{display:none}
+.sa-ph-a{min-width:0}.sa-ph-a .sa-seg{max-width:100%;overflow-x:auto}.alog{overflow:hidden}.aw,.aa,.ac{min-width:0}
 .demo-strip{position:static;font-size:12px;padding:6px 14px}.navgroup{flex-direction:row;flex-wrap:nowrap}
 .navgroup+.navgroup{margin-top:0}aside nav,aside>div:has(nav){overflow-x:auto;scrollbar-width:none;max-width:100%}
 aside nav{flex-wrap:nowrap!important}.acct{display:none}}
@@ -528,7 +531,12 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .cdec-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;color:var(--ink)}
 .cdec .act{padding-left:0}.cdec .ballots{padding-left:0}.props{max-width:420px}
 .case{grid-template-columns:minmax(0,1fr) minmax(320px,400px)}.cnotes{margin-top:24px}
-.sa-tile-v .v{display:inline}.wgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.sa-tile-v .v{display:inline}
+main a.sa-tab,main a.sa-seg a,main .sa-seg a,main a.sa-rowlink,main a.wrow,main a.sa-btn{color:inherit}
+main .sa-tab{color:var(--soft)}main .sa-tab.on{color:var(--ink)}main .sa-seg a{color:var(--ink2)}
+main a.sa-btn.ghost{color:var(--ink)}main a.sa-btn:not(.ghost){color:#fff}
+.demo-strip b{white-space:nowrap}.eyebrow b{color:var(--ink)}
+@media (min-width:861px){body{background:linear-gradient(to right,var(--side) 244px,var(--line) 244px,var(--line) 245px,var(--bg) 245px)}}.wgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
 .wrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:7px 0;border-top:1px solid var(--line2);
 font-size:13px;color:var(--ink2)!important}.wrow:hover{text-decoration:none!important;background:#fafaf8}
 .wt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
@@ -542,8 +550,9 @@ border-radius:10px;padding:14px 16px;margin:0 0 16px;font-size:14px;color:var(--
 .hh b{color:var(--ink)}.hjob .res{font-size:12px;color:var(--faint);margin-top:2px;word-break:break-word}
 .hwhen{text-align:right;font-size:12.5px}.hfix{margin-top:8px;background:#fdecec;border-radius:6px;padding:8px 10px;color:var(--ink2)}
 @media (max-width:860px){.hjob{grid-template-columns:22px minmax(0,1fr)}.hwhen{grid-column:2;text-align:left}}@media (max-width:860px){.wgrid{grid-template-columns:1fr}}
-@media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;background:var(--card,#fff);
-padding:10px 0;z-index:2}.act button{flex:1 1 40%;min-height:44px}}
+@media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;top:auto;background:var(--card,#fff);
+padding:10px 0;z-index:2;box-shadow:0 -6px 12px -10px rgba(0,0,0,.25)}.act button{flex:1 1 40%;min-height:44px}
+.item.dec .act .faint{flex-basis:100%;order:3}.item.dec .item-foot{padding-top:10px}}
 """
 
 
@@ -585,9 +594,9 @@ def page(title: str, body: str, products: list[str], current: str | None, tab: s
             for g, a in groups) + "</nav></div>"
     prods = "".join(f'<a class="{"on" if p == current else ""}" href="/p/{e(p)}/"><span class=dot></span>{e(p)}</a>'
                     for p in products)
-    mode = getattr(snap, "label", None) or "Live view"
+    mode = getattr(snap, "label", None) or ("Dry run" if snap is not None and not snap.config.live else "Live view")
     con = getattr(snap, "console", None)
-    stamp = f"<br>{e(when(snap.now.isoformat()))}" if snap is not None and mode != "Live view" else ""
+    stamp = f"<br>{e(when(snap.now.isoformat()))}" if snap is not None and getattr(snap, "label", None) else ""
     demo = snap is not None and not snap.config.live
     strip = ("<div class=demo-strip role=note><b>Dry run</b><span>Fake adapters: nothing is sent to anyone and no money "
              "moves.</span></div>" if demo else "")
@@ -895,9 +904,7 @@ def _decision_material(s: Snapshot, v: dict, rec: dict) -> str:
             return "<p class=faint>Draft file not readable.</p>"
         return (f"<div class=mail><div class=mh><b>From</b><span>{e(s.config.support_address)}</span><b>To</b>"
                 f"<span>{e(rec.get('customer'))}</span><b>Subject</b><span>Re: {e(rec.get('title'))}</span></div>"
-                f"<div class=mb>{e(_strip_subject(text))}</div></div>"
-                f"<div class=faint style='font-size:12px;margin-top:8px'>Version <code>{e(str(sp.get('sha256', ''))[:12])}"
-                f"</code></div>")
+                f"<div class=mb>{e(_strip_subject(text))}</div></div>")
     if kind == "money":
         cap = s.config.policy.refund_max_minor
         cur = ", ".join(s.config.policy.currencies).upper()
@@ -951,8 +958,7 @@ def _vote_form(s: Snapshot, v: dict) -> str:
     return (f"<form class=act method=post action='/p/{e(s.config.slug)}/vote'>{hidden}"
             f"<button class=yes name=answer value=yes>{e(YES_LABEL.get(v.get('kind'), 'Approve'))}</button>"
             f"<button class=no name=answer value=no>Decline</button>"
-            f"<span class=faint>Approves only the exact version shown here. Acts on the next run, with every "
-            f"safety check.</span></form>")
+            f"<span class=faint>Approves only the exact version shown here.</span></form>")
 
 
 def _console_form(s: Snapshot, action: str, label: str, cls: str = "") -> str:
@@ -1156,9 +1162,9 @@ def _preview(s: Snapshot, rec: dict) -> str:
     msgs = customer_messages(s, rec)
     if not msgs:
         return ""
-    text = str(msgs[-1]).split("\n\n", 1)[-1]
+    text = re.sub(r"<[^>]{0,200}>", " ", str(msgs[-1]).split("\n\n", 1)[-1])
     flat = " ".join(text.split())
-    return flat[:140] + ("\u2026" if len(flat) > 140 else "")
+    return flat[:300]
 
 
 def render_board(s: Snapshot, products: list[str], view: str = "", q: str = "") -> str:
