@@ -419,7 +419,7 @@ background:var(--line2);overflow:hidden}.hb .t i{display:block;height:100%;borde
 flex:none;color:var(--mute);background:var(--grey-bg)}
 .banner{display:flex;gap:10px;align-items:center;padding:12px 16px;border-radius:var(--r);margin-bottom:24px;
 background:var(--amber-bg);color:#6b4200}
-.note{display:flex;gap:10px;align-items:center;font-size:13.5px;color:var(--mute);margin:0 0 18px}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--mute);margin:0 0 18px}
 .item{border-bottom:1px solid var(--line);padding:26px 0}.item:first-of-type{border-top:1px solid var(--line)}
 .item-head{display:flex;gap:14px;align-items:flex-start}.item-head .who{flex:1;min-width:0}
 .eyebrow{font-size:12.5px;color:var(--faint)}.eyebrow b{color:var(--accent);font-weight:600}
@@ -523,7 +523,8 @@ color:var(--ink);font-weight:600;font-size:14px}.acct summary::-webkit-details-m
 details.acct:not([open]) .menu{display:none}
 @media (max-width:860px){body{grid-template-columns:minmax(0,1fr)}main{padding:20px 16px 48px;min-width:0}
 aside{min-width:0;max-width:100vw}aside>div{min-width:0}body.has-strip aside{top:0;height:auto}
-aside nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px}.navgroup .navlabel{display:none}
+aside nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px;
+-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent);padding-right:28px}.navgroup .navlabel{display:none}
 .sa-ph-a{min-width:0}.sa-ph-a .sa-seg{max-width:100%;overflow-x:auto}.alog{overflow:hidden}.aw,.aa,.ac{min-width:0}
 .demo-strip{position:static;font-size:12px;padding:6px 14px}.navgroup{flex-direction:row;flex-wrap:nowrap}
 .navgroup+.navgroup{margin-top:0}aside nav,aside>div:has(nav){overflow-x:auto;scrollbar-width:none;max-width:100%}
@@ -533,7 +534,7 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .item.dec:first-of-type{border-top:1px solid var(--line)}.qflags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .qamt{font-size:15px}.tickf{margin:0}
 @media (min-width:1180px){.dsplit{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:20px;align-items:start}
-.dsplit .queue{position:sticky;top:46px;margin:0}main a.qrow{grid-template-columns:28px minmax(0,1fr) 56px}
+.dsplit .queue{position:sticky;top:46px;margin:0}main .dsplit a.qrow{grid-template-columns:28px minmax(0,1fr) 44px}
 .dsplit .qk,.dsplit .qa{display:none}.dsplit .qw{flex-direction:column;gap:0}.dcards .qgroup:first-child{margin-top:0}}
 .queue{display:block;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;margin:0 0 18px;overflow:hidden}
 .qhead{display:flex;gap:10px;align-items:baseline;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--faint)}
@@ -543,7 +544,7 @@ border-top:1px solid var(--line2);color:var(--ink2);font-size:13.5px}main a.qrow
 .qhead+.qrow{border-top:0}.qw{display:flex;gap:10px;min-width:0}.qw b{color:var(--ink);font-weight:600;white-space:nowrap}
 .qw span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--soft)}.qk{font-size:12.5px;color:var(--soft)}
 .qa,.qt{text-align:right;font-size:12.5px;color:var(--faint)}.item.dec{scroll-margin-top:16px}.item.dec:target{outline:2px solid var(--accent)}
-@media (max-width:860px){main a.qrow{grid-template-columns:28px minmax(0,1fr) auto}.qk,.qa{display:none}.qw{flex-direction:column;gap:0}}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
+@media (max-width:860px){main .queue a.qrow{grid-template-columns:28px minmax(0,1fr) auto}.qk,.qa{display:none}.qw{flex-direction:column;gap:0}}.item.dec .act{border-top:1px solid var(--line2);margin-top:14px}
 .item.dec .item-body .sa-trust{margin-top:12px}
 .ib-who{display:flex;gap:10px;align-items:flex-start;min-width:0}.ib-who>div{min-width:0}
 .inbox .sa-cell-s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62ch}
@@ -1115,11 +1116,19 @@ def _kind_label(v: dict) -> str:
 
 
 def _version_of(v: dict) -> str:
+    """What a Yes is bound to, in words: 'reply version 2', 'refund of $29.00 USD on ch_x', 'head abc123'."""
+    from sayso.brand import app as A
     key = str(v.get("key") or "")
+    sp = v.get("spec") or {}
     if v.get("kind") == "reply" and re.search(r":v\d+$", key):
-        return "version " + key.rsplit(":v", 1)[-1]
+        return "reply version " + key.rsplit(":v", 1)[-1]
     if v.get("kind") == "merge":
-        return "head " + str((v.get("spec") or {}).get("head", ""))[:12]
+        return "head " + str(sp.get("head", ""))[:12]
+    if v.get("kind") == "money" and sp.get("action") == "refund":
+        return f"a refund of {A.money_plain(sp.get('amount'), sp.get('currency'))}" + (
+            f" on {sp.get('charge')}" if sp.get("charge") else "")
+    if v.get("kind") == "money":
+        return str(sp.get("action", "this money action")).replace("_", " ")
     return "this exact request"
 
 
@@ -1146,16 +1155,16 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
             f"<div class=who><div class=eyebrow><b>{e(_kind_label(v))}</b> · {e(rec.get('customer'))}</div>"
             f"<div class=title>{e(v.get('subject'))}</div><div class=q>{e(v.get('question'))}</div>"
             f"<div class=qflags>{wait_badges(s, v, ref)} {chips}</div></div>"
-            f"<div class=meta>{amount}<span>{ago(v.get('opened_at'), ref)}</span></div></div>"
+            f"<div class=meta>{amount}</div></div>"
             f"<div class=item-body>{_decision_material(s, v, rec)}"
             f"{A.trust_line(str(v.get('fingerprint') or ''), version=_version_of(v))}</div>"
-            f"{_ballots_html(s, v)}{_vote_form(s, v)}<div class=item-foot><span>Case: {e(rec.get('title'))}</span>"
+            f"{_ballots_html(s, v)}{_vote_form(s, v)}<div class=item-foot>"
             f"<a href='/p/{e(slug)}/case/{e(v.get('case_key'))}'>Open case →</a></div></article>")
     if items:
         qrows = "".join(
             f"<a class=qrow href='#d-{e(v.get('key'))}'>{avatar(s.cases.get(v.get('case_key'), {}).get('customer'))}"
             f"<span class=qw><b>{e(s.cases.get(v.get('case_key'), {}).get('customer') or '')}</b>"
-            f"<span>{e(s.cases.get(v.get('case_key'), {}).get('title') or v.get('subject'))}</span></span>"
+            f"<span>{e(_kind_label(v))} \u00b7 {e(s.cases.get(v.get('case_key'), {}).get('title') or v.get('subject'))}</span></span>"
             f"<span class=qk>{e(_kind_label(v))}</span>"
             f"<span class=qa>{A.money((v.get('spec') or {}).get('amount'), (v.get('spec') or {}).get('currency')) if v.get('kind') == 'money' and (v.get('spec') or {}).get('action') == 'refund' else ''}</span>"
             f"<span class=qt>{A.reltime(v.get('opened_at'), ref)}</span></a>" for v, _ in items)
@@ -1181,8 +1190,8 @@ def render_decisions(s: Snapshot, products: list[str], sort: str = "priority") -
                    f"Run the loop once</button></form>" + actions)
     note = ""
     if items:
-        note = (f"<div class=note>{icon('lock')}<span>Your Yes counts only for the exact version shown. If it changes "
-                f"before the loop runs, the vote is void and asked again. No approve-all: each Yes is its own.</span></div>"
+        note = (f"<div class=note>{icon('lock')}<span>No approve-all: each Yes is its own, for the exact version on its "
+                f"card.</span></div>"
                 if s.console else
                 f"<div class=note>{icon('lock')}<span>Approve or decline on the board poll. This page cannot approve, "
                 f"so nothing here can act by mistake.</span></div>")
