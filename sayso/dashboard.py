@@ -528,6 +528,11 @@ aside nav{flex-wrap:nowrap!important}.acct{display:none}}
 .cdec-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;color:var(--ink)}
 .cdec .act{padding-left:0}.cdec .ballots{padding-left:0}.props{max-width:420px}
 .case{grid-template-columns:minmax(0,1fr) minmax(320px,400px)}.cnotes{margin-top:24px}
+.sa-tile-v .v{display:inline}.wgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:7px 0;border-top:1px solid var(--line2);
+font-size:13px;color:var(--ink2)!important}.wrow:hover{text-decoration:none!important;background:#fafaf8}
+.wt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.grid2>.sa-panel{margin:0}@media (max-width:860px){.wgrid{grid-template-columns:1fr}}
 @media (max-width:860px){.item.dec{padding:14px}.item.dec .act{position:sticky;bottom:0;background:var(--card,#fff);
 padding:10px 0;z-index:2}.act button{flex:1 1 40%;min-height:44px}}
 """
@@ -747,61 +752,129 @@ OUTCOMES = (("Approved", ("approved", "done"), "c-green"), ("Declined", ("declin
             ("Waiting", ("open",), "c-amber"))
 
 
+PERIODS = (7, 14, 30)
+WAIT_BUCKETS = (("Under 1 hour", 0, 1), ("1-4 h", 1, 4), ("4-24 h", 4, 24), ("1-3 days", 24, 72),
+                ("More than 3 days", 72, None))
+
+
 def render_overview(s: Snapshot, products: list[str], days: str = "") -> str:
+    from sayso.brand import app as A
+    slug, ref = s.config.slug, ref_time(s)
+    n_days = int(days) if str(days).isdigit() and int(days) in PERIODS else 14
+    start = ref - timedelta(days=n_days)
+    prev = start - timedelta(days=n_days)
     live = _live_cases(s)
-    open_cases = sum(1 for _, r in live if s.stage(r["card_id"]) != stages.DONE)
     waiting = s.open_votes()
-    times = decision_times(s)
-    status = Counter(v.get("status") for v in s.votes.values())
-    decided = sum(status.get(x, 0) for x in ("approved", "done", "declined"))
-    approved = sum(status.get(x, 0) for x in ("approved", "done"))
-    health = s.health()
-    ran = [h for h in health if h["state"] != "never"]
-    healthy = sum(1 for h in ran if h["state"] == "ok")
-    metrics = (_metric("Waiting on you", len(waiting), "decisions in the inbox", hot=bool(waiting))
-               + _metric("Open cases", open_cases, f"{len(live) - open_cases} closed")
-               + _metric("Time to a decision", _hours(_median(times)), f"median, {len(times)} with a recorded time")
-               + _metric("Approval rate", f"{100 * approved / decided:.0f}%" if decided else "—",
-                         f"{approved} of {decided} decided"))
-    new_cases = bar_chart(daily(s, [_at(r.get("created_at")) for _, r in live]))
+
+    def within(at, lo, hi):
+        return at is not None and lo < at <= hi
+
+    new_now = sum(1 for _, r in live if within(_at(r.get("created_at")), start, ref))
+    new_prev = sum(1 for _, r in live if within(_at(r.get("created_at")), prev, start))
     firsts = first_decisions(s)
-    decisions = bar_chart(daily(s, [at for _, at, a in firsts if a == "yes"]),
-                          second=daily(s, [at for _, at, a in firsts if a == "no"])).replace("<svg class=chart", "<svg class='chart yn'", 1)
-    total = sum(status.values()) or 1
-    stack = "".join(f"<i class='{c}' style='width:{max(100 * sum(status.get(x, 0) for x in keys) / total, 1.5 if sum(status.get(x, 0) for x in keys) else 0):.2f}%' "
-                    f"title='{e(name)}'></i>" for name, keys, c in OUTCOMES)
-    legend = "".join(f"<span><i class='sw {c}'></i>{e(name)} <b>{sum(status.get(x, 0) for x in keys)}</b></span>"
-                     for name, keys, c in OUTCOMES if sum(status.get(x, 0) for x in keys))
-    kind_counts = Counter(str(r.get("kind") or "other") for _, r in live)
-    kinds = hbars(kind_counts.most_common(6) + ([("everything else", sum(kind_counts.values())
-                                                  - sum(v for _, v in kind_counts.most_common(6)))]
-                                                if len(kind_counts) > 6 else []))
-    stage_rows = Counter(s.stage(r["card_id"]) for _, r in live)
-    where = hbars([(st, stage_rows.get(st, 0)) for st in STAGE_ORDER if stage_rows.get(st)])
-    stale = [h["job"] for h in health if h["state"] == "stale"]
+    dec_now = [(k, at, a) for k, at, a in firsts if within(at, start, ref)]
+    yes_now = sum(1 for *_, a in dec_now if a == "yes")
+    opened: dict[str, datetime] = {}
+    times = []
+    for j in s.journal:
+        key, at = str(j.get("key") or ""), _at(j.get("at"))
+        if not key or at is None:
+            continue
+        if j.get("event") == "vote_opened":
+            opened.setdefault(key, at)
+    for k, at, _a in dec_now:
+        if k in opened:
+            times.append(max((at - opened[k]).total_seconds() / 3600, 0.0))
+    sent = sum(1 for j in s.journal if j.get("event") == "vote_done" and within(_at(j.get("at")), start, ref)
+               and (j.get("receipt") or {}).get("status") == "SENT_AND_VERIFIED")
+    refunded = sum(int((j.get("receipt") or {}).get("amount") or 0) for j in s.journal
+                   if j.get("event") == "vote_done" and str(j.get("key", "")).startswith("money:")
+                   and within(_at(j.get("at")), start, ref))
+    cur = (s.config.policy.currencies[0] if s.config.policy.currencies else "usd")
+
+    def delta(now, before):
+        if not before and not now:
+            return "No change on the period before"
+        if not before:
+            return "None in the period before"
+        d = now - before
+        return f"{'+' if d >= 0 else ''}{d} on the {n_days} days before"
+
+    tiles = A.tiles([
+        A.tile("Waiting on you", f"<div class=v>{len(waiting)}</div>", hot=bool(waiting),
+               note="Open decisions right now", source="Open votes in the vote records"),
+        A.tile("New cases", e(new_now), note=delta(new_now, new_prev), source="Case records, by date opened"),
+        A.tile("Decisions", e(len(dec_now)), note=f"{yes_now} Yes, {len(dec_now) - yes_now} No",
+               source="Decision journal: the first answer counts"),
+        A.tile("Median time to a decision", e(_hours(_median(times))),
+               note=f"{len(times)} with a recorded open time" if times else "No decision with an open time in this period",
+               source="Decision journal: vote opened to first answer"),
+        A.tile("Replies verified", e(sent), source="Sends found in the Sent folder after they went out"),
+        A.tile("Refunded", A.money(refunded, cur), source="Refunds confirmed with the payment provider"),
+    ])
+    span = [(lbl, n) for lbl, n in daily(s, [_at(r.get("created_at")) for _, r in live], n_days)]
+    yes_s = daily(s, [at for _, at, a in firsts if a == "yes"], n_days)
+    no_s = daily(s, [at for _, at, a in firsts if a == "no"], n_days)
+    ch_new = A.axis_chart(span, label=f"New cases per day, last {n_days} days").replace("class=sa-chart", "class='sa-chart chart'", 1)
+    ch_dec = A.axis_chart(yes_s, second=no_s, label=f"Decisions per day, last {n_days} days").replace(
+        "class=sa-chart", "class='sa-chart yn'", 1)
+    # time waiting on you
+    buckets = []
+    for lbl, lo, hi in WAIT_BUCKETS:
+        n = 0
+        for v in waiting:
+            at = _at(v.get("opened_at"))
+            if at is None:
+                continue
+            h = (ref - at).total_seconds() / 3600
+            if h >= lo and (hi is None or h < hi):
+                n += 1
+        buckets.append((lbl, n))
+    oldest = sorted(waiting, key=lambda v: str(v.get("opened_at", "")))[:5]
+    old_rows = "".join(
+        f"<a class=wrow href='/p/{e(slug)}/case/{e(v.get('case_key'))}'><span class=wt>{e(v.get('subject'))}</span>"
+        f"<span class=sa-faint>{e(_kind_label(v))}</span>{A.reltime(v.get('opened_at'), ref, long=True)}</a>"
+        for v in oldest) or "<p class=sa-faint>Nothing is waiting.</p>"
+    wait_panel = A.panel(
+        "Time waiting on you", f"<div class=wgrid><div>{A.hbars(buckets, total=len(waiting) or 1)}</div>"
+        f"<div class=wlist><div class=sa-faint style='font-size:12.5px;margin-bottom:4px'>Oldest first"
+        f" ({len(oldest)} of {len(waiting)})</div>{old_rows}</div></div>"
+        + A.source("open decisions in the vote records; age from when each vote opened"),
+        sub=f"{len(waiting)} open" + (f" \u00b7 oldest {A.long_age((ref - _at(oldest[0].get('opened_at'))).total_seconds())}"
+                                     if oldest and _at(oldest[0].get('opened_at')) else ""),
+        actions_html=(f"<a class='sa-btn ghost sm' href='/p/{e(slug)}/'>Review decisions</a>" if waiting else ""))
+    status = Counter(v.get("status") for v in s.votes.values())
+    outcome_rows = [(name, sum(status.get(x, 0) for x in keys)) for name, keys, _c in OUTCOMES]
+    flag_counts = Counter()
+    for _, r in live:
+        fl = [lbl for _t, lbl in flags(s, r)]
+        for lbl in fl or ["No flag"]:
+            flag_counts["Repeat contact" if lbl.startswith("Wrote ") or lbl.endswith(" cases") else lbl] += 1
+    who = Counter(str(v.get("decided_by")) for v in s.votes.values() if v.get("decided_by"))
+    stale = [h["job"] for h in s.health() if h["state"] == "stale"]
     alert = (f"<div class=banner style='background:var(--red-bg);color:var(--red)'>{icon('health')}<div><b>Needs a look:"
-             f"</b> {e(', '.join(stale))} missed its last runs. <a href='/p/{e(s.config.slug)}/health'>Open health →</a>"
+             f"</b> {e(', '.join(stale))} missed its last runs. <a href='/p/{e(slug)}/health'>Open health →</a>"
              f"</div></div>" if stale else "")
+    periods = A.segmented([(f"{d} days", A.qs(f"/p/{slug}/overview", days=d if d != 14 else ""), d == n_days)
+                           for d in PERIODS], label="Period")
     body = (f"{_paused_banner(s)}{alert}"
-            + head("Overview", "How support is going, from what the loop has recorded.", crumb=e(s.config.name))
-            + f"<div class=metrics>{metrics}</div>"
-            + "<div class=grid2 style='margin-top:20px'>"
-            f"<div class=panel><h3>New cases</h3><div class=ph>Per day, last 14 days</div>{new_cases}</div>"
-            f"<div class=panel><h3>Decisions made</h3><div class=ph>Per day, last 14 days · <span class='sw c-green'></span> Yes "
-            f"&nbsp;<span class='sw c-red'></span> No</div>{decisions}</div>"
-            f"<div class=panel><h3>Decision outcomes</h3><div class=ph>All {sum(status.values())} decisions · "
-            f"approval rate counts only Yes and No</div>"
-            f"<div class=stack>{stack}</div><div class=legend>{legend}</div></div>"
-            f"<div class=panel><h3>Where cases are now</h3><div class=ph>By stage on the board</div>{where}</div>"
-            f"<div class=panel><h3>Loop health</h3><div class=ph>Jobs that have run here: {healthy} of {len(ran)} healthy"
-            f"</div>"
-            + "".join(f"<div class=hb style='grid-template-columns:1fr auto'><span class=l style='text-transform:"
-                      f"capitalize'>{e(h['job'])}</span>{pill(h['state'])}</div>" for h in ran)
-            + f"<p style='margin:10px 0 0'><a href='/p/{e(s.config.slug)}/health'>All jobs →</a></p></div>"
-            + f"<div class=panel><h3>Cases by type</h3><div class=ph>Open and closed</div>{kinds}</div>"
+            + A.header("Insights", f"Last {n_days} days to {ref.strftime('%d %b %Y')} (UTC). Every number is read from "
+                       "this product's records.", actions_html=periods, eyebrow_html=e(s.config.name))
+            + tiles + wait_panel
+            + "<div class=grid2 style='margin-top:16px'>"
+            + A.panel("New cases", ch_new + A.source("case records, by the day each case opened"), sub=f"Per day, last {n_days} days")
+            + A.panel("Decisions made", ch_dec + A.source("decision journal; a decision counts once, at its first answer"),
+                      sub=f"Per day, last {n_days} days \u00b7 green Yes, red No")
+            + A.panel("Decision outcomes", A.hbars(outcome_rows, total=sum(status.values()) or 1)
+                      + A.source("vote records, by current status"), sub=f"All {sum(status.values())} decisions")
+            + A.panel("Cases by flag", A.hbars(flag_counts.most_common(), total=len(live) or 1)
+                      + A.source("Inbox flags; a case can carry more than one"), sub=f"% of {len(live)} cases")
+            + A.panel("Who decided", A.hbars(who.most_common(6)) if who else "<p class=sa-faint>No decision yet.</p>",
+                      sub="Every recorded decider, all time")
             + "</div>"
-            "<p class=notmeasured>Not measured yet, so not shown: AI cost per case and customer satisfaction.</p>")
-    return page("Overview", body, products, s.config.slug, "overview", snap=s)
+            "<p class=notmeasured>Not measured yet, so not shown: AI cost per case, first reply time in business hours "
+            "and customer satisfaction. The core does not record them.</p>")
+    return page("Insights", body, products, slug, "overview", snap=s)
 
 
 def _decision_material(s: Snapshot, v: dict, rec: dict) -> str:
