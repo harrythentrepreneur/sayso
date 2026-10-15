@@ -105,6 +105,21 @@ class ConsolePagesTests(unittest.TestCase):
         self.assertIn("$19.00", body)
         self.assertIn("re_19", body)
 
+    # -- refunds ----------------------------------------------------------------------------------
+    def test_refunds_tiles_tabs_and_provider_column(self):
+        _, _, body = self.get("/p/demo/money")
+        self.assertIn("<h1>Refunds</h1>", body)
+        tiles = body[body.index("sa-tiles"):body.index("sa-bar")]
+        self.assertIn("Waiting for a decision", tiles)
+        self.assertIn("$29.00", tiles)
+        self.assertIn("Refunded and verified", tiles)
+        self.assertIn("$50.00", tiles)                               # cap from the settings file
+        self.assertIn("Provider check", body)
+        _, _, body = self.get("/p/demo/money?view=waiting")
+        rows = body.split("<tbody>")[1]
+        self.assertIn("ch_demo0002", rows)
+        self.assertNotIn("ch_demo0001", rows)
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]
