@@ -120,6 +120,17 @@ class ConsolePagesTests(unittest.TestCase):
         self.assertIn("ch_demo0002", rows)
         self.assertNotIn("ch_demo0001", rows)
 
+    # -- insights ---------------------------------------------------------------------------------
+    def test_insights_periods_sources_and_axis(self):
+        for d, want in (("7", "Last 7 days"), ("30", "Last 30 days"), ("", "Last 14 days"), ("99", "Last 14 days")):
+            _, _, body = self.get(f"/p/demo/overview?days={d}")
+            self.assertIn(want, body)
+        main = body[body.index("<main>"):]
+        self.assertEqual(main.count("class=sa-tile-s"), 6)              # every KPI says where it came from
+        self.assertIn("text-anchor='end'>0</text>", main)              # y axis starts at zero, labelled
+        self.assertIn("Time waiting on you", main)
+        self.assertIn("Not measured yet", main)
+
     def test_nav_groups_and_labels(self):
         _, _, body = self.get("/p/demo/")
         nav = body[body.index("<nav"):body.index("</nav>")]

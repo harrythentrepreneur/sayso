@@ -103,7 +103,7 @@ class DashboardTests(unittest.TestCase):
         n_open = sum(1 for v in vs.values() if v["status"] == votes.OPEN)
         self.assertIn(f"<div class=v>{n_open}</div>", body)  # waiting on you
         self.assertIn(f"All {len(vs)} decisions", body)
-        self.assertIn("<svg class=chart", body)
+        self.assertIn("<svg class='sa-chart chart'", body)  # real-axis chart
         self.assertIn("Not measured yet", body)  # no invented cost or satisfaction numbers
 
     def test_decision_time_is_measured_from_the_journal(self):
