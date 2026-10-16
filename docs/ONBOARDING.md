@@ -11,6 +11,7 @@ and prove each one before you switch the next.
 | Helpdesk (owns correspondence) | `frappe` | Helpdesk URL, API key and secret, site timezone set to UTC |
 | Mailbox (independent send receipt) | `imap` | IMAP host, user, app password, Sent folder name |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
+| Payments (optional) | `lemonsqueezy` | A Lemon Squeezy API key and the store's number (see below) |
 | Code host (optional) | `github` | Repo `owner/name`, a fine-grained token: pull requests read/write, contents read |
 | Drafter | `hermes` | A Hermes profile that writes support replies |
 | Dev runner (optional) | `hermes` | A Hermes profile that codes, opens a PR and stops |
@@ -54,6 +55,31 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
    and run `sayso run sender`. It must end `SENT_AND_VERIFIED`, with the email
    in your inbox and exactly one copy in the Sent folder.
 7. **Install the timers.** See [INSTALL.md](INSTALL.md).
+
+### Lemon Squeezy payments
+
+1. In Lemon Squeezy, switch the dashboard to **Test mode** and open
+   Settings > API. Create an API key (keys made in test mode see only test data;
+   every key expires after a year). Put it in the secrets file as
+   `ACME_LEMONSQUEEZY_KEY=...`.
+2. Find the store's number: Settings > Stores, or
+   `curl -s https://api.lemonsqueezy.com/v1/stores -H 'Accept: application/vnd.api+json' -H "Authorization: Bearer $ACME_LEMONSQUEEZY_KEY"`
+   and read `data[].id`.
+3. In the settings file:
+   ```toml
+   [payments]
+   adapter = "lemonsqueezy"
+   api_key_env = "ACME_LEMONSQUEEZY_KEY"
+   store_id = "12345"
+   test_mode = true        # remove (or set false) when you switch to a live key
+   ```
+4. Money specs use prefixed ids: `ls_order_<order id>` for refunds,
+   `ls_sub_<subscription id>` for cancellations and `ls_cust_<customer id>` for the
+   customer. A bare number or a Stripe id is refused.
+5. Prove it with one test purchase (card 4242 4242 4242 4242), approve a small
+   partial refund of that test order, and check the order in Lemon Squeezy shows
+   the refunded amount. A Lemon Squeezy key has no scopes: it can do anything the
+   store owner can, so keep `refund_max_minor` low.
 
 ## Go-live checklist
 

@@ -1067,6 +1067,263 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.lemonsqueezy.API": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.lemonsqueezy.CUSTOMER_PREFIX": {
+   "kind": "value",
+   "type": "str",
+   "value": "ls_cust_"
+  },
+  "sayso.adapters.lemonsqueezy.LemonSqueezyError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.lemonsqueezy.LemonSqueezyPayments": {
+   "init": [
+    [
+     "section",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "api_key",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "api_key",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "sleep",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "cancel_subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "check": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "customer_email": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "order_owner": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_order": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_refunds": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_sub": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "refund": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "amount",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "currency",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "subscription_owner": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.lemonsqueezy.ORDER_PREFIX": {
+   "kind": "value",
+   "type": "str",
+   "value": "ls_order_"
+  },
+  "sayso.adapters.lemonsqueezy.SUBSCRIPTION_PREFIX": {
+   "kind": "value",
+   "type": "str",
+   "value": "ls_sub_"
+  },
+  "sayso.adapters.lemonsqueezy.customer_id": {
+   "kind": "function",
+   "signature": [
+    [
+     "spec_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.lemonsqueezy.order_id": {
+   "kind": "function",
+   "signature": [
+    [
+     "spec_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.lemonsqueezy.parse_stores": {
+   "kind": "function",
+   "signature": [
+    [
+     "doc",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.lemonsqueezy.subscription_id": {
+   "kind": "function",
+   "signature": [
+    [
+     "spec_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.reference.DiscordForumBoard": {
    "init": [
     [
