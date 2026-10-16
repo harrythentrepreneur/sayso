@@ -1076,6 +1076,15 @@
    "kind": "value",
    "type": "dict"
   },
+  "sayso.adapters.intercom.IntercomError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
   "sayso.adapters.intercom.IntercomHelpdesk": {
    "init": [
     [
@@ -1334,6 +1343,11 @@
      ]
     ]
    }
+  },
+  "sayso.adapters.intercom.NO_EMAIL_DOMAIN": {
+   "kind": "value",
+   "type": "str",
+   "value": "contacts.intercom.invalid"
   },
   "sayso.adapters.intercom.VERSION": {
    "kind": "value",
