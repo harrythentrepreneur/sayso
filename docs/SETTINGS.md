@@ -26,7 +26,7 @@ relative path is relative to the settings file. Keep it out of any git repositor
 
 ## Adapter sections
 
-`[board] [helpdesk] [mailbox] [payments] [codehost] [drafter] [dev_runner] [qa_runner]`
+`[board] [helpdesk] [mailbox] [payments] [codehost] [drafter] [dev_runner] [qa_runner] [events]`
 
 Each section takes `adapter = "..."` plus the adapter's own keys.
 
@@ -40,6 +40,7 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | drafter | `fake`, `hermes` | `fake` |
 | dev_runner | `none`, `fake`, `hermes` | `none` |
 | qa_runner | `none`, `fake`, `hermes` | `none` |
+| events | `none`, `webhook` | `none` |
 
 A key ending in `_env` names an **environment variable**, never a value.
 `token_env = "ACME_DISCORD_TOKEN"` is accepted. `token_env = "abc123"` is refused.
@@ -53,6 +54,8 @@ Reference adapter keys:
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
   defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.
 - hermes (drafter and dev_runner): `profile`
+- webhook (events): `url` (https), `secret_env`, optional `events` (list; default all four) and
+  `include_content` (default `false`). See [WEBHOOKS.md](WEBHOOKS.md).
 - hermes (qa_runner): `profile` (must differ from the dev profile), `red_proof_cmd` (prints one JSON line
   `{"state": "red-proved" | "not-red" | "head-red" | "error"}`; gets the PR number and head SHA as its last two arguments)
 
@@ -93,7 +96,7 @@ Reference adapter keys:
 
 Seconds between runs for each job, minimum 30:
 `intake 60, draft 120, sender 120, money 120, votes 60, dev 300, qa 300, release 300,
-close 900, reconcile 600, stall 300, health 600`. Health reports a job as stale after three missed intervals.
+close 900, reconcile 600, stall 300, health 600, events 60`. Health reports a job as stale after three missed intervals.
 
 ## [[plugins]]
 

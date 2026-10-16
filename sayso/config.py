@@ -24,6 +24,7 @@ ADAPTER_CHOICES = {
     "drafter": ("fake", "hermes"),
     "dev_runner": ("none", "fake", "hermes"),
     "qa_runner": ("none", "fake", "hermes"),
+    "events": ("none", "webhook"),
 }
 DEFAULT_JOBS = {
     "intake": 60,
@@ -38,6 +39,7 @@ DEFAULT_JOBS = {
     "close": 900,
     "reconcile": 600,
     "health": 600,
+    "events": 60,
 }
 _SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
 _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -171,7 +173,7 @@ def _need(table: dict, key: str, where: str) -> Any:
 
 def parse(raw: dict, path: Path) -> Config:
     top = _take(raw, {"product", "operators", "state", "board", "helpdesk", "mailbox", "payments",
-                      "codehost", "drafter", "dev_runner", "qa_runner", "policy", "jobs", "plugins"}, "top level")
+                      "codehost", "drafter", "dev_runner", "qa_runner", "policy", "jobs", "plugins", "events"}, "top level")
     product = _take(_need(top, "product", "top level"),
                     {"name", "slug", "mode", "support_address", "own_addresses", "labels"}, "product")
     slug = _need(product, "slug", "product")

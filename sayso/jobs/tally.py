@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 from sayso import votes, pr_refs
+from sayso.adapters import events
 from sayso.store import parse_iso
 
 
@@ -94,6 +95,9 @@ def run(ctx) -> dict:
         where = " (from the console)" if via == "console" else ""
         ctx.board.post(rec["card_id"], f"{by} {word}{where}: {rec['question']}", idempotency_key=f"decided:{key}")
         _close_poll(ctx, rec)
+        events.publish(ctx, "vote.decided", events.vote_payload(rec, status, by, via), f"decided:{key}",
+                       card_id=rec["card_id"], content=lambda: events.content_for_case(
+                           ctx, rec["case_key"], question=rec.get("question"), subject=rec.get("subject")))
         counts[word] += 1
     ctx.beat("votes", str(counts))
     return counts

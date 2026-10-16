@@ -81,6 +81,7 @@ class Context:
     qa_runner: Any = None
     world: Any = None  # the shared fake world, when fakes are in use
     plugins: list[Any] = field(default_factory=list)
+    events: Any = None  # outgoing webhooks (sayso.adapters.events), None when off
 
     def __post_init__(self) -> None:
         self.paths = Paths(self.config.state_dir)
@@ -154,4 +155,7 @@ def build(config: Config, clock: Clock | None = None) -> Context:
                   mailbox=make("mailbox"), payments=make("payments"), codehost=make("codehost"),
                   drafter=make("drafter"), dev_runner=make("dev_runner"), qa_runner=make("qa_runner"), world=world)
     ctx.plugins = plugin_registry.load_enabled(config)
+    ctx.events = make("events")
+    if ctx.events is not None:
+        ctx.events.bind(ctx)
     return ctx

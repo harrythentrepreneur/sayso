@@ -566,6 +566,418 @@
     ]
    }
   },
+  "sayso.adapters.events.DELIVERY_HEADER": {
+   "kind": "value",
+   "type": "str",
+   "value": "X-Sayso-Delivery"
+  },
+  "sayso.adapters.events.EVENTS": {
+   "kind": "value",
+   "type": "tuple",
+   "value": [
+    "vote.decided",
+    "reply.sent",
+    "money.verified",
+    "case.closed"
+   ]
+  },
+  "sayso.adapters.events.EVENT_HEADER": {
+   "kind": "value",
+   "type": "str",
+   "value": "X-Sayso-Event"
+  },
+  "sayso.adapters.events.Endpoint": {
+   "init": [
+    [
+     "id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "url",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "events",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "url",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "secret",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "events",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.events.EventsError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.events.MAX_ATTEMPTS": {
+   "kind": "value",
+   "type": "int",
+   "value": 8
+  },
+  "sayso.adapters.events.SIGNATURE_HEADER": {
+   "kind": "value",
+   "type": "str",
+   "value": "X-Sayso-Signature"
+  },
+  "sayso.adapters.events.TEST_EVENT": {
+   "kind": "value",
+   "type": "str",
+   "value": "sayso.test"
+  },
+  "sayso.adapters.events.WebhookEvents": {
+   "init": [
+    [
+     "endpoints",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "outbox_path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "product",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "clock",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "transport",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "include_content",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "journal",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "alert",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "endpoints",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "outbox_path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "product",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "clock",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "transport",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "include_content",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "journal",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "alert",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "bind": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ctx",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "cancel": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "endpoint_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "emit": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "event",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "payload",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "content",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "only",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "flush": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "only",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "limit",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "log": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "endpoint_id",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "limit",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.events.check_events": {
+   "kind": "function",
+   "signature": [
+    [
+     "names",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.events.emit_test": {
+   "kind": "function",
+   "signature": [
+    [
+     "adapter",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "endpoint_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "nonce",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.events.event_id": {
+   "kind": "function",
+   "signature": [
+    [
+     "product",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "event",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "idempotency_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.events.log": {
+   "kind": "function",
+   "signature": [
+    [
+     "outbox_path",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "endpoint_id",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "limit",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.events.outbox_path": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.events.sign": {
+   "kind": "function",
+   "signature": [
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "timestamp",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.events.verify": {
+   "kind": "function",
+   "signature": [
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "header",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "now",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "tolerance",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
   "sayso.adapters.fake.FakeBoard": {
    "init": [
     [
@@ -2210,6 +2622,7 @@
     "close",
     "dev",
     "draft",
+    "events",
     "health",
     "intake",
     "money",
@@ -2238,7 +2651,8 @@
     "close",
     "reconcile",
     "stall",
-    "health"
+    "health",
+    "events"
    ]
   },
   "sayso.jobs.draft.run": {
@@ -2469,6 +2883,11 @@
      "plugins",
      "POSITIONAL_OR_KEYWORD",
      true
+    ],
+    [
+     "events",
+     "POSITIONAL_OR_KEYWORD",
+     true
     ]
    ],
    "kind": "class",
@@ -2536,6 +2955,11 @@
      ],
      [
       "plugins",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "events",
       "POSITIONAL_OR_KEYWORD",
       true
      ]

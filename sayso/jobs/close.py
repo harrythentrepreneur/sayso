@@ -16,6 +16,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 from sayso import cases, stages, votes
+from sayso.adapters import events
 from sayso.store import parse_iso
 
 
@@ -48,6 +49,9 @@ def _no_reply_close(ctx, vkey: str, v: dict) -> str | None:
     votes.set_status(ctx, vkey, votes.DONE)
     ctx.board.post(card, f"Closed with no reply by {v.get('decided_by')} ({v['spec']['reason']}). Nothing was "
                    "sent. A new email reopens it.", idempotency_key=f"closed:{vkey}")
+    events.publish(ctx, "case.closed", {"case_key": v["case_key"], "vote_key": vkey, "how": "no_reply",
+                                        "closed_by": v.get("decided_by")}, f"closed:{vkey}", card_id=card,
+                   content=lambda: events.content_for_case(ctx, v["case_key"], reason=v["spec"].get("reason")))
     return "closed"
 
 
@@ -101,6 +105,9 @@ def run(ctx) -> dict:
             votes.set_status(ctx, vkey, votes.DONE)
             ctx.board.post(rec["card_id"], f"Closed by {v.get('decided_by')}. A new email reopens it.",
                            idempotency_key=f"closed:{vkey}")
+            events.publish(ctx, "case.closed", {"case_key": v["case_key"], "vote_key": vkey, "how": "quiet",
+                                                "closed_by": v.get("decided_by")}, f"closed:{vkey}",
+                           card_id=rec["card_id"], content=lambda: events.content_for_case(ctx, v["case_key"]))
             out["closed"].append(v["case_key"])
     ctx.beat("close", str(out))
     return out
