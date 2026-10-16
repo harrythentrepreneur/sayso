@@ -15,6 +15,15 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
   the order and subscription back. No idempotency header exists, so every write reads first (one refund per
   order). Specs use prefixed ids (`ls_order_`, `ls_sub_`, `ls_cust_`); the send check and the masker refuse
   them in customer text. See docs/ADAPTERS.md and docs/ONBOARDING.md.
+- Outgoing webhooks (#26): optional `[events] adapter = "webhook"` (default `none`). The loop emits
+  `vote.decided`, `reply.sent` (only after the helpdesk + Sent-folder read-back), `money.verified` (after the
+  provider's own record matches) and `case.closed`. Each is queued in a durable outbox in the state dir and
+  POSTed by the new `events` job (last in `jobs.ORDER`) as JSON signed `X-Sayso-Signature: t=..,v1=..`
+  (HMAC-SHA256, Stripe shape). Event ids are stable across re-emits and retries, so receivers dedupe.
+  Bounded retries with backoff, redirects never followed, `410` stops, no customer text unless
+  `include_content = true`. Delivery problems never block a job. Docs: `docs/WEBHOOKS.md` (Zapier Catch Hook).
+  Stable API: `sayso.jobs.ORDER` gains `"events"` at the end (re-recorded on purpose); new names listed for Cloud.
+
 - Console and dashboard pages, ported from Sayso Cloud: a grouped sidebar (daily work, then Admin), a dry-run
   strip and an account menu; **Decisions** as a priority queue (money and billing, repeat contacts, oldest) with
   waiting and expiry badges and a say-so lock on every decision (what the Yes binds to plus its fingerprint),

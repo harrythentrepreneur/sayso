@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 from sayso import money, votes
+from sayso.adapters import events
 from sayso.store import load_json, locked, save_json
 
 
@@ -118,6 +119,8 @@ def run(ctx) -> dict:
             votes.set_status(ctx, key, votes.DONE, receipt=receipt)
             ctx.board.post(rec["card_id"], f"Done and verified with the payment provider: {money.describe(spec)}.",
                            idempotency_key=f"money-done:{key}")
+            events.publish(ctx, "money.verified", events.money_payload(rec, spec, receipt), f"money-done:{key}",
+                           card_id=rec["card_id"], content=lambda: events.content_for_case(ctx, rec["case_key"]))
         else:
             ctx.alert(f"money-unverified:{key}", f"{money.describe(spec)} for {rec['subject']!r} could not be "
                       "verified with the provider. Not retried. Check by hand.")

@@ -59,7 +59,14 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
 6. **One real reply to yourself.** Approve the draft for your own test email
    and run `sayso run sender`. It must end `SENT_AND_VERIFIED`, with the email
    in your inbox and exactly one copy in the Sent folder.
-7. **Install the timers.** See [INSTALL.md](INSTALL.md).
+7. **Optional: outgoing webhooks** (for Zapier or your own tools). Make a secret,
+   `python3 -c "import secrets; print('whsec_' + secrets.token_hex(32))"`, add it to the
+   secrets file as `SAYSO_WEBHOOK_SECRET=...`, and add an `[events]` section with
+   `adapter = "webhook"`, your `https://` `url` and `secret_env = "SAYSO_WEBHOOK_SECRET"`.
+   Run `sayso run events --config acme.toml` after a decision and check the receiver got it
+   with a valid `X-Sayso-Signature`. Leave `include_content` off unless the receiver may see
+   customer mail. Details: [WEBHOOKS.md](WEBHOOKS.md).
+8. **Install the timers.** See [INSTALL.md](INSTALL.md).
 
 ## Microsoft 365 mailbox (OAuth instead of an app password)
 

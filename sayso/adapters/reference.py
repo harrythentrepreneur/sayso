@@ -687,4 +687,7 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "hermes" and name == "qa_runner":
         return HermesQaRunner(section, config.state_dir,
                               dev_profile=config.section("dev_runner").options.get("profile"))
+    if kind == "webhook" and name == "events":
+        from sayso.adapters import events
+        return events.from_section(section, config)
     raise ConfigError(f"no reference adapter {kind!r} for {name}")

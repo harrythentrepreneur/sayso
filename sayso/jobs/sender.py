@@ -21,6 +21,7 @@ import json
 from pathlib import Path
 
 from sayso import cases, safety, stages, votes
+from sayso.adapters import events
 from sayso.store import load_json, locked, save_json
 
 PENDING, VERIFIED, UNVERIFIED = "pending", "SENT_AND_VERIFIED", "UNVERIFIED"
@@ -125,6 +126,10 @@ def send_one(ctx, rec: dict, *, sleep) -> str:
                    idempotency_key=f"sent:{key}")
     cases.move(ctx, rec["card_id"], stages.DONE, waiting=True)
     cases.update(ctx, case_key, last_reply_at=ctx.clock.now().isoformat())
+    events.publish(ctx, "reply.sent", {"case_key": case_key, "vote_key": key, "message_id": receipt["message_id"],
+                                       "verified": True, "approved_by": rec.get("decided_by")},
+                   f"sent:{key}", card_id=rec["card_id"],
+                   content=lambda: events.content_for_case(ctx, case_key, recipient=recipient, body=body))
     return VERIFIED
 
 

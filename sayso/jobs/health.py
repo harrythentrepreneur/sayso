@@ -20,6 +20,8 @@ def watched(ctx) -> tuple[str, ...]:
         extra.append("money")
     if ctx.dev_runner is not None:
         extra.append("dev")
+    if getattr(ctx, "events", None) is not None:
+        extra.append("events")
     if ctx.codehost is not None:
         extra.append("release")
         if ctx.qa_runner is not None:
