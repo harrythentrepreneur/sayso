@@ -1949,6 +1949,31 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.http.urllib_transport": {
+   "kind": "function",
+   "signature": [
+    [
+     "method",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "url",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "headers",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.intercom.HOSTS": {
    "keys": [
     "au",
@@ -3383,6 +3408,390 @@
      ]
     ]
    }
+  },
+  "sayso.adapters.slack.MAX_RETRIES": {
+   "kind": "value",
+   "type": "int",
+   "value": 3
+  },
+  "sayso.adapters.slack.NO": {
+   "kind": "value",
+   "type": "str",
+   "value": "x"
+  },
+  "sayso.adapters.slack.SlackBoard": {
+   "init": [
+    [
+     "section",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "state_dir",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "token",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "channel_id",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "alerts_channel_id",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "state_dir",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "sleep",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "clock",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "token",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "channel_id",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "alerts_channel_id",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "alert": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "call": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "method",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "get",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "args",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "close_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "ensure_card": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "title",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "first_message",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tags",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "get_tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_activity": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "me": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "message_authors": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "messages": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "notify": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mention",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "open_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "question",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "post": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "text",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_poll": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "poll_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "set_tags": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "card_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tags",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.slack.SlackError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.slack.TS": {
+   "kind": "value",
+   "type": "Pattern"
+  },
+  "sayso.adapters.slack.USER": {
+   "kind": "value",
+   "type": "Pattern"
+  },
+  "sayso.adapters.slack.YES": {
+   "kind": "value",
+   "type": "str",
+   "value": "white_check_mark"
+  },
+  "sayso.adapters.slack.escape": {
+   "kind": "function",
+   "signature": [
+    [
+     "text",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.slack.vote_marker": {
+   "kind": "function",
+   "signature": [
+    [
+     "idempotency_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
   },
   "sayso.adapters.zendesk.RateLimited": {
    "bases": [

@@ -644,6 +644,9 @@ class HermesQaRunner:
 def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "discord":
         return DiscordForumBoard(section)
+    if kind == "slack":
+        from sayso.adapters.slack import SlackBoard
+        return SlackBoard(section, config.state_dir)
     if kind == "frappe":
         return FrappeHelpdesk(section, config.support_address)
     if kind == "helpscout":

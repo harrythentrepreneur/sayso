@@ -7,7 +7,7 @@ and prove each one before you switch the next.
 
 | Piece | Reference adapter | You provide |
 |---|---|---|
-| Board (human work surface) | `discord` | A forum channel, an alerts channel, a bot token |
+| Board (human work surface) | `discord` or `slack` | Discord: a forum channel, an alerts channel, a bot token. Slack: one channel and a bot token (see below) |
 | Helpdesk (owns correspondence) | `frappe` | Helpdesk URL, API key and secret, site timezone set to UTC |
 | Helpdesk, Zendesk instead | `zendesk` | Zendesk subdomain, an admin's email and API token (see below) |
 | Helpdesk + receipt, Intercom | `intercom` (both `[helpdesk]` and `[mailbox]`) | A private-app access token, the replying admin's id, the region. See "Intercom" below |
@@ -289,6 +289,31 @@ adapter does not retry inside a run.
    partial refund of that test order, and check the order in Lemon Squeezy shows
    the refunded amount. A Lemon Squeezy key has no scopes: it can do anything the
    store owner can, so keep `refund_max_minor` low.
+## Slack instead of Discord
+
+Set `[board] adapter = "slack"` to keep the cases in one Slack channel.
+
+1. At https://api.slack.com/apps press **Create New App** > **From scratch**, name it Sayso, pick
+   your workspace.
+2. **OAuth & Permissions** > **Bot Token Scopes**: add `chat:write`, `reactions:read`, `users:read`
+   and `channels:history` (`groups:history` too for a private channel). Add no user scopes.
+3. **Install to Workspace**, then copy the **Bot User OAuth Token** (`xoxb-...`) into your secrets
+   file as `ACME_SLACK_TOKEN=...`. Do not turn on token rotation: the adapter reads one fixed token.
+4. In Slack, make a channel for cases (for example `#support-cases`), type `/invite @Sayso` in it,
+   and copy its id (channel name > **About** > Channel ID, `C...`).
+5. In the settings file:
+   ```toml
+   [board]
+   adapter = "slack"
+   channel_id = "C0123456789"
+   alerts_channel_id = "C0123456790"   # optional; defaults to channel_id
+   token_env = "ACME_SLACK_TOKEN"
+   ```
+6. `[operators]` holds Slack user ids (profile > **...** > **Copy member ID**, `U...`), for example
+   `"U0123ABCD" = "Pat"`. Only these people's reactions count.
+7. Votes are reactions on the vote reply in each case thread: `:white_check_mark:` approves,
+   `:x:` declines. Any `:x:` from an operator declines. Run `sayso run health` and check the
+   alerts channel, then do step 6 of the step-by-step above.
 
 ## Go-live checklist
 

@@ -32,7 +32,7 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 
 | Section | Choices | Default |
 |---|---|---|
-| board | `fake`, `discord` | `fake` |
+| board | `fake`, `discord`, `slack` | `fake` |
 | helpdesk | `fake`, `frappe` | `fake` |
 | mailbox | `fake`, `imap`, `gmail` | `fake` |
 | helpdesk | `fake`, `frappe`, `helpscout` | `fake` |
