@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "ctm_01hrffh7gvp29kc7xahm8wddwa",
+    "status": "active",
+    "custom_data": null,
+    "name": "Sam Miller",
+    "email": "sam@example.com",
+    "marketing_consent": false,
+    "locale": "en",
+    "created_at": "2024-03-08T16:49:53.691Z",
+    "updated_at": "2024-04-11T16:03:57.924146Z",
+    "import_meta": null
+  },
+  "meta": {
+    "request_id": "aa0009cb-18f7-4538-b1cd-ad29d91cfaa7"
+  }
+}

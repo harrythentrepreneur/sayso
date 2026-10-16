@@ -1067,6 +1067,233 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.paddle.PaddleError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.paddle.PaddlePayments": {
+   "init": [
+    [
+     "section",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "cancel_subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "effective",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "charge_customer": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "check": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "customer_email": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "from_key": [
+     [
+      "cls",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "api_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "environment",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "read_refunds": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "read_subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "refund": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "charge",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "amount",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "currency",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "refund_adjustments": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "txn",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "subscription": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "sub",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "subscription_customer": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subscription",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "transaction": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "txn",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.paddle.environment_of": {
+   "kind": "function",
+   "signature": [
+    [
+     "api_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.reference.DiscordForumBoard": {
    "init": [
     [
@@ -2260,6 +2487,11 @@
      false
     ]
    ]
+  },
+  "sayso.jobs.money_job.PENDING_WITH_PROVIDER": {
+   "kind": "value",
+   "type": "str",
+   "value": "PENDING_WITH_PROVIDER"
   },
   "sayso.jobs.money_job.request": {
    "kind": "function",

@@ -10,7 +10,7 @@ The core never imports a vendor SDK.
 | Board | `ensure_card, get_tags, set_tags, post, messages, open_poll, read_poll, alert, notify, last_activity`; optional `message_authors` | `set_tags` receives the full list. `read_poll` returns `{user_id: "yes"/"no"}` and must skip bots. `notify(text, key, mention)` pings `mention` and nobody else. `message_authors(card)` returns `[(user_id, iso_time)]` oldest first, bots skipped; without it every vote is for anyone. `last_activity(card)` returns the ISO time of the card's NEWEST message (not its creation; a tag change is not activity) and raises when unreadable. |
 | Helpdesk | `fetch_inbound, send_reply, sent_readback, last_sent_at, last_inbound_at` | `last_inbound_at(ticket, customer)` must include mail from that customer on ANY ticket. |
 | Mailbox | `sent_copies(message_id)` | Counts copies in the mailbox's own Sent folder. It must be independent of the helpdesk. |
-| Payments | `refund, cancel_subscription, read_refunds, read_subscription` | Reads return the provider's own records. |
+| Payments | `refund, cancel_subscription, read_refunds, read_subscription` | Reads return the provider's own records. A refund the provider has made but not yet approved reads back as status `pending` (the money job then waits, re-reads, and never re-executes); only `succeeded` is done. `cancel_subscription` may take `effective` (`"next_billing_period"` or `"immediately"`) when the spec has one; a cancel that is scheduled reads back as `cancel_scheduled`. |
 | CodeHost | `pull_request, pr_facts(number, head), merge(number, expected_head, key)` and `for_ref(owner/repo#N)` | `merge` must refuse if the head is not `expected_head`. `pr_facts` reports unreadable as unreadable, never as empty-and-fine. Its `changed_lines` (added + deleted) is `None` when any file lacks counts; small-fix release then keeps the vote. |
 | Drafter | `draft(case, thread) -> str` | Its output is data. It is never sent unapproved. It may answer `NO-REPLY: <reason>` as its first line (no reply is owed: one close vote, nothing sent), or end a reply with `MONEY: {json spec}` lines (one money vote each; the reply waits for every provider receipt, then gets its own vote as written). See `sayso/decisions.py`. |
 | DevRunner | `start(case_key, brief, key) -> run_id, result(run_id), state(run_id)` | `result` returns one PR (`{"pr": int}`) or several (`{"prs": [int or "owner/repo#N"]}`); `state` is `running`, `dead` or `unknown` (unknown never retries). Measured `usage` is optional. |
@@ -52,6 +52,16 @@ Rules for every adapter:
   `Message-ID` with the angle brackets. Open the folder read-only.
 - **Stripe:** use a restricted key. Pass `Idempotency-Key`. Verify the refund
   by listing refunds for the charge and matching amount and currency exactly.
+- **Paddle Billing** (`sayso/adapters/paddle.py`): a refund is `POST /adjustments` (`action: refund`,
+  `type: full`, or `partial` with `items`) on a completed transaction `txn_...`; read back with
+  `GET /adjustments?transaction_id=...&action=refund`. Most live refunds are created `pending_approval`
+  and Paddle approves or rejects them later; the adapter reports `pending` until `approved`. Paddle refuses
+  a new adjustment while one is pending. A cancel is `POST /subscriptions/{id}/cancel`; by default it
+  schedules the cancel for the end of the billing period (status stays `active` with a `scheduled_change`).
+  No idempotency header exists: the refund `reason` carries `sayso-ref:<hash of the key>` and the adapter
+  lists the transaction's refunds first. Send `Paddle-Version: 1`. A 429 blocks the IP for 60 s
+  (`Retry-After` header), so the adapter never retries in a run. Keys are `pdl_live_apikey_...` or
+  `pdl_sdbx_apikey_...`; sandbox base is `https://sandbox-api.paddle.com`.
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.

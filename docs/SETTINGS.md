@@ -35,7 +35,7 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | board | `fake`, `discord` | `fake` |
 | helpdesk | `fake`, `frappe` | `fake` |
 | mailbox | `fake`, `imap` | `fake` |
-| payments | `none`, `fake`, `stripe` | `none` |
+| payments | `none`, `fake`, `stripe`, `paddle` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
 | dev_runner | `none`, `fake`, `hermes` | `none` |
@@ -50,6 +50,8 @@ Reference adapter keys:
 - frappe: `url`, `api_key_env`, `api_secret_env`
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
 - stripe: `api_key_env`
+- paddle: `api_key_env`, optional `environment` (`"live"` default, or `"sandbox"`; must match the key's
+  `pdl_live_`/`pdl_sdbx_` prefix)
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
   defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.
 - hermes (drafter and dev_runner): `profile`
