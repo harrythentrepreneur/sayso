@@ -9,6 +9,7 @@ and prove each one before you switch the next.
 |---|---|---|
 | Board (human work surface) | `discord` | A forum channel, an alerts channel, a bot token |
 | Helpdesk (owns correspondence) | `frappe` | Helpdesk URL, API key and secret, site timezone set to UTC |
+| Helpdesk, Zendesk instead | `zendesk` | Zendesk subdomain, an admin's email and API token (see below) |
 | Mailbox (independent send receipt) | `imap` | IMAP host, user, app password, Sent folder name |
 | Mailbox, Gmail with Google sign-in | `gmail` | A Google Cloud OAuth client and one sign-in ([below](#gmail-with-google-sign-in)) |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
@@ -138,6 +139,27 @@ stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
 4. Read-only proof: `sayso run intake` after writing in from your own test address. The card's
    ticket is the Help Scout conversation id. Then step 6 above with your own conversation: the
    sender must end `SENT_AND_VERIFIED`, and Help Scout must show exactly one reply.
+## Zendesk instead of Frappe
+
+1. In Zendesk Admin Center, open **Apps and integrations > APIs > Zendesk API**, turn on token access
+   and add a token named `sayso`. Use an **admin** account: the ticket-events export Sayso reads is admin
+   only. (Zendesk marks API tokens as deprecated in favour of OAuth; for OAuth set `auth = "oauth"` and
+   put the access token in the variable instead.)
+2. Check that a trigger emails the requester when an agent adds a public comment (the default
+   "Notify requester of comment update" does). Sayso's send receipt is that notification.
+3. Settings:
+   ```toml
+   [helpdesk]
+   adapter = "zendesk"
+   subdomain = "acme"            # acme.zendesk.com
+   email = "admin@acme.example"
+   token_env = "ACME_ZENDESK_TOKEN"
+   [mailbox]
+   adapter = "zendesk"
+   ```
+   Set `[product] support_address` to your Zendesk support address.
+4. Prove it read-only: `sayso run intake` against a test ticket you opened as an end user from your own
+   address, then one approved reply to yourself (step 6 above). The ticket must have no CCs.
 
 ## Go-live checklist
 

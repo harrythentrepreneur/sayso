@@ -2347,6 +2347,350 @@
     ]
    }
   },
+  "sayso.adapters.zendesk.RateLimited": {
+   "bases": [
+    "sayso.adapters.http.HttpError",
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.zendesk.ZendeskError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.zendesk.ZendeskHelpdesk": {
+   "init": [
+    [
+     "subdomain",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "auth_header",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "support_address",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "now",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "backfill_hours",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subdomain",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "auth_header",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "support_address",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "sleep",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "now",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "backfill_hours",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "check": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "fetch_inbound": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "cursor",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "from_section": [
+     [
+      "cls",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "support_address",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "kw",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "last_inbound_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_sent_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "send_reply": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipient",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_readback": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body_sha",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "support_addresses": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "ticket_url": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.zendesk.ZendeskMailbox": {
+   "init": [
+    [
+     "helpdesk",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "helpdesk",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "from_section": [
+     [
+      "cls",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "kw",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_copies": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.zendesk.ZendeskRefused": {
+   "bases": [
+    "sayso.adapters.zendesk.ZendeskError",
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.zendesk.authorization": {
+   "kind": "function",
+   "signature": [
+    [
+     "auth",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "email",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.zendesk.check_subdomain": {
+   "kind": "function",
+   "signature": [
+    [
+     "value",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.brand.FONTS": {
    "keys": [
     "inter"

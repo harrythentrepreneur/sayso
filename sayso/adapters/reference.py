@@ -652,6 +652,9 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "gmail":
         from sayso.adapters.gmail import GmailMailbox
         return GmailMailbox(section)
+    if kind == "zendesk":
+        from sayso.adapters import zendesk
+        return zendesk.build(name, section, config)
     if kind == "stripe":
         return StripePayments(section)
     if kind == "github":
