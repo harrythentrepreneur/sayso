@@ -16,6 +16,7 @@ The core never imports a vendor SDK.
 | DevRunner | `start(case_key, brief, key) -> run_id, result(run_id), state(run_id)` | `result` returns one PR (`{"pr": int}`) or several (`{"prs": [int or "owner/repo#N"]}`); `state` is `running`, `dead` or `unknown` (unknown never retries). Measured `usage` is optional. |
 | Events | `emit(event, payload, idempotency_key, *, content=None) -> event id`, `flush() -> counts` | Optional (`none` by default). `emit` only queues; it never touches the network. The same `(event, idempotency_key)` must give the same event id, queued once. `flush` must never raise for a delivery problem. Reference: `sayso/adapters/events.py`, see [WEBHOOKS.md](WEBHOOKS.md). |
 | QaRunner | `fails_on_old_code(pr, head), start(case_key, brief, key) -> run_id, result(run_id)` | Must be a different agent from the dev runner. `result` returns `{"text": str}` or None. |
+| CustomerFacts | `facts(email) -> dict` | Optional (`none` by default). Read-only; flat string/number/bool fields only. The draft job calls it through `facts.lookup`, which turns any failure into no facts plus one alert per outage, and passes the result to the drafter as `case["customer_facts"]` (untrusted data: wrap it with `facts.prompt_block`). Reference: `http`, see [CUSTOMER_LOOKUP.md](CUSTOMER_LOOKUP.md). |
 
 Rules for every adapter:
 1. **Honour the idempotency key** on every write. Pass it to the vendor when

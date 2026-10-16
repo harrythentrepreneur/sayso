@@ -474,9 +474,11 @@ class HermesDrafter:
         self.run = run
 
     def draft(self, case, thread):
+        from sayso.adapters.facts import prompt_block
+        facts = prompt_block(case.get("customer_facts"))
         prompt = ("Write ONE plain-text customer reply for this support case. Do not claim money moved, "
                   "do not promise dates, do not include payment ids. Output only the reply.\n\n"
-                  + "\n\n---\n\n".join(thread))
+                  + (facts + "\n\n" if facts else "") + "\n\n---\n\n".join(thread))
         out = self.run(["hermes", "-p", str(self.profile), "chat", "--oneshot", "--query", prompt],
                        capture_output=True, text=True, timeout=600, check=True)
         return out.stdout.strip()
@@ -690,4 +692,7 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "webhook" and name == "events":
         from sayso.adapters import events
         return events.from_section(section, config)
+    if kind == "http" and name == "customer_facts":
+        from sayso.adapters.facts import HttpFacts
+        return HttpFacts.from_section(section)
     raise ConfigError(f"no reference adapter {kind!r} for {name}")

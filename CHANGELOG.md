@@ -24,6 +24,11 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
   `include_content = true`. Delivery problems never block a job. Docs: `docs/WEBHOOKS.md` (Zapier Catch Hook).
   Stable API: `sayso.jobs.ORDER` gains `"events"` at the end (re-recorded on purpose); new names listed for Cloud.
 
+- Customer lookup (#25): optional `[customer_facts]` adapter (`none` default, `http`). Before each draft Sayso
+  calls `GET <url>?email=` on the business's own app, signed with HMAC-SHA256 (`X-Sayso-Signature: v1=...`,
+  `X-Sayso-Timestamp`), 3 s timeout, 16 KB cap, flat fields only. The drafter gets the facts as a labelled,
+  quoted block of untrusted data. A failed lookup never blocks a draft (one alert per outage). Contract and
+  Python/Node endpoint examples: docs/CUSTOMER_LOOKUP.md.
 - Console and dashboard pages, ported from Sayso Cloud: a grouped sidebar (daily work, then Admin), a dry-run
   strip and an account menu; **Decisions** as a priority queue (money and billing, repeat contacts, oldest) with
   waiting and expiry badges and a say-so lock on every decision (what the Yes binds to plus its fingerprint),

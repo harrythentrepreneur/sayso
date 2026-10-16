@@ -321,6 +321,12 @@ Set `[board] adapter = "slack"` to keep the cases in one Slack channel.
 7. Votes are reactions on the vote reply in each case thread: `:white_check_mark:` approves,
    `:x:` declines. Any `:x:` from an operator declines. Run `sayso run health` and check the
    alerts channel, then do step 6 of the step-by-step above.
+7. **Install the timers.** See [INSTALL.md](INSTALL.md).
+8. **Optional: customer lookup.** To give drafts the customer's plan and usage from your
+   own app, build the small signed endpoint in [CUSTOMER_LOOKUP.md](CUSTOMER_LOOKUP.md), add a
+   `[customer_facts]` section and its secret, and check it with
+   `python3 -m sayso.adapters.facts --config acme.toml --email you@example.com`.
+   A failing lookup never blocks a draft.
 
 ## Go-live checklist
 
