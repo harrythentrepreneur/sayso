@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 
 _CARD = re.compile(r"(?<!\d)\d(?:[ -]?\d){12,18}(?!\d)")
-_PAYMENT_ID = re.compile(r"\b(?:cus|sub|pi|ch|py|in|re|cs)_[A-Za-z0-9]{6,}\b")
+_PAYMENT_ID = re.compile(r"\b(?:cus|sub|pi|ch|py|in|re|cs)_[A-Za-z0-9]{6,}\b|\bls_(?:order|sub|cust)_[0-9]+\b")
 # Paddle Billing ids: a prefix and 26 lower-case letters/digits (developer.paddle.com, "Paddle IDs").
 _PADDLE_ID = re.compile(r"\b(?:txn|txnitm|ctm|adj|adjitm|add|biz|inv|sub)_[a-z\d]{26}\b")
 _SECRET = re.compile(r"\bpdl_(?:live|sdbx)_apikey_[A-Za-z0-9_]+|\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]+|\bghp_[A-Za-z0-9]{20,}|\bxox[abp]-[A-Za-z0-9-]+")

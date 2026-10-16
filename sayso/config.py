@@ -19,7 +19,7 @@ ADAPTER_CHOICES = {
     "board": ("fake", "discord"),
     "helpdesk": ("fake", "frappe", "helpscout", "zendesk", "intercom", "crisp"),
     "mailbox": ("fake", "imap", "gmail", "helpscout", "zendesk", "intercom", "crisp"),
-    "payments": ("none", "fake", "stripe", "paddle"),
+    "payments": ("none", "fake", "stripe", "paddle", "lemonsqueezy"),
     "codehost": ("none", "fake", "github"),
     "drafter": ("fake", "hermes"),
     "dev_runner": ("none", "fake", "hermes"),

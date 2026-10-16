@@ -46,6 +46,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | payments | `none`, `fake`, `stripe` | `none` |
 | mailbox | `fake`, `imap` | `fake` |
 | payments | `none`, `fake`, `stripe`, `paddle` | `none` |
+| mailbox | `fake`, `imap` | `fake` |
+| payments | `none`, `fake`, `stripe`, `lemonsqueezy` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
 | dev_runner | `none`, `fake`, `hermes` | `none` |
@@ -72,6 +74,7 @@ Reference adapter keys:
 - stripe: `api_key_env`
 - paddle: `api_key_env`, optional `environment` (`"live"` default, or `"sandbox"`; must match the key's
   `pdl_live_`/`pdl_sdbx_` prefix)
+- lemonsqueezy: `api_key_env`, `store_id`, optional `test_mode`
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
   defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.
 - hermes (drafter and dev_runner): `profile`

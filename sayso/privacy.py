@@ -31,7 +31,8 @@ EMAIL = re.compile(r"[A-Za-z0-9._%+'*•-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<![\w/.-])\+?\(?\d[\d ()-]{7,}\d(?![\w/.-])")
 CARD = re.compile(r"(?<!\d)\d(?:[ -]?\d){12,18}(?!\d)")
 IP = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
-PAYMENT_ID = re.compile(r"\b(?:cus|ch|sub|pi|py|in|re|cs|pm|txn|ba|card|seti|si|prod|price)_[A-Za-z0-9]{6,}\b")
+PAYMENT_ID = re.compile(r"\b(?:cus|ch|sub|pi|py|in|re|cs|pm|txn|ba|card|seti|si|prod|price)_[A-Za-z0-9]{6,}\b"
+                        r"|\bls_(?:order|sub|cust)_[0-9]+\b")
 URL_QUERY = re.compile(r"(https?://[^\s?#<>\"']+)\?[^\s<>\"']+")
 ORG = re.compile(r"\b(?:[A-Z][\w'’.-]+\s){1,4}(?:School|College|Primary|Academy|High|District|Kindergarten|Kindy|"
                  r"Preschool|Elementary|Grammar|Montessori|University|Institute|Department of Education)\b")

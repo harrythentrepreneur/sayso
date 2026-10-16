@@ -672,6 +672,9 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "paddle":
         from sayso.adapters.paddle import PaddlePayments
         return PaddlePayments(section)
+    if kind == "lemonsqueezy":
+        from sayso.adapters.lemonsqueezy import LemonSqueezyPayments
+        return LemonSqueezyPayments(section)
     if kind == "github":
         return GitHubCodeHost(section)
     if kind == "hermes" and name == "drafter":

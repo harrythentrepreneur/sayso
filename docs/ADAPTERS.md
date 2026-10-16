@@ -233,3 +233,16 @@ fallback), and whether a reply thread's `to` lists the customer.
   **Weaker receipt:** Crisp is both the record and the receipt. `CrispMailbox.sent_copies` reads the
   message back from Crisp by fingerprint; there is no independent Sent folder. A message Crisp stored
   but never delivered (for example an email-origin conversation that bounced) still reads as sent.
+- **Lemon Squeezy** (`sayso/adapters/lemonsqueezy.py`): JSON:API (`Accept` and
+  `Content-Type: application/vnd.api+json`), Bearer API key, 300 calls a minute.
+  Refund is `POST /v1/orders/{id}/refund` with `amount` in cents (partial allowed);
+  cancel is `DELETE /v1/subscriptions/{id}`, which leaves the subscription
+  `cancelled` with `ends_at` set (it runs to the end of the period). There is **no
+  idempotency header**, so every write reads first: a refund is refused when the
+  order already shows any `refunded_amount`, and a cancel that is already done is
+  not sent again. The read-back is `refunded_amount` on `GET /v1/orders/{id}` (one
+  receipt per order, not a list) and `cancelled` + `status` on
+  `GET /v1/subscriptions/{id}`. Ids are bare numbers, so specs carry them prefixed
+  (`ls_order_`, `ls_sub_`, `ls_cust_`) and the adapter refuses any other shape. One
+  key reaches every store of the account, so each object's `store_id` must match
+  the configured store.

@@ -1,0 +1,101 @@
+{
+  "_source": "https://docs.lemonsqueezy.com/api/subscriptions/cancel-subscription",
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "self": "https://api.lemonsqueezy.com/v1/subscriptions/1"
+  },
+  "data": {
+    "type": "subscriptions",
+    "id": "1",
+    "attributes": {
+      "store_id": 1,
+      "customer_id": 1,
+      "order_id": 1,
+      "order_item_id": 1,
+      "product_id": 1,
+      "variant_id": 1,
+      "product_name": "Lemonade",
+      "variant_name": "Citrus Blast",
+      "user_name": "John Doe",
+      "user_email": "customer@example.com",
+      "status": "cancelled",
+      "status_formatted": "Cancelled",
+      "pause": null,
+      "cancelled": true,
+      "trial_ends_at": null,
+      "billing_anchor": 12,
+      "first_subscription_item": {
+        "id": 1,
+        "subscription_id": 1,
+        "price_id": 1,
+        "quantity": 5,
+        "created_at": "2021-08-11T13:47:28.000000Z",
+        "updated_at": "2021-08-11T13:47:28.000000Z"
+      },
+      "urls": {
+        "update_payment_method": "https://my-store.lemonsqueezy.com/subscription/1/payment-details?expires=1666869343&signature=9985e3bf9007840aeb3951412be475abc17439c449c1af3e56e08e45e1345413",
+        "customer_portal": "https://my-store.lemonsqueezy.com/billing?expires=1666869343&signature=82ae290ceac8edd4190c82825dd73a8743346d894a8ddbc4898b97eb96d105a5"
+      },
+      "renews_at": "2022-11-12T00:00:00.000000Z",
+      "ends_at": "2022-11-12T00:00:00.000000Z",
+      "created_at": "2021-08-11T13:47:27.000000Z",
+      "updated_at": "2021-08-11T13:54:19.000000Z",
+      "test_mode": false
+    },
+    "relationships": {
+      "store": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/store",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/store"
+        }
+      },
+      "customer": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/customer",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/customer"
+        }
+      },
+      "order": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/order",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/order"
+        }
+      },
+      "order-item": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/order-item",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/order-item"
+        }
+      },
+      "product": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/product",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/product"
+        }
+      },
+      "variant": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/variant",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/variant"
+        }
+      },
+      "subscription-items": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/subscription-items",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/subscription-items"
+        }
+      },
+      "subscription-invoices": {
+        "links": {
+          "related": "https://api.lemonsqueezy.com/v1/subscriptions/1/subscription-invoices",
+          "self": "https://api.lemonsqueezy.com/v1/subscriptions/1/relationships/subscription-invoices"
+        }
+      }
+    },
+    "links": {
+      "self": "https://api.lemonsqueezy.com/v1/subscriptions/1"
+    }
+  }
+}
