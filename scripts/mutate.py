@@ -476,6 +476,8 @@ MUTATIONS = [
      "                   and requester in _ids(e.get(\"recipients\")))", "                   )"),
     ("zendesk: other tickets not checked for inbound", "sayso/adapters/zendesk.py",
      "        if not email:\n            return best", "        if True:\n            return best"),
+    ("zendesk: any From address passes as ours", "sayso/adapters/zendesk.py",
+     "        if self.support and frm in {r[\"email\"] for r in ours}:", "        if self.support:"),
     ("zendesk: Retry-After header ignored", "sayso/adapters/zendesk.py",
      "                self.sleep(max(wait, 1.0))", "                pass"),
 ]

@@ -384,7 +384,7 @@ class ZendeskHelpdesk:
         cc = _ids(t.get("email_cc_ids")) or _ids(t.get("collaborator_ids"))
         self._load_users(cc)
         recipients = ",".join([requester["email"]] + [self._users[i]["email"] for i in cc])
-        sender = str(t.get("recipient") or "").lower() or self._default_address()
+        sender = self._sender_of(t)
         comments = {c.get("id"): c for c in self._comments(tid)}
         out = []
         for a in audits:
@@ -398,12 +398,15 @@ class ZendeskHelpdesk:
                                   status="Sent" if ok else "Not Sent"))
         return out
 
-    def _default_address(self) -> str:
-        rows = self.support_addresses()
-        for r in rows:
-            if r["default"]:
-                return r["email"]
-        return self.support
+    def _sender_of(self, t: dict) -> str:
+        """The address Zendesk mails the reply from: the ticket's recipient, or the account default.
+        Reported as our ``support_address`` only when it is one of THIS account's support addresses;
+        anything else is reported as it is, so the sender's From check fails closed."""
+        ours = self.support_addresses()
+        frm = str(t.get("recipient") or "").strip().lower() or next((r["email"] for r in ours if r["default"]), "")
+        if self.support and frm in {r["email"] for r in ours}:
+            return self.support
+        return frm
 
     def last_sent_at(self, ticket):
         return self._last_public_by(ticket, lambda _i, u: u["role"] in STAFF_ROLES)

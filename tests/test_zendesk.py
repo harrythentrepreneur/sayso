@@ -109,6 +109,8 @@ class FakeZendesk:
         self.store_body = None        # override what Zendesk stores (to prove the text check)
         self.fail_put_after_write = False
         self.ratelimit = []           # queued Retry-After values for the next calls
+        self.addresses = [{"email": "support@acme.example", "default": True},
+                          {"email": "help@brand2.example", "default": False}]
 
     def __call__(self, method, url, headers, body):
         p = urllib.parse.urlsplit(url)
@@ -126,7 +128,7 @@ class FakeZendesk:
         if parts == ["users", "me"]:
             return 200, {"user": self.users[AGENT] | {"role": "admin"}}
         if parts == ["recipient_addresses"]:
-            return 200, {"recipient_addresses": [{"email": "support@acme.example", "default": True}]}
+            return 200, {"recipient_addresses": self.addresses}
         if parts == ["incremental", "ticket_events"]:
             return 200, self.events_pages.pop(0)
         if parts == ["users", "show_many"]:
@@ -404,6 +406,17 @@ class ReadbackTests(ZendeskTestBase):
         r = rows[0]
         self.assertEqual((r.status, r.recipient, r.sender), ("Sent", "johnny@example.com", "support@acme.example"))
         self.assertTrue(r.message_id.startswith("zendesk:35436:"))
+
+    def test_second_brand_address_counts_as_ours(self):
+        self.zd.tickets[35436]["recipient"] = "help@brand2.example"
+        self.send()
+        self.assertEqual(self.h.sent_readback("35436", self.sha())[0].sender, "support@acme.example")
+
+    def test_foreign_from_address_is_reported_as_is(self):
+        """A ticket whose From is not one of this account's support addresses fails the sender's From check."""
+        self.zd.tickets[35436]["recipient"] = "someone@elsewhere.example"
+        self.send()
+        self.assertEqual(self.h.sent_readback("35436", self.sha())[0].sender, "someone@elsewhere.example")
 
     def test_nothing_written_reads_empty(self):
         self.assertEqual(self.h.sent_readback("35436", self.sha()), [])
