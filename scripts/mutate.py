@@ -469,6 +469,8 @@ MUTATIONS = [
      'done = s["cancelled"] is True and s["status"] in ENDED_STATUSES', 'done = s["status"] in ENDED_STATUSES'),
     ('lemonsqueezy: refund currency not checked', 'sayso/adapters/lemonsqueezy.py',
      'if o["currency"] != str(currency).lower():', 'if False:'),
+    ("safety: Lemon Squeezy ids pass the send check", "sayso/safety.py",
+     '|\\bls_(?:order|sub|cust)_[0-9]+\\b")', '")'),
     ('lemonsqueezy: missing refunded_amount read as zero', 'sayso/adapters/lemonsqueezy.py',
      'status, total, refunded = a.get("status"), a.get("total"), a.get("refunded_amount")', 'status, total, refunded = a.get("status"), a.get("total"), a.get("refunded_amount", 0)'),
 ]

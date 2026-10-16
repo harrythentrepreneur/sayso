@@ -161,6 +161,22 @@ class IdTests(unittest.TestCase):
         self.assertEqual(money.validate(cancel, max_minor=5000, currencies=("usd",)), cancel)
 
 
+class OutgoingTextTests(unittest.TestCase):
+    """A Lemon Squeezy id must never reach a customer: the send-time check and the masker both catch it."""
+
+    def test_send_check_refuses_ls_ids(self):
+        from sayso import safety
+        for text in ("Your order ls_order_12 is refunded.", "ls_sub_9 is cancelled", "customer ls_cust_77"):
+            with self.assertRaises(safety.Refused, msg=text):
+                safety.check_no_payment_identifiers(text)
+        safety.check_no_payment_identifiers("Your order 12 is on its way.")
+
+    def test_masker_finds_ls_ids(self):
+        from sayso import privacy
+        self.assertTrue(privacy.PAYMENT_ID.search("see ls_order_5"))
+        self.assertTrue(privacy.PAYMENT_ID.search("see ls_sub_5 and ls_cust_6"))
+
+
 @mock.patch.dict(os.environ, ENV)
 class ConfigTests(unittest.TestCase):
     def test_store_id_required(self):

@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 
 _CARD = re.compile(r"(?<!\d)\d(?:[ -]?\d){12,18}(?!\d)")
-_PAYMENT_ID = re.compile(r"\b(?:cus|sub|pi|ch|py|in|re|cs)_[A-Za-z0-9]{6,}\b")
+_PAYMENT_ID = re.compile(r"\b(?:cus|sub|pi|ch|py|in|re|cs)_[A-Za-z0-9]{6,}\b|\bls_(?:order|sub|cust)_[0-9]+\b")
 _SECRET = re.compile(r"\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]+|\bghp_[A-Za-z0-9]{20,}|\bxox[abp]-[A-Za-z0-9-]+")
 
 # Past-tense money claims. A reply must not tell a customer money moved unless
