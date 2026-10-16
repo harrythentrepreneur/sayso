@@ -457,6 +457,23 @@ MUTATIONS = [
      "set(was[\"keys\"]) <= set(now.get(\"keys\", ()))", "True"),
     ("stable api: a removed class method passes", "scripts/stable_api.py",
      "            return got is not None and sig_compatible(v, got)", "            return True"),
+    ("host check: any Host accepted (DNS rebinding)", "sayso/hostcheck.py",
+     "        if policy is None or not policy.allows(self.headers.get_all(\"Host\")):", "        if False:"),
+    ("host check: port ignored", "sayso/hostcheck.py",
+     "        if port != self.port:\n            return False", "        if False:\n            return False"),
+    ("host check: two Host headers accepted", "sayso/hostcheck.py",
+     "        if not values or len(values) != 1:", "        if not values:"),
+    ("host check: any IP literal accepted on a loopback bind", "sayso/hostcheck.py",
+     "        return self.wildcard or (self.loopback and ip.is_loopback) or", "        return True or"),
+    ("host check: allow-list ignores the port", "sayso/hostcheck.py",
+     "                self.exact.add((name, str(int(port))))", "                self.any_port.add(name)"),
+    ("host check: dashboard skips the check", "sayso/dashboard.py",
+     "    class Handler(hostcheck.HostCheckHandler):\n        server_version = \"sayso-dashboard\"",
+     "    class Handler(BaseHTTPRequestHandler):\n        server_version = \"sayso-dashboard\""),
+    ("host check: console skips the check", "sayso/console.py",
+     "    class Handler(hostcheck.HostCheckHandler):", "    class Handler(BaseHTTPRequestHandler):"),
+    ("host check: console allow-list dropped", "sayso/console.py",
+     "ThreadingHTTPServer((host, port), Handler), host, allowed_hosts)", "ThreadingHTTPServer((host, port), Handler), host, None)"),
 ]
 
 

@@ -42,6 +42,13 @@ sort, tabs and filters are plain links, and search is the `?q=` parameter.
 - **This machine only.** It refuses to listen on anything but loopback,
   because it has no login. To see it from another computer, use an SSH tunnel:
   `ssh -L 8765:127.0.0.1:8765 host`.
+- **Only its own Host name (DNS rebinding).** A web page on another site can point its own domain at
+  127.0.0.1 and try to read the dashboard from your browser. The browser still sends that domain as the
+  `Host` header, so the dashboard answers only to `127.0.0.1:<port>`, `localhost:<port>` and
+  `[::1]:<port>`; anything else (or no Host) gets `421 Misdirected Request`. The console does the same for
+  the address it is started on. If you put either behind a reverse proxy or tunnel that passes its own name
+  through, list that name: `--allowed-host dash.example.com` (any port) or `--allowed-host
+  dash.example.com:8443` (that port only). Repeat the flag for more names. Only list names you control.
 - **Customer text is shown as text.** Email bodies, subjects and drafts are
   HTML-escaped, and a strict Content-Security-Policy blocks scripts.
 - **Only this product's files.** A draft path outside the state directory is

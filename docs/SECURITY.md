@@ -31,6 +31,7 @@
 | A bot votes | Board adapters skip bot users when reading a poll. |
 | A draft or spec is edited after approval | Fingerprints are re-checked; the vote goes void. |
 | A replay or double run | Idempotency keys, per-job locks, the seen-message list, and pending attempts that are never re-executed. |
+| A web page rebinds its domain to 127.0.0.1 (DNS rebinding) to read the dashboard or drive the console | Both servers answer only to the Host they were started on (plus any `--allowed-host`); anything else gets 421. See DASHBOARD.md. |
 | A stolen settings file | It holds no secrets. |
 | Shell access to the state directory | Out of scope for the loop. Protect it with OS permissions and host access control. See SAFETY.md, "What this does not protect against". |
 
