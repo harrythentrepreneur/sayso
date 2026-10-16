@@ -245,16 +245,40 @@ def _frappe_time(value: str) -> str:
 
 
 # --------------------------------------------------------------------------- IMAP Sent folder
-class ImapMailbox:
-    """Counts copies of a Message-ID in the mailbox's own Sent folder."""
+def _reconnect_needed(exc: BaseException) -> bool:
+    from sayso.adapters import oauth
+    return isinstance(exc, oauth.ReconnectNeeded)
 
-    def __init__(self, section: Section, connect=None):
+
+class ImapMailbox:
+    """Counts copies of a Message-ID in the mailbox's own Sent folder.
+
+    ``auth = "password"`` (default) logs in with ``password_env``. ``auth = "oauth"`` signs in with XOAUTH2
+    using ``provider`` (microsoft | google), ``tenant``, ``client_id_env``, ``client_secret_env`` and
+    ``refresh_token_env``."""
+
+    def __init__(self, section: Section, connect=None, transport=None):
         self.host = section.options.get("host")
         self.user = section.options.get("user")
         self.folder = section.options.get("sent_folder", '"[Gmail]/Sent Mail"')
         if not self.host or not self.user:
             raise ConfigError("[mailbox] imap needs host and user")
-        self.password = section.secret("password")
+        self.auth = section.options.get("auth", "password")
+        self.tokens = None
+        if self.auth == "oauth":       # Microsoft 365 / Google: XOAUTH2 (docs/ADAPTERS.md, "OAuth mailboxes")
+            from sayso.adapters import oauth
+            try:
+                self.tokens = oauth.TokenSource(
+                    str(section.options.get("provider", "microsoft")), section.secret("client_id"),
+                    section.secret("client_secret"), section.secret("refresh_token"),
+                    tenant=section.options.get("tenant"), transport=transport)
+            except oauth.OAuthError as exc:
+                raise ConfigError(f"[mailbox] oauth: {exc}") from None
+            self.password = ""
+        elif self.auth == "password":
+            self.password = section.secret("password")
+        else:
+            raise ConfigError('[mailbox] auth must be "password" or "oauth"')
         self.connect = connect or (lambda: imaplib.IMAP4_SSL(str(self.host)))
 
     READ_ATTEMPTS = 3
@@ -270,13 +294,19 @@ class ImapMailbox:
             try:
                 return self._count(mid)
             except (OSError, imaplib.IMAP4.error, RuntimeError) as exc:
+                if self.tokens is not None and _reconnect_needed(exc):
+                    raise    # the sign-in no longer works: retrying cannot help, a person must sign in again
                 last = exc
         raise RuntimeError(f"IMAP read failed {self.READ_ATTEMPTS} times: {type(last).__name__}") from last
 
     def _count(self, mid):
         conn = self.connect()
         try:
-            conn.login(str(self.user), self.password)
+            if self.tokens is not None:
+                from sayso.adapters import oauth
+                conn.authenticate("XOAUTH2", oauth.imap_auth(str(self.user), self.tokens.access_token()))
+            else:
+                conn.login(str(self.user), self.password)
             conn.select(self.folder, readonly=True)
             status, data = conn.search(None, "HEADER", "Message-ID", mid)
             if status != "OK":

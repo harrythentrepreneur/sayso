@@ -1067,6 +1067,400 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.oauth.MS_IMAP_SCOPE": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.oauth.MS_SMTP_SCOPE": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.oauth.OAuthError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.oauth.PROVIDERS": {
+   "keys": [
+    "google",
+    "microsoft"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.adapters.oauth.ReconnectNeeded": {
+   "bases": [
+    "sayso.adapters.oauth.OAuthError",
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.oauth.TokenSource": {
+   "init": [
+    [
+     "provider_name",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "refresh_token",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "tenant",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "clock",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "on_rotate",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "on_token",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "cached",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "provider_name",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "client_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "client_secret",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "refresh_token",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "tenant",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "clock",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "sleep",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "on_rotate",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "on_token",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "cached",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "access_token": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "invalidate": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "valid": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.oauth.authorize_url": {
+   "kind": "function",
+   "signature": [
+    [
+     "name",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "redirect_uri",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "state",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "code_challenge",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "nonce",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "tenant",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "login_hint",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "prompt",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.check_tenant": {
+   "kind": "function",
+   "signature": [
+    [
+     "name",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "tenant",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.exchange_code": {
+   "kind": "function",
+   "signature": [
+    [
+     "name",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "code",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "redirect_uri",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "verifier",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "tenant",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "transport",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.id_claims": {
+   "kind": "function",
+   "signature": [
+    [
+     "id_token",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_id",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "nonce",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "now",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.imap_auth": {
+   "kind": "function",
+   "signature": [
+    [
+     "user",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "token",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.mailbox_address": {
+   "kind": "function",
+   "signature": [
+    [
+     "claims",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.missing_scopes": {
+   "kind": "function",
+   "signature": [
+    [
+     "name",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "data",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.pkce_pair": {
+   "kind": "function",
+   "signature": []
+  },
+  "sayso.adapters.oauth.smtp_auth": {
+   "kind": "function",
+   "signature": [
+    [
+     "user",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "token",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.xoauth2": {
+   "kind": "function",
+   "signature": [
+    [
+     "user",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "token",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.reference.DiscordForumBoard": {
    "init": [
     [
