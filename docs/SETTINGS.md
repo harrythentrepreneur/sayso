@@ -34,7 +34,7 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 |---|---|---|
 | board | `fake`, `discord` | `fake` |
 | helpdesk | `fake`, `frappe` | `fake` |
-| mailbox | `fake`, `imap` | `fake` |
+| mailbox | `fake`, `imap`, `gmail` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
@@ -52,6 +52,7 @@ Reference adapter keys:
   - or, for Microsoft 365 / Google sign-in: `auth = "oauth"`, `provider` (`microsoft` | `google`), `tenant`
     (Microsoft only; default `common`), `client_id_env`, `client_secret_env`, `refresh_token_env`
     (see [ADAPTERS.md](ADAPTERS.md#oauth-mailboxes-microsoft-365-google))
+- gmail: `user`, `auth` (`oauth` default, or `password`), `client_id_env`, `client_secret_env`, `refresh_token_env` (oauth) or `password_env` (app password), optional `sent_folder` (default: the folder IMAP flags `\Sent`). See ONBOARDING.md, "Gmail with Google sign-in".
 - stripe: `api_key_env`
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
   defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.
