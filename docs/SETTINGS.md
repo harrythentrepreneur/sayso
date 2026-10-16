@@ -33,8 +33,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | Section | Choices | Default |
 |---|---|---|
 | board | `fake`, `discord` | `fake` |
-| helpdesk | `fake`, `frappe` | `fake` |
-| mailbox | `fake`, `imap` | `fake` |
+| helpdesk | `fake`, `frappe`, `zendesk` | `fake` |
+| mailbox | `fake`, `imap`, `zendesk` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
@@ -48,6 +48,9 @@ A missing or empty variable is an error when the adapter starts.
 Reference adapter keys:
 - discord: `forum_id`, `alerts_channel_id`, `token_env`
 - frappe: `url`, `api_key_env`, `api_secret_env`
+- zendesk (helpdesk): `subdomain` (the part before `.zendesk.com`), `auth` (`"token"` default or `"oauth"`),
+  `email` (the admin's email, for `auth = "token"`), `token_env`, optional `backfill_hours` (default 24: how far
+  back the first run reads). zendesk (mailbox): no keys; it reads the `[helpdesk]` Zendesk account.
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
 - stripe: `api_key_env`
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;

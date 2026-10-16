@@ -55,3 +55,32 @@ Rules for every adapter:
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.
+- **Zendesk** (`sayso/adapters/zendesk.py`, helpdesk + mailbox = `zendesk`):
+  - Inbound reads the ticket-events export (`/api/v2/incremental/ticket_events?include=comment_events`).
+    That export is **admin only** and allows 10 requests a minute, so the token must belong to an admin
+    and a run reads at most 3 pages. Only PUBLIC comments written by END USERS become customer mail;
+    agent replies, internal notes and unknown roles never do (an unknown role raises). The export can
+    repeat events; message ids are `zendesk:<ticket>:<comment>`, so the intake de-duplicates them.
+  - A reply is a public comment through `PUT /api/v2/tickets/{id}` with `html_body` (escaped, so
+    Markdown and Zendesk's whitespace collapsing cannot change the approved words). It never changes
+    the ticket status. It is refused when the requester is not the approved recipient, when the ticket
+    has any CC (a public comment is emailed to every CC), when the ticket is closed, when the text has
+    `{{` (Zendesk expands or strips placeholders) and when it is over 60,000 bytes (Zendesk truncates at
+    64 kB without an error).
+  - Idempotency: Zendesk documents `Idempotency-Key` for ticket CREATION, kept for two hours. The adapter
+    sends it on the update too, but does not rely on it: every write first reads the ticket's audits for
+    the idempotency key it stores in the audit's `metadata.custom.sayso_key`. A retry after a crash, or
+    after two hours, finds the first comment and does not post again.
+  - Read-back: the audit with our body hash in its metadata, then the comment it created, which must be
+    public and whose text (whitespace-normalised) must match the approved text.
+  - Mailbox receipt: there is no separate Sent folder; Zendesk emails the requester itself. `sent_copies`
+    counts the `Notification` events to the requester in the SAME audit as our comment. This is the same
+    system as the helpdesk, so it is weaker than an IMAP Sent folder: it proves Zendesk's trigger fired,
+    not that the mail was delivered. If your account has no trigger that notifies the requester on a
+    public comment, every send ends UNVERIFIED (that is the safe failure).
+  - `last_inbound_at` also reads the customer's other tickets (`users/search` by exact email, then
+    `users/{id}/tickets/requested` newest first; archived tickets are not listed by Zendesk).
+  - 429: the wait is in the `Retry-After` header. Waits over a minute end the run.
+  - API tokens are fine for your own (internal) use. A service used by many Zendesk customers must use
+    a global OAuth client (`auth = "oauth"`); Zendesk's docs say customers may not share API tokens with
+    a third party.
