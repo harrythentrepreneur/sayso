@@ -119,6 +119,7 @@ class SlackBoard:
         self.transport = transport or urllib_transport
         self.sleep = sleep
         self.clock = clock
+        self.max_retries = MAX_RETRIES      # a web page that calls Slack may set 0: never block a request
         self._last_post: dict[str, float] = {}
         self._me: dict | None = None
         self._users: dict[str, dict] = {}
@@ -133,7 +134,7 @@ class SlackBoard:
         else:
             headers["Content-Type"] = "application/json; charset=utf-8"
             body = json.dumps({k: v for k, v in args.items() if v is not None}).encode()
-        for attempt in range(MAX_RETRIES + 1):
+        for attempt in range(self.max_retries + 1):
             status, resp_headers, raw = self.transport("GET" if get else "POST", url, headers, body)
             try:
                 data = json.loads(raw or b"{}")
@@ -141,7 +142,7 @@ class SlackBoard:
                 data = None
             limited = status == 429 or (isinstance(data, dict) and data.get("error") == "ratelimited")
             if limited:
-                if attempt == MAX_RETRIES:
+                if attempt >= self.max_retries:
                     raise SlackError(method, "ratelimited")
                 try:
                     wait = float(_header(resp_headers, "Retry-After") or 1)

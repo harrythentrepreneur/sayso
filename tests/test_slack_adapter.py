@@ -367,6 +367,14 @@ class SlackBoardTests(unittest.TestCase):
             self.card(b)
         self.assertEqual(self.waits.count(slack.MAX_WAIT), 3, "capped at 30 s, 3 tries")
 
+    def test_no_retries_when_a_caller_asks_for_none(self):
+        b = self.board()
+        b.max_retries = 0
+        self.slack.fail_next.append((429, {"Retry-After": "5"}, {"ok": False, "error": "ratelimited"}))
+        with self.assertRaises(slack.SlackError):
+            b.me()
+        self.assertEqual(self.waits, [])
+
     def test_posts_are_paced_one_per_second_per_channel(self):
         b = self.board()
         card = self.card(b)
