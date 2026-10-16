@@ -55,6 +55,21 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
    in your inbox and exactly one copy in the Sent folder.
 7. **Install the timers.** See [INSTALL.md](INSTALL.md).
 
+### Help Scout instead of Frappe + IMAP
+
+1. In Help Scout, open **Your Profile > My Apps > Create My App**. Any redirect URL works for
+   Client Credentials (for example `https://example.com`). Copy the App ID and App Secret.
+   The app acts as YOUR user, so that user must be able to see and reply in the inbox.
+   The Free plan has no API access.
+2. Find the inbox number: `GET https://api.helpscout.net/v2/mailboxes` once with a token from
+   step 1 lists every inbox with its `id` and `email`.
+3. Put `ACME_HS_CLIENT_ID=...` and `ACME_HS_CLIENT_SECRET=...` in the secrets file and set
+   `[helpdesk]` and `[mailbox]` to `adapter = "helpscout"` (see [ADAPTERS.md](ADAPTERS.md)).
+   Set `support_address` to the inbox's own email address.
+4. Read-only proof: `sayso run intake` after writing in from your own test address. The card's
+   ticket is the Help Scout conversation id. Then step 6 above with your own conversation: the
+   sender must end `SENT_AND_VERIFIED`, and Help Scout must show exactly one reply.
+
 ## Go-live checklist
 
 Tick every line before real customers reach the loop.

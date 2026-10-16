@@ -33,8 +33,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | Section | Choices | Default |
 |---|---|---|
 | board | `fake`, `discord` | `fake` |
-| helpdesk | `fake`, `frappe` | `fake` |
-| mailbox | `fake`, `imap` | `fake` |
+| helpdesk | `fake`, `frappe`, `helpscout` | `fake` |
+| mailbox | `fake`, `imap`, `helpscout` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
