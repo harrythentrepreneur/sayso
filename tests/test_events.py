@@ -214,6 +214,18 @@ class EmitTests(Box):
                                             .values()))["body"])
                 self.assertEqual("content" in body["data"], include)
 
+    def test_content_per_endpoint(self):
+        plain = events.Endpoint("plain", URL, SECRET)
+        trusted = events.Endpoint("trusted", "https://example.com/hook", SECRET, include_content=True)
+        rec = Recorder()
+        a = self.adapter(rec, endpoints=[plain, trusted])
+        a.emit("reply.sent", {"case_key": "c1"}, "k", content={"body": "Hi Pat, refunded."})
+        a.flush()
+        got = {c["url"]: json.loads(c["body"])["data"] for c in rec.calls}
+        self.assertNotIn("content", got[URL])
+        self.assertEqual(got["https://example.com/hook"]["content"], {"body": "Hi Pat, refunded."})
+        self.assertNotIn(b"Hi Pat", next(c["body"] for c in rec.calls if c["url"] == URL))
+
     def test_outbox_is_bounded(self):
         a = self.adapter(Recorder())
         with mock.patch.object(events, "MAX_PENDING", 3):

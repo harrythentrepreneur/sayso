@@ -148,6 +148,7 @@ class Endpoint:
     url: str
     secret: str = field(repr=False)
     events: tuple[str, ...] = EVENTS
+    include_content: bool = False     # this endpoint may receive customer text (see module doc)
 
     def __post_init__(self):
         if not _ID.match(self.id):
@@ -173,7 +174,8 @@ class WebhookEvents:
         self.product = str(product)
         self.clock = clock
         self.transport = transport or urllib_transport
-        self.include_content = bool(include_content)
+        self.include_content = bool(include_content) or any(ep.include_content for ep in endpoints)
+        self._content_all = bool(include_content)
         self.journal = journal
         self.alert = alert
 
@@ -197,12 +199,13 @@ class WebhookEvents:
                    if (only is None or ep.id == only) and (event == TEST_EVENT or event in ep.events)]
         if not targets:
             return eid
-        data = dict(payload or {})
-        if self.include_content and content:
-            data["content"] = content
         now = self.clock.now()
-        body = json.dumps({"id": eid, "type": event, "created": _iso(now), "product": self.product,
-                           "data": data}, sort_keys=True, default=str)
+        plain = dict(payload or {})
+        bodies = {}
+        for with_content in (False, True):
+            data = dict(plain, content=content) if with_content and content else plain
+            bodies[with_content] = json.dumps({"id": eid, "type": event, "created": _iso(now),
+                                               "product": self.product, "data": data}, sort_keys=True, default=str)
         with locked(self.path):
             box = load_json(self.path, {"rows": {}})
             rows = box.setdefault("rows", {})
@@ -214,6 +217,7 @@ class WebhookEvents:
                 if waiting >= MAX_PENDING:
                     save_json(self.path, box)
                     raise EventsError("the webhook outbox is full; events are not being delivered")
+                body = bodies[self.include_content and (self._content_all or ep.include_content)]
                 rows[rid] = {"endpoint": ep.id, "id": eid, "event": event, "created": _iso(now), "body": body,
                              "status": PENDING, "attempts": 0, "next_at": _iso(now), "last_status": None,
                              "last_error": None, "last_at": None, "delivered_at": None}
