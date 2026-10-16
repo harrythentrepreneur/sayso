@@ -39,6 +39,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | mailbox | `fake`, `imap`, `helpscout` | `fake` |
 | helpdesk | `fake`, `frappe`, `zendesk` | `fake` |
 | mailbox | `fake`, `imap`, `zendesk` | `fake` |
+| helpdesk | `fake`, `frappe`, `intercom` | `fake` |
+| mailbox | `fake`, `imap`, `intercom` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
@@ -55,6 +57,7 @@ Reference adapter keys:
 - zendesk (helpdesk): `subdomain` (the part before `.zendesk.com`), `auth` (`"token"` default or `"oauth"`),
   `email` (the admin's email, for `auth = "token"`), `token_env`, optional `backfill_hours` (default 24: how far
   back the first run reads). zendesk (mailbox): no keys; it reads the `[helpdesk]` Zendesk account.
+- intercom (`[helpdesk]`): `token_env`, `admin_id`, `region` (`us`|`eu`|`au`, default `us`), `backfill_hours` (0-720, default 24). `[mailbox] adapter = "intercom"` takes no keys and needs the Intercom helpdesk.
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
   - or, for Microsoft 365 / Google sign-in: `auth = "oauth"`, `provider` (`microsoft` | `google`), `tenant`
     (Microsoft only; default `common`), `client_id_env`, `client_secret_env`, `refresh_token_env`

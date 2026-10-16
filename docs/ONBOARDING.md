@@ -10,6 +10,7 @@ and prove each one before you switch the next.
 | Board (human work surface) | `discord` | A forum channel, an alerts channel, a bot token |
 | Helpdesk (owns correspondence) | `frappe` | Helpdesk URL, API key and secret, site timezone set to UTC |
 | Helpdesk, Zendesk instead | `zendesk` | Zendesk subdomain, an admin's email and API token (see below) |
+| Helpdesk + receipt, Intercom | `intercom` (both `[helpdesk]` and `[mailbox]`) | A private-app access token, the replying admin's id, the region. See "Intercom" below |
 | Mailbox (independent send receipt) | `imap` | IMAP host, user, app password, Sent folder name |
 | Mailbox, Gmail with Google sign-in | `gmail` | A Google Cloud OAuth client and one sign-in ([below](#gmail-with-google-sign-in)) |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
@@ -160,6 +161,43 @@ stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
    Set `[product] support_address` to your Zendesk support address.
 4. Prove it read-only: `sayso run intake` against a test ticket you opened as an end user from your own
    address, then one approved reply to yourself (step 6 above). The ticket must have no CCs.
+## Intercom (instead of Frappe + IMAP)
+
+Use this when your customers write to you through Intercom conversations.
+
+1. **Make a private app in YOUR workspace.** Intercom > Settings > Integrations >
+   Developer Hub > New app (internal). A private app reads only your own workspace,
+   so it needs no review by Intercom. Under Configure > Authentication, copy the
+   Access Token into your secrets file (`ACME_INTERCOM_TOKEN=...`). Treat it like a password.
+   Never paste another company's token into your settings: Intercom's terms require
+   OAuth for that.
+2. **Find the admin who will sign replies.** Run, with the token loaded:
+   `curl -s https://api.intercom.io/me -H "Authorization: Bearer $ACME_INTERCOM_TOKEN" -H "Intercom-Version: 2.14"`
+   and copy `id`. That admin needs an inbox seat. Use a real teammate, not a bot:
+   Intercom does not email bot replies to customers by default.
+3. **Settings:**
+   ```toml
+   [helpdesk]
+   adapter = "intercom"
+   token_env = "ACME_INTERCOM_TOKEN"
+   admin_id = "1234567"
+   region = "us"          # us | eu | au: where your workspace is hosted
+   backfill_hours = 24    # the first run reads conversations updated in this window
+
+   [mailbox]
+   adapter = "intercom"   # the receipt re-reads the reply part in Intercom
+   ```
+4. **Read-only proof.** `sayso run intake` with a scratch `state.dir`. Start a
+   conversation from your own test contact in the Messenger first, and check the
+   card shows its verbatim text.
+5. **One real reply to yourself.** Approve the draft and run `sayso run sender`.
+   It must end `SENT_AND_VERIFIED`. In Intercom the reply shows as a message from
+   your admin and ends with a `Ref: sayso-...` line; that line is how a retry finds
+   the earlier reply, so do not remove it.
+
+Limits: every request pins `Intercom-Version: 2.14`. Group conversations (more
+than one customer) are refused, never answered. Intercom has no Sent folder, so
+the receipt is a second read of Intercom, not an independent system.
 
 ## Go-live checklist
 

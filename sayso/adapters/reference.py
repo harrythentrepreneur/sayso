@@ -655,6 +655,13 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "zendesk":
         from sayso.adapters import zendesk
         return zendesk.build(name, section, config)
+    if kind == "intercom":
+        from sayso.adapters.intercom import IntercomHelpdesk, IntercomMailbox
+        desk = config.section("helpdesk")
+        if desk.adapter != "intercom":
+            raise ConfigError("[mailbox] intercom needs [helpdesk] adapter = \"intercom\"")
+        helpdesk = IntercomHelpdesk.from_section(desk, config.support_address)
+        return helpdesk if name == "helpdesk" else IntercomMailbox(helpdesk)
     if kind == "stripe":
         return StripePayments(section)
     if kind == "github":
