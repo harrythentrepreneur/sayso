@@ -7,7 +7,7 @@ and prove each one before you switch the next.
 
 | Piece | Reference adapter | You provide |
 |---|---|---|
-| Board (human work surface) | `discord` | A forum channel, an alerts channel, a bot token |
+| Board (human work surface) | `discord` or `slack` | Discord: a forum channel, an alerts channel, a bot token. Slack: one channel and a bot token (see below) |
 | Helpdesk (owns correspondence) | `frappe` | Helpdesk URL, API key and secret, site timezone set to UTC |
 | Mailbox (independent send receipt) | `imap` | IMAP host, user, app password, Sent folder name |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
@@ -54,6 +54,32 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
    and run `sayso run sender`. It must end `SENT_AND_VERIFIED`, with the email
    in your inbox and exactly one copy in the Sent folder.
 7. **Install the timers.** See [INSTALL.md](INSTALL.md).
+
+## Slack instead of Discord
+
+Set `[board] adapter = "slack"` to keep the cases in one Slack channel.
+
+1. At https://api.slack.com/apps press **Create New App** > **From scratch**, name it Sayso, pick
+   your workspace.
+2. **OAuth & Permissions** > **Bot Token Scopes**: add `chat:write`, `reactions:read`, `users:read`
+   and `channels:history` (`groups:history` too for a private channel). Add no user scopes.
+3. **Install to Workspace**, then copy the **Bot User OAuth Token** (`xoxb-...`) into your secrets
+   file as `ACME_SLACK_TOKEN=...`. Do not turn on token rotation: the adapter reads one fixed token.
+4. In Slack, make a channel for cases (for example `#support-cases`), type `/invite @Sayso` in it,
+   and copy its id (channel name > **About** > Channel ID, `C...`).
+5. In the settings file:
+   ```toml
+   [board]
+   adapter = "slack"
+   channel_id = "C0123456789"
+   alerts_channel_id = "C0123456790"   # optional; defaults to channel_id
+   token_env = "ACME_SLACK_TOKEN"
+   ```
+6. `[operators]` holds Slack user ids (profile > **...** > **Copy member ID**, `U...`), for example
+   `"U0123ABCD" = "Pat"`. Only these people's reactions count.
+7. Votes are reactions on the vote reply in each case thread: `:white_check_mark:` approves,
+   `:x:` declines. Any `:x:` from an operator declines. Run `sayso run health` and check the
+   alerts channel, then do step 6 of the step-by-step above.
 
 ## Go-live checklist
 

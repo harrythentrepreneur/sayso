@@ -16,7 +16,7 @@ from typing import Any
 
 MODES = ("dry-run", "live")
 ADAPTER_CHOICES = {
-    "board": ("fake", "discord"),
+    "board": ("fake", "discord", "slack"),
     "helpdesk": ("fake", "frappe"),
     "mailbox": ("fake", "imap"),
     "payments": ("none", "fake", "stripe"),

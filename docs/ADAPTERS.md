@@ -7,7 +7,7 @@ The core never imports a vendor SDK.
 
 | Protocol | Methods | Notes |
 |---|---|---|
-| Board | `ensure_card, get_tags, set_tags, post, messages, open_poll, read_poll, alert, notify, last_activity`; optional `message_authors` | `set_tags` receives the full list. `read_poll` returns `{user_id: "yes"/"no"}` and must skip bots. `notify(text, key, mention)` pings `mention` and nobody else. `message_authors(card)` returns `[(user_id, iso_time)]` oldest first, bots skipped; without it every vote is for anyone. `last_activity(card)` returns the ISO time of the card's NEWEST message (not its creation; a tag change is not activity) and raises when unreadable. |
+| Board (`discord`, `slack`) | `ensure_card, get_tags, set_tags, post, messages, open_poll, read_poll, alert, notify, last_activity`; optional `message_authors` | `set_tags` receives the full list. `read_poll` returns `{user_id: "yes"/"no"}` and must skip bots. `notify(text, key, mention)` pings `mention` and nobody else. `message_authors(card)` returns `[(user_id, iso_time)]` oldest first, bots skipped; without it every vote is for anyone. `last_activity(card)` returns the ISO time of the card's NEWEST message (not its creation; a tag change is not activity) and raises when unreadable. |
 | Helpdesk | `fetch_inbound, send_reply, sent_readback, last_sent_at, last_inbound_at` | `last_inbound_at(ticket, customer)` must include mail from that customer on ANY ticket. |
 | Mailbox | `sent_copies(message_id)` | Counts copies in the mailbox's own Sent folder. It must be independent of the helpdesk. |
 | Payments | `refund, cancel_subscription, read_refunds, read_subscription` | Reads return the provider's own records. |
@@ -55,3 +55,22 @@ Rules for every adapter:
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.
+- **Slack** (`[board] adapter = "slack"`, `sayso/adapters/slack.py`): one
+  parent message per case in ONE channel (`channel_id`); everything else goes in
+  its thread. The stage is the parent's `Stage:` line, changed with
+  `chat.update` (an edit, never a new message). A vote is a thread reply with a
+  `vote:<hash>` marker: people react `white_check_mark` (yes) or `x` (no), and
+  `read_poll` reads it with `reactions.get(full=true)`. A shorter `users` list
+  than `count`, a message this bot did not open for this case, or a lost marker
+  is refused. Bots (`users.info` `is_bot`, Slackbot) never count; only ids in
+  `[operators]` (Slack user ids, `U...`/`W...`) decide. Slack has no idempotency
+  key for `chat.postMessage`, so the adapter records every write key in
+  `<state>/slack-board.json` when Slack returns the `ts`, and reads every write
+  back. All text is escaped (`& < >`), so `<!channel>` in an email pings nobody;
+  `notify` adds exactly one `<@U...>`. HTTP 429 carries `Retry-After` in the
+  HEADER (Discord puts it in the body); the adapter waits it (max 30 s, 3 times)
+  and paces posts to one per second per channel. Bot scopes: `chat:write`,
+  `reactions:read`, `users:read`, `channels:history` (`groups:history` for a
+  private channel). `conversations.replies` is Tier 3 for internal apps but
+  1 request per minute for apps distributed outside the Marketplace, so a hosted,
+  distributed app should not use this adapter's thread reads as is.
