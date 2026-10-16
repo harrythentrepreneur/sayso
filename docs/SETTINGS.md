@@ -49,6 +49,9 @@ Reference adapter keys:
 - discord: `forum_id`, `alerts_channel_id`, `token_env`
 - frappe: `url`, `api_key_env`, `api_secret_env`
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
+  - or, for Microsoft 365 / Google sign-in: `auth = "oauth"`, `provider` (`microsoft` | `google`), `tenant`
+    (Microsoft only; default `common`), `client_id_env`, `client_secret_env`, `refresh_token_env`
+    (see [ADAPTERS.md](ADAPTERS.md#oauth-mailboxes-microsoft-365-google))
 - stripe: `api_key_env`
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
   defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.

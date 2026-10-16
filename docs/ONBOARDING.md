@@ -55,6 +55,31 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
    in your inbox and exactly one copy in the Sent folder.
 7. **Install the timers.** See [INSTALL.md](INSTALL.md).
 
+## Microsoft 365 mailbox (OAuth instead of an app password)
+
+Business Outlook mailboxes no longer accept passwords for IMAP. Use OAuth:
+
+1. **Register an app.** Open the Microsoft Entra admin center > App registrations > New registration.
+   Choose "Accounts in any organizational directory and personal Microsoft accounts" (or only your
+   organisation). Add a **Web** redirect URI that you control, for example `http://localhost:8765/callback`.
+2. **Add permissions.** API permissions > Add a permission > APIs my organization uses > Office 365
+   Exchange Online > Delegated: `IMAP.AccessAsUser.All` and `SMTP.Send`. Add Microsoft Graph delegated
+   `offline_access`, `openid` and `email`. If your tenant only lets users consent to verified apps, press
+   "Grant admin consent".
+3. **Make a client secret.** Certificates & secrets > New client secret. Copy the value at once.
+4. **Get a refresh token once.** Run the authorization-code flow with PKCE against your redirect URI
+   (`sayso.adapters.oauth.authorize_url` and `exchange_code` do both halves) and sign in as the mailbox.
+   Keep the `refresh_token` from the answer.
+5. **Allow IMAP for the mailbox.** Microsoft 365 admin center > Users > Active users > the user > Mail >
+   Manage email apps: tick IMAP and Authenticated SMTP.
+6. **Write the secrets file** with `ACME_MS_CLIENT_ID`, `ACME_MS_CLIENT_SECRET` and
+   `ACME_MS_REFRESH_TOKEN`, and set the `[mailbox]` section as shown in
+   [ADAPTERS.md](ADAPTERS.md#oauth-mailboxes-microsoft-365-google).
+7. Run `sayso validate`, then the read-only proof in step 5 above.
+
+A refresh token stops working after 90 days without use, or when the user resets their password or
+an admin revokes the app. The adapter then raises `ReconnectNeeded`; repeat step 4.
+
 ## Go-live checklist
 
 Tick every line before real customers reach the loop.

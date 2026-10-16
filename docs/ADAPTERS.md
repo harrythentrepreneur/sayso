@@ -55,3 +55,47 @@ Rules for every adapter:
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.
+
+## OAuth mailboxes (Microsoft 365, Google)
+
+Microsoft has turned off Basic authentication for IMAP in every Exchange Online tenant, and turns
+SMTP AUTH Basic off by default at the end of December 2026. App passwords therefore fail for most
+business Outlook mailboxes. `sayso/adapters/oauth.py` signs in with OAuth 2.0 instead:
+
+- `TokenSource(provider, client_id, client_secret, refresh_token, tenant=None, transport=None)`.
+  `access_token()` uses the refresh-token grant and caches the token until 5 minutes before it expires.
+  `on_rotate(new_refresh_token)` hands over a rotated refresh token; Microsoft rotates on every use,
+  so a host that keeps tokens must store the new one and drop the old one.
+- `xoauth2(user, token)` builds the SASL string `user={user}^Aauth=Bearer {token}^A^A`.
+  `imap_auth` / `smtp_auth` wrap it for `IMAP4.authenticate("XOAUTH2", ...)` and `SMTP.auth("XOAUTH2", ...)`.
+- `PROVIDERS` holds the only token endpoints that are ever called:
+  `microsoft` (`login.microsoftonline.com/{tenant}`, scopes `https://outlook.office.com/IMAP.AccessAsUser.All`,
+  `https://outlook.office.com/SMTP.Send`, `offline_access`) and `google` (`oauth2.googleapis.com`,
+  scope `https://mail.google.com/`).
+- `ReconnectNeeded` means the refresh token is dead (`invalid_grant`, `interaction_required`,
+  AADSTS50173/70008/700082/65001/90094). The adapter never retries it. A person must sign in again,
+  and `admin_consent` is True when an administrator must approve the app once.
+- 429 and 5xx responses honour `Retry-After` (capped at 30 s, 2 retries) and then raise `OAuthError`.
+  So does any token response the adapter does not understand. Error text carries only the error code.
+- Hosts that run the sign-in themselves can use `pkce_pair`, `authorize_url`, `exchange_code`,
+  `id_claims` and `mailbox_address`.
+
+The `imap` mailbox takes `auth = "oauth"`:
+
+```toml
+[mailbox]
+adapter = "imap"
+host = "outlook.office365.com"
+user = "help@contoso.com"
+sent_folder = '"Sent Items"'
+auth = "oauth"
+provider = "microsoft"
+tenant = "contoso.com"            # or the tenant id; "common" when unsure
+client_id_env = "ACME_MS_CLIENT_ID"
+client_secret_env = "ACME_MS_CLIENT_SECRET"
+refresh_token_env = "ACME_MS_REFRESH_TOKEN"
+```
+
+Password auth (`password_env`) stays the default and is unchanged. The core has no SMTP send path
+(the helpdesk sends), so OAuth only changes how the Sent-folder receipt is read.
+
