@@ -440,6 +440,24 @@ class ReadbackTests(ZendeskTestBase):
         mid = self.h.sent_readback("35436", self.sha())[0].message_id
         self.assertEqual(zendesk.ZendeskMailbox(self.h).sent_copies(mid), 0)
 
+    def test_mailbox_ignores_a_notification_to_someone_else(self):
+        """A trigger that only told the assignee is not the customer's email."""
+        self.send()
+        audit = self.zd.audits[35436][-1]
+        for e in audit["events"]:
+            if e["type"] == "Notification":
+                e["recipients"] = [{"id": AGENT, "name": "Agent"}]
+        mid = self.h.sent_readback("35436", self.sha())[0].message_id
+        self.assertEqual(zendesk.ZendeskMailbox(self.h).sent_copies(mid), 0)
+
+    def test_mailbox_accepts_object_recipients(self):
+        self.send()
+        for e in self.zd.audits[35436][-1]["events"]:
+            if e["type"] == "Notification":
+                e["recipients"] = [{"id": REQUESTER, "name": "Johnny"}]
+        mid = self.h.sent_readback("35436", self.sha())[0].message_id
+        self.assertEqual(zendesk.ZendeskMailbox(self.h).sent_copies(mid), 1)
+
     def test_mailbox_refuses_foreign_id(self):
         with self.assertRaises(zendesk.ZendeskError):
             zendesk.ZendeskMailbox(self.h).sent_copies("<abc@mail>")
@@ -540,3 +558,54 @@ class WiringTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LoopTests(unittest.TestCase):
+    """The real core jobs (intake, draft, votes, sender) with Zendesk as helpdesk and mailbox."""
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+
+        from sayso import demo
+        self._tmp = tempfile.TemporaryDirectory(prefix="sayso-zd-")
+        self.ctx = demo.build(Path(self._tmp.name))
+        self.zd = FakeZendesk()
+        self.zd.route_support = "support@example.com"
+        self.zd.tickets[35436]["recipient"] = "support@example.com"
+        h = zendesk.ZendeskHelpdesk("acme", "Bearer x", "support@example.com", transport=self.zd,
+                                    sleep=lambda s: None, now=lambda: NOW)
+        self.ctx.helpdesk, self.ctx.mailbox = h, zendesk.ZendeskMailbox(h)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def run_to_send(self):
+        from sayso import votes
+        from sayso.jobs import JOBS
+        JOBS["intake"](self.ctx)
+        JOBS["draft"](self.ctx)
+        live = [v for v in votes.load(self.ctx).values() if v["kind"] == "reply" and v["status"] == votes.OPEN]
+        self.assertEqual(len(live), 1, votes.load(self.ctx))
+        self.ctx.world.operator_votes(live[0]["poll_id"], "1001", "yes")
+        JOBS["votes"](self.ctx)
+        return JOBS["sender"](self.ctx, sleep=lambda s: None), live[0]["key"]
+
+    def agent_comments(self):
+        return [c for c in self.zd.comments[35436] if c["author_id"] == AGENT]
+
+    def test_customer_comment_to_verified_reply(self):
+        out, key = self.run_to_send()
+        self.assertEqual(out[key], "SENT_AND_VERIFIED")
+        self.assertEqual(len(self.agent_comments()), 1)
+        from sayso import cases
+        (case,) = cases.load(self.ctx).values()
+        self.assertEqual((case["customer"], case["ticket"]), ("johnny@example.com", "35436"))
+
+    def test_no_notification_trigger_is_unverified_and_not_retried(self):
+        self.zd.notify = False
+        out, key = self.run_to_send()
+        self.assertEqual(out[key], "UNVERIFIED")
+        from sayso.jobs import JOBS
+        JOBS["sender"](self.ctx, sleep=lambda s: None)
+        self.assertEqual(len(self.agent_comments()), 1)
