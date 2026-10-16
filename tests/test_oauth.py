@@ -360,7 +360,7 @@ class AuthCodeTests(unittest.TestCase):
 
     def test_authorize_url(self):
         url = oauth.authorize_url("microsoft", "cid", "https://sayso.example/connect/oauth/microsoft/callback",
-                                  "st4te", "chal", "n0nce", login_hint="help@contoso.com")
+                                  "st4te-0123456789abcdef", "chal", "n0nce", login_hint="help@contoso.com")
         parts = urllib.parse.urlsplit(url)
         self.assertEqual((parts.scheme, parts.hostname, parts.path),
                          ("https", "login.microsoftonline.com", "/common/oauth2/v2.0/authorize"))
@@ -368,7 +368,7 @@ class AuthCodeTests(unittest.TestCase):
         self.assertEqual(q["response_type"], "code")
         self.assertEqual(q["code_challenge_method"], "S256")
         self.assertEqual(q["code_challenge"], "chal")
-        self.assertEqual(q["state"], "st4te")
+        self.assertEqual(q["state"], "st4te-0123456789abcdef")
         self.assertEqual(q["nonce"], "n0nce")
         self.assertEqual(q["login_hint"], "help@contoso.com")
         self.assertEqual(q["scope"].split(), ["https://outlook.office.com/IMAP.AccessAsUser.All",
@@ -377,7 +377,7 @@ class AuthCodeTests(unittest.TestCase):
 
     def test_google_authorize_asks_offline_consent(self):
         q = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(
-            oauth.authorize_url("google", "cid", "https://x.example/cb", "s", "c", "n")).query))
+            oauth.authorize_url("google", "cid", "https://x.example/cb", "s" * 32, "c", "n")).query))
         self.assertEqual((q["access_type"], q["prompt"]), ("offline", "consent"))
 
     def test_exchange_code(self):

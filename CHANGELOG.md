@@ -10,25 +10,36 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
   text) before any page, login or vote. Behind a reverse proxy or tunnel that keeps its own Host name, add
   `--allowed-host NAME[:PORT]` (repeatable) to `sayso dashboard` and `sayso console serve`. `make_server` and
   `serve` gain an optional `allowed_hosts` keyword; nothing else changes.
-- **Lemon Squeezy payments adapter** (`payments = "lemonsqueezy"`): refunds (`POST /v1/orders/{id}/refund`,
-  partial allowed) and cancellations (`DELETE /v1/subscriptions/{id}`, runs to period end), verified by reading
-  the order and subscription back. No idempotency header exists, so every write reads first (one refund per
-  order). Specs use prefixed ids (`ls_order_`, `ls_sub_`, `ls_cust_`); the send check and the masker refuse
-  them in customer text. See docs/ADAPTERS.md and docs/ONBOARDING.md.
-- Outgoing webhooks (#26): optional `[events] adapter = "webhook"` (default `none`). The loop emits
-  `vote.decided`, `reply.sent` (only after the helpdesk + Sent-folder read-back), `money.verified` (after the
-  provider's own record matches) and `case.closed`. Each is queued in a durable outbox in the state dir and
-  POSTed by the new `events` job (last in `jobs.ORDER`) as JSON signed `X-Sayso-Signature: t=..,v1=..`
-  (HMAC-SHA256, Stripe shape). Event ids are stable across re-emits and retries, so receivers dedupe.
-  Bounded retries with backoff, redirects never followed, `410` stops, no customer text unless
-  `include_content = true`. Delivery problems never block a job. Docs: `docs/WEBHOOKS.md` (Zapier Catch Hook).
-  Stable API: `sayso.jobs.ORDER` gains `"events"` at the end (re-recorded on purpose); new names listed for Cloud.
-
-- Customer lookup (#25): optional `[customer_facts]` adapter (`none` default, `http`). Before each draft Sayso
-  calls `GET <url>?email=` on the business's own app, signed with HMAC-SHA256 (`X-Sayso-Signature: v1=...`,
-  `X-Sayso-Timestamp`), 3 s timeout, 16 KB cap, flat fields only. The drafter gets the facts as a labelled,
-  quoted block of untrusted data. A failed lookup never blocks a draft (one alert per outage). Contract and
-  Python/Node endpoint examples: docs/CUSTOMER_LOOKUP.md.
+- **Integrations (11 adapters, all optional and off unless you set them; `mode = "live"` still required).**
+  Every new adapter is stdlib only and listed in `config.ADAPTER_CHOICES`, which now also drives the
+  allowed top-level sections, so config validation names every adapter.
+  - Mailboxes: **Microsoft 365 / Outlook** (`[mailbox] adapter = "imap"`, `auth = "oauth"`) and **Gmail /
+    Google Workspace** (`adapter = "gmail"`) sign in with OAuth 2.0 + XOAUTH2. ONE shared module,
+    `sayso/adapters/oauth.py`, holds the token endpoint, refresh + rotation, PKCE, the authorize URL (a 16+
+    character state and a PKCE challenge are required for every provider), the code exchange and the id_token
+    checks; `gmail.py` keeps only Gmail's own rules (the `\Sent` flag, labels, throttling, the loopback sign-in
+    CLI `python -m sayso.adapters.gmail`). A dead grant (`invalid_grant`) is never retried.
+  - Help desks: **Help Scout**, **Zendesk**, **Intercom**, **Crisp** as `[helpdesk]` and as the receipt
+    `[mailbox]`. One help desk at a time: a help-desk `[mailbox]` must match `[helpdesk]`
+    (`config.check_one_helpdesk`, refused when the settings are read). None of these APIs except Zendesk
+    has an idempotency key, so each reply carries a marker and the thread is read before every post.
+  - Payments: **Paddle Billing** (refunds as adjustments, cancels at period end unless the approved spec says
+    `"effective": "immediately"`; a refund Paddle must still approve stays `PENDING_WITH_PROVIDER` and is
+    never sent again) and **Lemon Squeezy** (refund then read back; one refund per order). `[payments]` is one
+    section, so a product has ONE payment provider (Stripe, Paddle or Lemon Squeezy). Money specs gain an
+    optional `effective` on a cancel. The send check and the masker refuse Paddle and Lemon Squeezy ids and
+    `pdl_..._apikey_` keys in customer text.
+  - **Slack** board (`[board] adapter = "slack"`): one thread per case, reaction votes from operators only.
+  - **Outgoing webhooks** (`[events] adapter = "webhook"`): `vote.decided`, `reply.sent`, `money.verified`,
+    `case.closed` from a durable outbox, signed `X-Sayso-Signature: t=..,v1=..` (HMAC-SHA256), stable event
+    ids, bounded retries, redirects never followed. New `events` job, last in `jobs.ORDER`. Docs:
+    `docs/WEBHOOKS.md`.
+  - **Customer lookup** (`[customer_facts] adapter = "http"`): one signed `GET <url>?email=` to your own app
+    before each draft (3 s, 16 KB, flat fields, quoted for the drafter as untrusted data). A failed lookup
+    never blocks a draft. Contract: `docs/CUSTOMER_LOOKUP.md`.
+  - Stable API: re-recorded once for the whole set (`scripts/stable_api.py --write`). Additions only, plus
+    deliberate compatible changes: `jobs.ORDER` gains `"events"` at the end, `Payments.cancel_subscription`
+    gains an optional `effective`, `ImapMailbox` an optional `transport`.
 - Console and dashboard pages, ported from Sayso Cloud: a grouped sidebar (daily work, then Admin), a dry-run
   strip and an account menu; **Decisions** as a priority queue (money and billing, repeat contacts, oldest) with
   waiting and expiry badges and a say-so lock on every decision (what the Yes binds to plus its fingerprint),

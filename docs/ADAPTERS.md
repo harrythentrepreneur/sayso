@@ -184,6 +184,13 @@ independent receipt, keep `[mailbox] adapter = "imap"` on the inbox's own mail a
 Vendor facts to re-check on the first real call: whether `page` is 1-based (the docs' examples
 disagree), whether Help Scout keeps the HTML comment marker in a reply body (the text match is the
 fallback), and whether a reply thread's `to` lists the customer.
+
+## Other integrations (help desks, payments, Slack)
+
+One help desk at a time: `[mailbox] adapter = "helpscout" | "zendesk" | "intercom" | "crisp"` reads the SAME
+account as `[helpdesk]`, so `config.check_one_helpdesk` refuses a mismatch when the settings are read. One
+payment provider at a time: `[payments]` is a single section.
+
 - **Zendesk** (`sayso/adapters/zendesk.py`, helpdesk + mailbox = `zendesk`):
   - Inbound reads the ticket-events export (`/api/v2/incremental/ticket_events?include=comment_events`).
     That export is **admin only** and allows 10 requests a minute, so the token must belong to an admin

@@ -31,8 +31,6 @@ The token endpoint, refresh and the XOAUTH2 string come from ``sayso.adapters.oa
 """
 from __future__ import annotations
 
-import base64
-import hashlib
 import http.server
 import imaplib
 import re
@@ -239,24 +237,14 @@ class GmailMailbox:
 
 # ----------------------------------------------------------------------------- one-time sign-in (self-hosters)
 def pkce_pair() -> tuple[str, str]:
-    """(code_verifier, S256 code_challenge), RFC 7636."""
-    verifier = _secrets.token_urlsafe(48)
-    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
-    return verifier, challenge
+    """(code_verifier, S256 code_challenge), RFC 7636. Shared with Microsoft: ``oauth.pkce_pair``."""
+    return _oauth().pkce_pair()
 
 
 def authorize_url(client_id: str, redirect_uri: str, state: str, code_challenge: str, login_hint: str = "") -> str:
     """Google's sign-in page for mailbox access: code flow, PKCE S256, offline access, consent every time
-    (Google returns a refresh token only on consent)."""
-    if not client_id or not state or len(state) < 16 or not code_challenge:
-        raise ValueError("client_id, a random state and a PKCE challenge are required")
-    q = {"client_id": client_id, "redirect_uri": redirect_uri, "response_type": "code",
-         "scope": f"{SCOPE} openid email", "access_type": "offline", "prompt": "consent",
-         "state": state, "code_challenge": code_challenge, "code_challenge_method": "S256",
-         "include_granted_scopes": "false"}
-    if login_hint:
-        q["login_hint"] = login_hint
-    return AUTHORIZE_URL + "?" + urllib.parse.urlencode(q, quote_via=urllib.parse.quote)
+    (Google returns a refresh token only on consent). Built by the shared ``oauth.authorize_url``."""
+    return _oauth().authorize_url("google", client_id, redirect_uri, state, code_challenge, login_hint=login_hint)
 
 
 def check_grant(data: dict) -> str:
@@ -271,96 +259,41 @@ def check_grant(data: dict) -> str:
     return rt
 
 
-TOKEN_RETRIES = 2
-RETRY_CAP = 30.0
-_CODE_TOKEN = re.compile(r"^[\x21-\x7e]{8,8192}$")
-
-
-def _header(headers, name: str) -> str:
-    for k, v in (headers or {}).items():
-        if str(k).lower() == name:
-            return str(v)
-    return ""
-
-
 def exchange_code(client_id: str, client_secret: str, code: str, redirect_uri: str, verifier: str,
                   transport=None, sleep: Callable[[float], None] | None = None) -> dict:
-    """Redeem an authorization code at Google's token endpoint and check the answer.
-
-    Only TOKEN_URL is called. 429/5xx honour Retry-After (capped) twice, then fail. ``invalid_grant`` (code
-    used twice, expired, wrong verifier) raises SignInExpired. Any other refusal carries only Google's
-    error code, never the body. A response without a Bearer access token, a lifetime, a refresh token and
-    the mail scope is NotUnderstood."""
-    import json
+    """Redeem an authorization code at Google's token endpoint (the shared ``oauth.exchange_code``) and check
+    the answer. 429/5xx honour Retry-After (capped) twice, then fail. A dead code (``invalid_grant``: used
+    twice, expired, wrong verifier) raises SignInExpired. Any other refusal carries only Google's error code,
+    never the body. An answer without a Bearer access token, a lifetime, a refresh token and the mail scope
+    is NotUnderstood."""
     import time
-    from sayso.adapters import http as _http
-    if not code or len(code) > 4096 or any(c in code for c in " \r\n\x00"):
-        raise NotUnderstood("the sign-in code is not valid")
-    send = transport or _http.urllib_transport
-    wait = sleep or time.sleep
-    body = urllib.parse.urlencode({"grant_type": "authorization_code", "code": code, "client_id": client_id,
-                                   "client_secret": client_secret, "redirect_uri": redirect_uri,
-                                   "code_verifier": verifier}).encode()
-    headers = {"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json",
-               "User-Agent": "sayso/0.2"}
-    for attempt in range(TOKEN_RETRIES + 1):
-        try:
-            status, resp_headers, raw = send("POST", TOKEN_URL, dict(headers), body)
-        except OSError as exc:
-            if attempt < TOKEN_RETRIES:
-                wait(1.0)
-                continue
-            raise RuntimeError(f"Google token endpoint unreachable ({type(exc).__name__})") from None
-        if status == 429 or status >= 500:
-            if attempt < TOKEN_RETRIES:
-                try:
-                    wait(max(0.0, min(float(_header(resp_headers, "retry-after") or 1), RETRY_CAP)))
-                except ValueError:
-                    wait(1.0)
-                continue
-            raise RuntimeError(f"Google token endpoint busy (HTTP {status})")
-        try:
-            data = json.loads(raw or b"")
-        except ValueError:
-            raise NotUnderstood("Google's token answer is not JSON") from None
-        if status >= 400:
-            err = data.get("error") if isinstance(data, dict) else ""
-            err = err if isinstance(err, str) and re.fullmatch(r"[a-z_]{1,64}", err) else f"HTTP {status}"
-            if err == "invalid_grant":
-                raise SignInExpired("the sign-in code was refused (invalid_grant): start again")
-            raise RuntimeError(f"Google refused the sign-in: {err}")
-        if not isinstance(data, dict) or str(data.get("token_type", "")).lower() != "bearer":
-            raise NotUnderstood("Google's token answer is not a Bearer token")
-        if not isinstance(data.get("access_token"), str) or not _CODE_TOKEN.match(data["access_token"]):
-            raise NotUnderstood("Google's token answer has no usable access_token")
-        life = data.get("expires_in")
-        if isinstance(life, bool) or not isinstance(life, int) or not 0 < life <= 86400:
-            raise NotUnderstood("Google's token answer has no usable expires_in")
-        rt = data.get("refresh_token")
-        if rt is not None and (not isinstance(rt, str) or not _CODE_TOKEN.match(rt)):
-            raise NotUnderstood("Google's token answer has an unusable refresh_token")
-        check_grant(data)
-        return data
-    raise RuntimeError("Google token endpoint busy")  # pragma: no cover
+    oauth = _oauth()
+    try:
+        data = oauth.exchange_code("google", client_id, client_secret, code, redirect_uri, verifier,
+                                   transport=transport, sleep=sleep or time.sleep)
+    except oauth.ReconnectNeeded:
+        raise SignInExpired("the sign-in code was refused (invalid_grant): start again") from None
+    except oauth.OAuthError as exc:
+        if exc.transient:
+            raise RuntimeError(f"Google token endpoint unreachable or busy ({exc})") from None
+        if exc.status:
+            raise RuntimeError(f"Google refused the sign-in: {exc.code or f'HTTP {exc.status}'}") from None
+        raise NotUnderstood(f"Google's token answer is not understood ({exc})") from None
+    check_grant(data)
+    return data
 
 
 def id_email(id_token: str, client_id: str, now: float | None = None) -> str:
     """The verified address in an id_token that came DIRECTLY from TOKEN_URL over TLS (OpenID Connect Core
-    3.1.3.7 lets TLS stand in for the signature there). Audience, issuer, expiry and email_verified are checked."""
-    import json
-    import time
+    3.1.3.7 lets TLS stand in for the signature there). Audience and expiry (shared ``oauth.decode_id_token``),
+    issuer and email_verified are checked."""
+    oauth = _oauth()
     try:
-        part = str(id_token).split(".")[1]
-        claims = json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))
-    except (IndexError, ValueError, TypeError):
-        raise NotUnderstood("id_token is not understood") from None
-    if not isinstance(claims, dict) or claims.get("aud") != client_id:
-        raise NotUnderstood("id_token is for another app")
+        claims = oauth.decode_id_token(id_token, client_id=client_id, now=now)
+    except oauth.OAuthError as exc:
+        raise NotUnderstood(str(exc)) from None
     if claims.get("iss") not in ("https://accounts.google.com", "accounts.google.com"):
         raise NotUnderstood("id_token is not from Google")
-    exp = claims.get("exp")
-    if not isinstance(exp, (int, float)) or (time.time() if now is None else now) > exp + 300:
-        raise NotUnderstood("id_token has expired")
     if claims.get("email_verified") is not True and str(claims.get("email_verified")).lower() != "true":
         raise NotUnderstood("Google has not verified this address")
     email = str(claims.get("email") or "").strip().lower()

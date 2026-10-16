@@ -68,6 +68,26 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
    customer mail. Details: [WEBHOOKS.md](WEBHOOKS.md).
 8. **Install the timers.** See [INSTALL.md](INSTALL.md).
 
+## Integrations at a glance
+
+Each one is optional. Pick at most ONE help desk (Frappe, Help Scout, Zendesk, Intercom or Crisp: a help-desk
+`[mailbox]` must match `[helpdesk]`) and at most ONE payment provider (Stripe, Paddle or Lemon Squeezy).
+`sayso validate` refuses anything else.
+
+| You use | Section(s) | Section below |
+|---|---|---|
+| Microsoft 365 / Outlook mailbox | `[mailbox] adapter = "imap"`, `auth = "oauth"` | Microsoft 365 mailbox |
+| Gmail / Google Workspace mailbox | `[mailbox] adapter = "gmail"` | Gmail with Google sign-in |
+| Help Scout | `[helpdesk]` + `[mailbox]` = `helpscout` | Help Scout instead of Frappe + IMAP |
+| Zendesk | `[helpdesk]` + `[mailbox]` = `zendesk` | Zendesk instead of Frappe |
+| Intercom | `[helpdesk]` + `[mailbox]` = `intercom` | Intercom |
+| Crisp | `[helpdesk]` + `[mailbox]` = `crisp` | Crisp as the helpdesk |
+| Paddle Billing | `[payments] adapter = "paddle"` | Paddle setup |
+| Lemon Squeezy | `[payments] adapter = "lemonsqueezy"` | Lemon Squeezy payments |
+| Slack approvals | `[board] adapter = "slack"` | Slack instead of Discord |
+| Outgoing webhooks (Zapier) | `[events] adapter = "webhook"` | Step 7 above, [WEBHOOKS.md](WEBHOOKS.md) |
+| Customer lookup | `[customer_facts] adapter = "http"` | [CUSTOMER_LOOKUP.md](CUSTOMER_LOOKUP.md) |
+
 ## Microsoft 365 mailbox (OAuth instead of an app password)
 
 Business Outlook mailboxes no longer accept passwords for IMAP. Use OAuth:
@@ -136,7 +156,8 @@ Limits to know: an External app in **Testing** gets refresh tokens that expire a
 again weekly, or use Internal). Google keeps at most 100 live refresh tokens per account per client; the
 oldest silently stops working. A password change on the Google account ends the token. When the token
 stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
-### Help Scout instead of Frappe + IMAP
+
+## Help Scout instead of Frappe + IMAP
 
 1. In Help Scout, open **Your Profile > My Apps > Create My App**. Any redirect URL works for
    Client Credentials (for example `https://example.com`). Copy the App ID and App Secret.
@@ -150,6 +171,7 @@ stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
 4. Read-only proof: `sayso run intake` after writing in from your own test address. The card's
    ticket is the Help Scout conversation id. Then step 6 above with your own conversation: the
    sender must end `SENT_AND_VERIFIED`, and Help Scout must show exactly one reply.
+
 ## Zendesk instead of Frappe
 
 1. In Zendesk Admin Center, open **Apps and integrations > APIs > Zendesk API**, turn on token access
@@ -171,6 +193,7 @@ stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
    Set `[product] support_address` to your Zendesk support address.
 4. Prove it read-only: `sayso run intake` against a test ticket you opened as an end user from your own
    address, then one approved reply to yourself (step 6 above). The ticket must have no CCs.
+
 ## Intercom (instead of Frappe + IMAP)
 
 Use this when your customers write to you through Intercom conversations.
@@ -208,6 +231,7 @@ Use this when your customers write to you through Intercom conversations.
 Limits: every request pins `Intercom-Version: 2.14`. Group conversations (more
 than one customer) are refused, never answered. Intercom has no Sent folder, so
 the receipt is a second read of Intercom, not an independent system.
+
 ## Crisp as the helpdesk
 
 Use this when your team answers customers in Crisp. Set BOTH `[helpdesk]` and `[mailbox]` to `crisp`.
@@ -244,6 +268,7 @@ Use this when your team answers customers in Crisp. Set BOTH `[helpdesk]` and `[
 
 Crisp is both the record and the send receipt, so the mailbox check is weaker than an IMAP Sent folder
 (see [ADAPTERS.md](ADAPTERS.md)).
+
 ## Paddle setup (instead of Stripe)
 
 Sayso uses Paddle Billing API v1 (not Paddle Classic). One payments provider per product.
@@ -272,7 +297,8 @@ Paddle notes: most live refunds wait for Paddle's approval, and a transaction wi
 get another one. Paddle has no idempotency header; the adapter writes `sayso-ref:<hash>` into the refund
 reason and looks for it before it creates a refund. A 429 blocks the server's IP for 60 seconds; the
 adapter does not retry inside a run.
-### Lemon Squeezy payments
+
+## Lemon Squeezy payments
 
 1. In Lemon Squeezy, switch the dashboard to **Test mode** and open
    Settings > API. Create an API key (keys made in test mode see only test data;
@@ -296,6 +322,7 @@ adapter does not retry inside a run.
    partial refund of that test order, and check the order in Lemon Squeezy shows
    the refunded amount. A Lemon Squeezy key has no scopes: it can do anything the
    store owner can, so keep `refund_max_minor` low.
+
 ## Slack instead of Discord
 
 Set `[board] adapter = "slack"` to keep the cases in one Slack channel.

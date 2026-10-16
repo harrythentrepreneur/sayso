@@ -206,9 +206,9 @@ class HeaderAndConfigTests(unittest.TestCase):
     def test_mailbox_intercom_needs_helpdesk_intercom(self):
         raw = {"product": {"slug": "acme", "mode": "live", "support_address": SUPPORT},
                "operators": {"1": "Ann"}, "state": {"dir": "/tmp/x"}, "mailbox": {"adapter": "intercom"}}
-        cfg = parse(raw, Path("/tmp/sayso.toml"))
-        with self.assertRaises(ConfigError):
-            reference.build("mailbox", "intercom", cfg.section("mailbox"), cfg)
+        with self.assertRaises(ConfigError) as ctx:      # one help desk at a time, refused at parse
+            parse(raw, Path("/tmp/sayso.toml"))
+        self.assertIn("one help desk at a time", str(ctx.exception))
 
 
 class FetchInboundTests(unittest.TestCase):

@@ -27,6 +27,19 @@ ADAPTER_CHOICES = {
     "events": ("none", "webhook"),
     "customer_facts": ("none", "http"),
 }
+# Help desks that also hold the send receipt: their [mailbox] reads the SAME account as [helpdesk].
+HELPDESKS = ("frappe", "helpscout", "zendesk", "intercom", "crisp")
+HELPDESK_MAILBOXES = ("helpscout", "zendesk", "intercom", "crisp")
+# Payment providers. [payments] is one section, so a product has ONE provider at a time.
+PAYMENT_PROVIDERS = ("stripe", "paddle", "lemonsqueezy")
+
+
+def check_one_helpdesk(helpdesk: str, mailbox: str) -> None:
+    """One help desk at a time: a help-desk mailbox must read the help desk that is connected."""
+    if mailbox in HELPDESK_MAILBOXES and helpdesk != mailbox:
+        raise ConfigError(f'[mailbox] {mailbox} needs [helpdesk] adapter = "{mailbox}" (one help desk at a time)')
+
+
 DEFAULT_JOBS = {
     "intake": 60,
     "draft": 120,
@@ -173,10 +186,9 @@ def _need(table: dict, key: str, where: str) -> Any:
 
 
 def parse(raw: dict, path: Path) -> Config:
-    top = _take(raw, {"product", "operators", "state", "board", "helpdesk", "mailbox", "payments",
-                      "codehost", "drafter", "dev_runner", "qa_runner", "policy", "jobs", "plugins", "events"}, "top level")
-                      "codehost", "drafter", "dev_runner", "qa_runner", "policy", "jobs", "plugins",
-                      "customer_facts"}, "top level")
+    # Every adapter section comes from ADAPTER_CHOICES, so a new adapter cannot be forgotten here.
+    top = _take(raw, {"product", "operators", "state", "policy", "jobs", "plugins"} | set(ADAPTER_CHOICES),
+                "top level")
     product = _take(_need(top, "product", "top level"),
                     {"name", "slug", "mode", "support_address", "own_addresses", "labels"}, "product")
     slug = _need(product, "slug", "product")
@@ -217,6 +229,8 @@ def parse(raw: dict, path: Path) -> Config:
         if adapter not in ("fake", "none") and mode != "live":
             raise ConfigError(f"[{name}] real adapter {adapter!r} needs [product] mode = \"live\"")
         sections[name] = Section(adapter, table)
+
+    check_one_helpdesk(sections["helpdesk"].adapter, sections["mailbox"].adapter)
 
     pol = _take(top.get("policy", {}), set(Policy.__dataclass_fields__), "policy")
     pol = dict(pol)

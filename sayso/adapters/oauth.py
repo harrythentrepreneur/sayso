@@ -83,11 +83,13 @@ _AADSTS = re.compile(r"AADSTS(\d{5,6})")
 class OAuthError(RuntimeError):
     """The token call failed or was not understood. ``code`` is the provider's error code (no secrets)."""
 
-    def __init__(self, message: str, *, code: str = "", aadsts: int | None = None, transient: bool = False):
+    def __init__(self, message: str, *, code: str = "", aadsts: int | None = None, transient: bool = False,
+                 status: int = 0):
         super().__init__(message)
         self.code = code
         self.aadsts = aadsts
         self.transient = transient
+        self.status = status      # HTTP status of a refusal by the provider; 0 = not a refusal
 
 
 class ReconnectNeeded(OAuthError):
@@ -218,8 +220,8 @@ def post_token(name: str, tenant: str | None, form: dict[str, str], *, transport
             if aadsts:
                 label += f" (AADSTS{aadsts})"
             if code in RECONNECT_ERRORS or (aadsts in RECONNECT_AADSTS):
-                raise ReconnectNeeded(f"sign-in no longer valid: {label}", code=code, aadsts=aadsts)
-            raise OAuthError(f"token request refused: {label}", code=code, aadsts=aadsts)
+                raise ReconnectNeeded(f"sign-in no longer valid: {label}", code=code, aadsts=aadsts, status=status)
+            raise OAuthError(f"token request refused: {label}", code=code, aadsts=aadsts, status=status)
         try:
             data = json.loads(raw or b"")
         except ValueError:
@@ -326,18 +328,25 @@ def pkce_challenge(verifier: str) -> str:
     return base64.urlsafe_b64encode(hashlib.sha256(verifier.encode("ascii")).digest()).rstrip(b"=").decode()
 
 
-def authorize_url(name: str, client_id: str, redirect_uri: str, state: str, code_challenge: str, nonce: str,
+def authorize_url(name: str, client_id: str, redirect_uri: str, state: str, code_challenge: str, nonce: str = "",
                   tenant: str | None = None, login_hint: str = "", prompt: str = "select_account") -> str:
-    """The sign-in page URL (authorization code + PKCE S256 + state + nonce)."""
+    """The sign-in page URL (authorization code + PKCE S256 + state, plus a nonce when the host checks one).
+
+    One flow for every provider: a random state of 16+ characters and a PKCE challenge are required."""
     p = provider(name)
     t = check_tenant(name, tenant)
+    if not client_id or not state or len(state) < 16 or not code_challenge:
+        raise ValueError("client_id, a random state and a PKCE challenge are required")
     q = {"client_id": client_id, "response_type": "code", "redirect_uri": redirect_uri,
-         "scope": " ".join(p["scopes"]), "state": state, "nonce": nonce,
+         "scope": " ".join(p["scopes"]), "state": state,
          "code_challenge": code_challenge, "code_challenge_method": "S256"}
+    if nonce:
+        q["nonce"] = nonce
     if name == "microsoft":
         q["response_mode"] = "query"
     if name == "google":
         q["access_type"] = "offline"
+        q["include_granted_scopes"] = "false"
         prompt = "consent"           # Google returns a refresh token only on consent
     if prompt:
         q["prompt"] = prompt
@@ -364,6 +373,15 @@ def exchange_code(name: str, client_id: str, client_secret: str, code: str, redi
 def id_claims(id_token: str, *, client_id: str, nonce: str, now: float | None = None) -> dict[str, Any]:
     """Claims of an id_token received DIRECTLY from the token endpoint over TLS (OpenID Connect Core 3.1.3.7
     allows TLS in place of the signature check there). Checks audience, nonce and expiry; raises OAuthError."""
+    claims = decode_id_token(id_token, client_id=client_id, now=now)
+    if not nonce or claims.get("nonce") != nonce:
+        raise OAuthError("id_token nonce does not match this sign-in")
+    return claims
+
+
+def decode_id_token(id_token: str, *, client_id: str, now: float | None = None) -> dict[str, Any]:
+    """Claims of an id_token from the token endpoint, after the audience and expiry checks (no nonce check:
+    for flows that do not send one, where the PKCE-bound code already ties the answer to this sign-in)."""
     try:
         payload = str(id_token).split(".")[1]
         claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
@@ -372,10 +390,8 @@ def id_claims(id_token: str, *, client_id: str, nonce: str, now: float | None = 
     if not isinstance(claims, dict):
         raise OAuthError("id_token is not understood")
     aud = claims.get("aud")
-    if aud != client_id and not (isinstance(aud, list) and client_id in aud):
+    if not client_id or (aud != client_id and not (isinstance(aud, list) and client_id in aud)):
         raise OAuthError("id_token is for another app")
-    if not nonce or claims.get("nonce") != nonce:
-        raise OAuthError("id_token nonce does not match this sign-in")
     exp = claims.get("exp")
     if not isinstance(exp, (int, float)) or (now if now is not None else time.time()) > exp + 300:
         raise OAuthError("id_token has expired")

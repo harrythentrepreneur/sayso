@@ -26,28 +26,16 @@ relative path is relative to the settings file. Keep it out of any git repositor
 
 ## Adapter sections
 
-`[board] [helpdesk] [mailbox] [payments] [codehost] [drafter] [dev_runner] [qa_runner] [events]`
+`[board] [helpdesk] [mailbox] [payments] [codehost] [drafter] [dev_runner] [qa_runner] [events] [customer_facts]`
 
 Each section takes `adapter = "..."` plus the adapter's own keys.
 
 | Section | Choices | Default |
 |---|---|---|
 | board | `fake`, `discord`, `slack` | `fake` |
-| helpdesk | `fake`, `frappe` | `fake` |
-| mailbox | `fake`, `imap`, `gmail` | `fake` |
-| helpdesk | `fake`, `frappe`, `helpscout` | `fake` |
-| mailbox | `fake`, `imap`, `helpscout` | `fake` |
-| helpdesk | `fake`, `frappe`, `zendesk` | `fake` |
-| mailbox | `fake`, `imap`, `zendesk` | `fake` |
-| helpdesk | `fake`, `frappe`, `intercom` | `fake` |
-| mailbox | `fake`, `imap`, `intercom` | `fake` |
-| helpdesk | `fake`, `frappe`, `crisp` | `fake` |
-| mailbox | `fake`, `imap`, `crisp` | `fake` |
-| payments | `none`, `fake`, `stripe` | `none` |
-| mailbox | `fake`, `imap` | `fake` |
-| payments | `none`, `fake`, `stripe`, `paddle` | `none` |
-| mailbox | `fake`, `imap` | `fake` |
-| payments | `none`, `fake`, `stripe`, `lemonsqueezy` | `none` |
+| helpdesk | `fake`, `frappe`, `helpscout`, `zendesk`, `intercom`, `crisp` | `fake` |
+| mailbox | `fake`, `imap`, `gmail`, `helpscout`, `zendesk`, `intercom`, `crisp` | `fake` |
+| payments | `none`, `fake`, `stripe`, `paddle`, `lemonsqueezy` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
 | dev_runner | `none`, `fake`, `hermes` | `none` |
@@ -66,6 +54,9 @@ Reference adapter keys:
   `email` (the admin's email, for `auth = "token"`), `token_env`, optional `backfill_hours` (default 24: how far
   back the first run reads). zendesk (mailbox): no keys; it reads the `[helpdesk]` Zendesk account.
 - intercom (`[helpdesk]`): `token_env`, `admin_id`, `region` (`us`|`eu`|`au`, default `us`), `backfill_hours` (0-720, default 24). `[mailbox] adapter = "intercom"` takes no keys and needs the Intercom helpdesk.
+- helpscout (helpdesk + mailbox): see ADAPTERS.md "Help Scout". helpscout/zendesk/intercom/crisp as `[mailbox]` read the
+  SAME account as `[helpdesk]`, so they need the matching `[helpdesk]` adapter: one help desk at a time.
+- payments: one provider per product (`stripe`, `paddle` or `lemonsqueezy`): `[payments]` is a single section.
 - crisp (helpdesk and mailbox, same keys in both): `website_id`, `tier` (`"plugin"` default, or `"website"`),
   `identifier_env`, `key_env`, optional `start_days` (first-run look-back, 1..90, default 7)
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`

@@ -873,6 +873,11 @@
      "events",
      "POSITIONAL_OR_KEYWORD",
      true
+    ],
+    [
+     "include_content",
+     "POSITIONAL_OR_KEYWORD",
+     true
     ]
    ],
    "kind": "class",
@@ -900,6 +905,11 @@
      ],
      [
       "events",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "include_content",
       "POSITIONAL_OR_KEYWORD",
       true
      ]
@@ -3367,7 +3377,7 @@
     [
      "nonce",
      "POSITIONAL_OR_KEYWORD",
-     false
+     true
     ],
     [
      "tenant",
@@ -5704,6 +5714,7 @@
     "close",
     "dev",
     "draft",
+    "events",
     "health",
     "intake",
     "money",
@@ -5732,7 +5743,8 @@
     "close",
     "reconcile",
     "stall",
-    "health"
+    "health",
+    "events"
    ]
   },
   "sayso.jobs.draft.run": {
@@ -5968,6 +5980,11 @@
      "plugins",
      "POSITIONAL_OR_KEYWORD",
      true
+    ],
+    [
+     "events",
+     "POSITIONAL_OR_KEYWORD",
+     true
     ]
    ],
    "kind": "class",
@@ -6035,6 +6052,11 @@
      ],
      [
       "plugins",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "events",
       "POSITIONAL_OR_KEYWORD",
       true
      ]

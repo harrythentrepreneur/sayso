@@ -19,7 +19,7 @@ from typing import Any
 
 from sayso.adapters.base import InboundMessage, MoneyReceipt, PollResult, PrFacts, PullRequest, SentRecord
 from sayso.adapters.http import Client, HttpError
-from sayso.config import Config, ConfigError, Section
+from sayso.config import Config, ConfigError, Section, check_one_helpdesk
 
 
 # --------------------------------------------------------------------------- Discord
@@ -665,8 +665,8 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
     if kind == "intercom":
         from sayso.adapters.intercom import IntercomHelpdesk, IntercomMailbox
         desk = config.section("helpdesk")
-        if desk.adapter != "intercom":
-            raise ConfigError("[mailbox] intercom needs [helpdesk] adapter = \"intercom\"")
+        if name == "mailbox":
+            check_one_helpdesk(desk.adapter, "intercom")
         helpdesk = IntercomHelpdesk.from_section(desk, config.support_address)
         return helpdesk if name == "helpdesk" else IntercomMailbox(helpdesk)
     if kind == "crisp":

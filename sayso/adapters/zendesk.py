@@ -36,7 +36,7 @@ from typing import Any
 
 from sayso.adapters.base import InboundMessage, SentRecord
 from sayso.adapters.http import Client, HttpError
-from sayso.config import ConfigError, Section
+from sayso.config import ConfigError, Section, check_one_helpdesk
 
 SUBDOMAIN = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")
 MAX_BODY_BYTES = 60_000          # Zendesk cuts comment bodies at 64 kB with no error
@@ -498,7 +498,6 @@ def build(name: str, section: Section, config) -> Any:
         return ZendeskHelpdesk.from_section(section, config.support_address)
     if name == "mailbox":
         helpdesk = config.section("helpdesk")
-        if helpdesk.adapter != "zendesk":
-            raise ConfigError("[mailbox] zendesk needs [helpdesk] adapter = \"zendesk\"")
+        check_one_helpdesk(helpdesk.adapter, "zendesk")
         return ZendeskMailbox.from_section(helpdesk)
     raise ConfigError(f"no zendesk adapter for {name}")

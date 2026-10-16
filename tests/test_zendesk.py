@@ -564,9 +564,10 @@ class WiringTests(unittest.TestCase):
         raw = {"product": {"slug": "acme", "mode": "live", "support_address": "support@acme.example"},
                "operators": {"1": "Ann"}, "state": {"dir": "/tmp/sayso-zd-test"},
                "mailbox": {"adapter": "zendesk"}}
-        cfg = config.parse(raw, Path("/tmp/x.toml"))
-        with self.assertRaises(ConfigError):
-            reference.build("mailbox", "zendesk", cfg.section("mailbox"), cfg)
+        with self.assertRaises(ConfigError) as ctx:      # one help desk at a time, refused at parse
+            config.parse(raw, Path("/tmp/x.toml"))
+        self.assertIn("one help desk at a time", str(ctx.exception))
+        self.assertTrue(reference.build)
 
 
 if __name__ == "__main__":
