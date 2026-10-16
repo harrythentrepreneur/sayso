@@ -419,6 +419,17 @@ class SlackBoardTests(unittest.TestCase):
         with self.assertRaises(slack.SlackError):
             b.read_poll(card, human)
 
+    def test_unrecorded_vote_message_is_refused_even_if_it_looks_right(self):
+        """Our own message, right thread, right marker, but this board never recorded opening it."""
+        b = self.board()
+        card, pid = self.poll(b)
+        data = json.loads((self.tmp / "slack-board.json").read_text())
+        data["polls"] = {}
+        (self.tmp / "slack-board.json").write_text(json.dumps(data))
+        self.slack.react(pid, "white_check_mark", "W222222")
+        with self.assertRaises(slack.SlackError):
+            b.read_poll(card, pid)
+
     def test_poll_for_another_card_is_refused(self):
         b = self.board()
         card, pid = self.poll(b)
