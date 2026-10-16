@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from sayso import dashboard, votes
+from sayso import dashboard, hostcheck, votes
 from sayso.brand import swipe
 from sayso.config import Config
 from sayso.store import load_json, locked, save_json
@@ -280,7 +280,8 @@ def login_page(error: str = "") -> str:
 
 def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int = 8080,
                 *, secure_cookie: bool | None = None, label: str | None = None, allow_tick: bool = False,
-                vote_off_reason: str | None = None) -> ThreadingHTTPServer:
+                vote_off_reason: str | None = None, allowed_hosts: list[str] | None = None) -> ThreadingHTTPServer:
+    """allowed_hosts: extra Host names to answer to (reverse proxy, tunnel); see sayso.hostcheck."""
     from sayso.runtime import Journal, Clock
     journal = Journal(config.state_dir / "journal.jsonl", Clock())
     if secure_cookie is None:
@@ -288,7 +289,7 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
     products = [config.slug]
     reader = dashboard.board_reader_for(config)
 
-    class Handler(BaseHTTPRequestHandler):
+    class Handler(hostcheck.HostCheckHandler):
         server_version = "sayso-console"
 
         def _send(self, status, ctype, body, extra=(), head=False, csp=None):
@@ -450,7 +451,7 @@ def make_server(config: Config, auth: Auth, host: str = "127.0.0.1", port: int =
         def log_message(self, fmt, *args):  # keep paths and form data out of logs
             pass
 
-    return ThreadingHTTPServer((host, port), Handler)
+    return hostcheck.attach(ThreadingHTTPServer((host, port), Handler), host, allowed_hosts)
 
 
 def run_tick(config: Config, who: str, journal) -> None:
@@ -469,14 +470,16 @@ def run_tick(config: Config, who: str, journal) -> None:
 
 
 def serve(config: Config, host: str, port: int, secret_env: str, label: str | None = None,
-          allow_tick: bool = False, vote_off_reason: str | None = None, behind_https: bool = False) -> None:
+          allow_tick: bool = False, vote_off_reason: str | None = None, behind_https: bool = False,
+          allowed_hosts: list[str] | None = None) -> None:
     """behind_https: served through an HTTPS tunnel on loopback; cookies get the Secure flag."""
     secret = os.environ.get(secret_env, "")
     auth = Auth(config, secret)
     if not load_json(users_path(config)):
         raise ConsoleError("no console users yet; run `sayso console add-user` first")
     srv = make_server(config, auth, host, port, label=label, allow_tick=allow_tick,
-                      vote_off_reason=vote_off_reason, secure_cookie=True if behind_https else None)
+                      vote_off_reason=vote_off_reason, secure_cookie=True if behind_https else None,
+                      allowed_hosts=allowed_hosts)
     print(f"console: http://{host}:{srv.server_address[1]}/  (Ctrl+C to stop)")
     try:
         srv.serve_forever()

@@ -4,6 +4,12 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Security: the dashboard and the console answer only to the Host they were started on (DNS-rebinding guard,
+  `sayso/hostcheck.py`). A loopback server answers to `127.0.0.1:<port>`, `localhost:<port>` and
+  `[::1]:<port>`; any other Host, a missing Host or two Host headers get `421 Misdirected Request` (plain
+  text) before any page, login or vote. Behind a reverse proxy or tunnel that keeps its own Host name, add
+  `--allowed-host NAME[:PORT]` (repeatable) to `sayso dashboard` and `sayso console serve`. `make_server` and
+  `serve` gain an optional `allowed_hosts` keyword; nothing else changes.
 - Console and dashboard pages, ported from Sayso Cloud: a grouped sidebar (daily work, then Admin), a dry-run
   strip and an account menu; **Decisions** as a priority queue (money and billing, repeat contacts, oldest) with
   waiting and expiry badges and a say-so lock on every decision (what the Yes binds to plus its fingerprint),

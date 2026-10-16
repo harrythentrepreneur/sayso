@@ -189,14 +189,14 @@ def cmd_dashboard(a) -> int:
         return 2
     if a.demo:
         with tempfile.TemporaryDirectory(prefix="sayso-dash-demo-") as tmp:
-            dashboard.serve([dashboard.build_demo_state(Path(tmp))], a.host, a.port)
+            dashboard.serve([dashboard.build_demo_state(Path(tmp))], a.host, a.port, allowed_hosts=a.allowed_host)
         return 0
     configs = [config_mod.load(p) for p in a.config]
     if len({c.slug for c in configs}) != len(configs):
         print("two settings files share a slug", file=sys.stderr)
         return 2
     readers = {c.slug: dashboard.board_reader_for(c) for c in configs}
-    dashboard.serve(configs, a.host, a.port, readers)
+    dashboard.serve(configs, a.host, a.port, readers, allowed_hosts=a.allowed_host)
     return 0
 
 
@@ -246,7 +246,8 @@ def cmd_console_invite(a) -> int:
 def cmd_console_serve(a) -> int:
     from sayso import console
     console.serve(config_mod.load(a.config), a.host, a.port, a.secret_env, label=a.label,
-                  allow_tick=a.allow_tick, vote_off_reason=a.votes_off, behind_https=a.behind_https)
+                  allow_tick=a.allow_tick, vote_off_reason=a.votes_off, behind_https=a.behind_https,
+                  allowed_hosts=a.allowed_host)
     return 0
 
 
@@ -296,6 +297,8 @@ def main(argv=None) -> int:
     s.add_argument("--demo", action="store_true", help="serve fake demo data")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--allowed-host", action="append", default=[], metavar="NAME[:PORT]",
+                   help="also answer to this Host name (reverse proxy); repeatable")
     s.set_defaults(fn=cmd_dashboard)
     co = sub.add_parser("console").add_subparsers(dest="action", required=True)
     s = co.add_parser("add-user")
@@ -320,6 +323,8 @@ def main(argv=None) -> int:
     s.add_argument("--allow-tick", action="store_true", help="dry-run products only: a 'run the loop' button")
     s.add_argument("--votes-off", default=None, metavar="REASON", help="show decisions but refuse web votes")
     s.add_argument("--behind-https", action="store_true", help="loopback behind an HTTPS tunnel: Secure cookies")
+    s.add_argument("--allowed-host", action="append", default=[], metavar="NAME[:PORT]",
+                   help="also answer to this Host name (reverse proxy); repeatable")
     s.set_defaults(fn=cmd_console_serve)
     fk = sub.add_parser("fake").add_subparsers(dest="action", required=True)
     s = fk.add_parser("write-in")

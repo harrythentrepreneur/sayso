@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import parse_qs, unquote, urlparse
 
-from sayso import stages
+from sayso import hostcheck, stages
 from sayso.config import Config
 from sayso.store import parse_iso
 
@@ -1794,7 +1794,9 @@ def check_host(host: str) -> None:
 
 
 def make_server(configs: list[Config], host: str = "127.0.0.1", port: int = 8765,
-                board_readers: dict[str, Callable] | None = None) -> ThreadingHTTPServer:
+                board_readers: dict[str, Callable] | None = None, *,
+                allowed_hosts: list[str] | None = None) -> ThreadingHTTPServer:
+    """allowed_hosts: extra Host names to answer to (reverse proxy); see sayso.hostcheck."""
     check_host(host)
     by_slug = {c.slug: c for c in configs}
     readers = board_readers or {}
@@ -1803,7 +1805,7 @@ def make_server(configs: list[Config], host: str = "127.0.0.1", port: int = 8765
     def snapshot_for(slug: str) -> Snapshot:
         return Snapshot(by_slug[slug], readers.get(slug))
 
-    class Handler(BaseHTTPRequestHandler):
+    class Handler(hostcheck.HostCheckHandler):
         server_version = "sayso-dashboard"
 
         def _send(self, status: int, ctype: str, body: str, head: bool = False) -> None:
@@ -1842,7 +1844,7 @@ def make_server(configs: list[Config], host: str = "127.0.0.1", port: int = 8765
         def log_message(self, fmt, *args):  # keep request paths out of logs
             pass
 
-    return ThreadingHTTPServer((host, port), Handler)
+    return hostcheck.attach(ThreadingHTTPServer((host, port), Handler), host, allowed_hosts)
 
 
 def board_reader_for(config: Config) -> Callable[[str], list[str]] | None:
@@ -1880,8 +1882,9 @@ def build_demo_state(tmp: Path) -> Config:
     return ctx.config
 
 
-def serve(configs: list[Config], host: str, port: int, readers: dict | None = None) -> None:
-    srv = make_server(configs, host, port, readers)
+def serve(configs: list[Config], host: str, port: int, readers: dict | None = None, *,
+          allowed_hosts: list[str] | None = None) -> None:
+    srv = make_server(configs, host, port, readers, allowed_hosts=allowed_hosts)
     print(f"read-only dashboard: http://{host}:{srv.server_address[1]}/  (Ctrl+C to stop)")
     try:
         srv.serve_forever()
