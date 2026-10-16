@@ -17,6 +17,7 @@ import stat
 import tempfile
 import threading
 import unittest
+import urllib.error
 import urllib.parse
 import urllib.request
 from unittest import mock
@@ -382,25 +383,31 @@ class SignInCliTests(unittest.TestCase):
     def test_loopback_sign_in_checks_state_and_writes_mode_600(self):
         rec = Recorder((200, DOC_TOKEN))
         seen = {}
+        statuses = []
 
         def browser(url):
             q = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query))
             seen.update(q)
 
             def go():
-                bad = q["redirect_uri"] + "/?code=x&state=forged"
-                with self.assertRaises(urllib.error.HTTPError) as refused:
-                    urllib.request.urlopen(bad, timeout=5)
-                refused.exception.close()
+                bad = q["redirect_uri"] + "/?code=forged-code&state=forged"
+                try:
+                    urllib.request.urlopen(bad, timeout=5).read()
+                    statuses.append(200)
+                except urllib.error.HTTPError as exc:
+                    statuses.append(exc.code)
+                    exc.close()
                 urllib.request.urlopen(q["redirect_uri"] + "/?" + urllib.parse.urlencode(
                     {"code": "4/P7q7W91a-oMsCeLvIaQm6bTrgtp7", "state": q["state"]}), timeout=5).read()
             threading.Thread(target=go, daemon=True).start()
 
-        import urllib.error  # noqa: F401
         token = gmail.sign_in("cid", "csecret", open_browser=browser, transport=rec, timeout=10)
         self.assertEqual(token, DOC_TOKEN["refresh_token"])
         self.assertTrue(seen["redirect_uri"].startswith("http://127.0.0.1:"))
         self.assertEqual(rec.calls[0]["form"]["redirect_uri"], seen["redirect_uri"])
+        self.assertEqual(rec.calls[0]["form"]["code"], "4/P7q7W91a-oMsCeLvIaQm6bTrgtp7",
+                         "only the request carrying our state may deliver the code")
+        self.assertEqual(statuses, [400], "the forged-state request is refused")
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "acme.env")
             gmail._write_secret(path, "ACME_GOOGLE_REFRESH_TOKEN", token)
