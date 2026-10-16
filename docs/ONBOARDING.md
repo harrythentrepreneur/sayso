@@ -13,6 +13,7 @@ and prove each one before you switch the next.
 | Helpdesk + receipt, Intercom | `intercom` (both `[helpdesk]` and `[mailbox]`) | A private-app access token, the replying admin's id, the region. See "Intercom" below |
 | Mailbox (independent send receipt) | `imap` | IMAP host, user, app password, Sent folder name |
 | Mailbox, Gmail with Google sign-in | `gmail` | A Google Cloud OAuth client and one sign-in ([below](#gmail-with-google-sign-in)) |
+| Helpdesk + mailbox on Crisp (instead of the two rows above) | `crisp` | Crisp website id and a token keypair (see "Crisp" below) |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
 | Code host (optional) | `github` | Repo `owner/name`, a fine-grained token: pull requests read/write, contents read |
 | Drafter | `hermes` | A Hermes profile that writes support replies |
@@ -198,6 +199,42 @@ Use this when your customers write to you through Intercom conversations.
 Limits: every request pins `Intercom-Version: 2.14`. Group conversations (more
 than one customer) are refused, never answered. Intercom has no Sent folder, so
 the receipt is a second read of Intercom, not an independent system.
+## Crisp as the helpdesk
+
+Use this when your team answers customers in Crisp. Set BOTH `[helpdesk]` and `[mailbox]` to `crisp`.
+
+1. Find the website id: Crisp app > Settings > Workspace Settings > Setup Instructions.
+2. Get a token keypair. Either:
+   - **Website token** (one workspace, no Marketplace account): Settings > Workspace Settings >
+     Advanced configuration > API Token > Generate Token. Only an owner can do this. Use `tier = "website"`.
+   - **Plugin token**: Crisp Marketplace (a separate account) > Plugins > New Plugin (Private) > Tokens.
+     The Development token works on your own trusted workspace. A Production token needs the scopes
+     `website:conversation:sessions` (read), `website:conversation:messages` (read + write) and
+     `website:people:conversations` (read), and Crisp reviews the request. Install the plugin on your
+     website with the private install link. Use `tier = "plugin"` (the default).
+3. Put both halves in the secrets file (`ACME_CRISP_ID=...`, `ACME_CRISP_KEY=...`) and add:
+   ```toml
+   [helpdesk]
+   adapter = "crisp"
+   website_id = "<your website id>"
+   tier = "website"
+   identifier_env = "ACME_CRISP_ID"
+   key_env = "ACME_CRISP_KEY"
+
+   [mailbox]
+   adapter = "crisp"
+   website_id = "<your website id>"
+   tier = "website"
+   identifier_env = "ACME_CRISP_ID"
+   key_env = "ACME_CRISP_KEY"
+   ```
+4. Prove it read-only (step 5 above): write to your own chatbox from a test email address, run
+   `sayso run intake`, and check the card. The first run reads the last 7 days (`start_days`).
+5. One real reply to yourself (step 6 above). It must end `SENT_AND_VERIFIED`, and the conversation in
+   Crisp must show exactly one operator message.
+
+Crisp is both the record and the send receipt, so the mailbox check is weaker than an IMAP Sent folder
+(see [ADAPTERS.md](ADAPTERS.md)).
 
 ## Go-live checklist
 

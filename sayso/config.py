@@ -17,8 +17,8 @@ from typing import Any
 MODES = ("dry-run", "live")
 ADAPTER_CHOICES = {
     "board": ("fake", "discord"),
-    "helpdesk": ("fake", "frappe", "helpscout", "zendesk", "intercom"),
-    "mailbox": ("fake", "imap", "gmail", "helpscout", "zendesk", "intercom"),
+    "helpdesk": ("fake", "frappe", "helpscout", "zendesk", "intercom", "crisp"),
+    "mailbox": ("fake", "imap", "gmail", "helpscout", "zendesk", "intercom", "crisp"),
     "payments": ("none", "fake", "stripe"),
     "codehost": ("none", "fake", "github"),
     "drafter": ("fake", "hermes"),
