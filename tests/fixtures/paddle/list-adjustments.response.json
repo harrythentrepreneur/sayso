@@ -1,0 +1,328 @@
+{
+  "data": [
+    {
+      "id": "adj_01hvgf2s84dr6reszzg29zbvcm",
+      "action": "refund",
+      "type": "partial",
+      "transaction_id": "txn_01hvcc93znj3mpqt1tenkjb04y",
+      "subscription_id": "sub_01hvccbx32q2gb40sqx7n42430",
+      "customer_id": "ctm_01hrffh7gvp29kc7xahm8wddwa",
+      "reason": "error",
+      "currency_code": "USD",
+      "status": "pending_approval",
+      "items": [
+        {
+          "id": "adjitm_01hvgf2s84dr6reszzg2gx70gj",
+          "item_id": "txnitm_01hvcc94b7qgz60qmrqmbm19zw",
+          "type": "partial",
+          "amount": "100",
+          "proration": null,
+          "totals": {
+            "subtotal": "92",
+            "tax": "8",
+            "total": "100"
+          }
+        }
+      ],
+      "totals": {
+        "subtotal": "92",
+        "tax": "8",
+        "total": "100",
+        "fee": "5",
+        "earnings": "87",
+        "currency_code": "USD",
+        "retained_fee": "5"
+      },
+      "payout_totals": {
+        "subtotal": "92",
+        "tax": "8",
+        "total": "100",
+        "fee": "5",
+        "earnings": "87",
+        "currency_code": "USD",
+        "retained_fee": "5",
+        "chargeback_fee": {
+          "amount": "10",
+          "original": null
+        }
+      },
+      "created_at": "2024-04-15T08:48:20.239695Z",
+      "updated_at": "2024-04-15T08:48:20.239695Z",
+      "credit_applied_to_balance": null,
+      "tax_rates_used": []
+    },
+    {
+      "id": "adj_01hp46vn5px3nntyy2hr8gnv73",
+      "action": "credit",
+      "type": "partial",
+      "credit_applied_to_balance": true,
+      "transaction_id": "txn_01hp46m5hyz2g3e9ar31pzy2kc",
+      "subscription_id": "sub_01hp463gxfvndqjjyqn2n7tkth",
+      "customer_id": "ctm_01hp462x4578nc20acj9g956yy",
+      "reason": "subscription_recurring",
+      "currency_code": "USD",
+      "status": "pending_approval",
+      "items": [
+        {
+          "id": "adjitm_01hp46vn5qkvqg09m1r8qkdwrx",
+          "item_id": "txnitm_01hp46m5xkw9zthfvxre4dgtp0",
+          "type": "proration",
+          "amount": "163261",
+          "proration": {
+            "rate": "0.9999",
+            "billing_period": {
+              "starts_at": "2024-02-08T11:15:15.582Z",
+              "ends_at": "2024-03-08T11:02:03.946454Z"
+            }
+          },
+          "totals": {
+            "subtotal": "149953",
+            "tax": "13308",
+            "total": "163261"
+          }
+        },
+        {
+          "id": "adjitm_01hp46vn5qkvqg09m1ra13rqsj",
+          "item_id": "txnitm_01hp46m5xkw9zthfvxrpf9r0pd",
+          "type": "proration",
+          "amount": "31020",
+          "proration": {
+            "rate": "0.9999",
+            "billing_period": {
+              "starts_at": "2024-02-08T11:15:15.596Z",
+              "ends_at": "2024-03-08T11:02:03.946454Z"
+            }
+          },
+          "totals": {
+            "subtotal": "28491",
+            "tax": "2529",
+            "total": "31020"
+          }
+        }
+      ],
+      "totals": {
+        "subtotal": "178444",
+        "tax": "15837",
+        "total": "194281",
+        "fee": "9764",
+        "retained_fee": "9764",
+        "earnings": "168680",
+        "currency_code": "USD"
+      },
+      "payout_totals": {
+        "subtotal": "178444",
+        "tax": "15837",
+        "total": "194281",
+        "fee": "9764",
+        "earnings": "168680",
+        "currency_code": "USD",
+        "retained_fee": "9764",
+        "chargeback_fee": {
+          "amount": "0",
+          "original": null
+        }
+      },
+      "created_at": "2024-02-08T11:15:15.779373Z",
+      "updated_at": "2024-02-08T11:15:15.779374Z",
+      "tax_rates_used": []
+    },
+    {
+      "id": "adj_01hkrape8pq0s8yxbpd76htz33",
+      "action": "credit",
+      "type": "partial",
+      "credit_applied_to_balance": true,
+      "transaction_id": "txn_01hj327s2cpxh4mprx55p5qwdz",
+      "subscription_id": "sub_01hj32a99syawqhdkkbpxacwgb",
+      "customer_id": "ctm_01hj3289s46amtzv8vr57xtnxp",
+      "reason": "subscription_recurring",
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [
+        {
+          "id": "adjitm_01hkrape8pq0s8yxbpdcrkakf4",
+          "item_id": "txnitm_01hj328ac2ak7h82bjg443x4px",
+          "type": "proration",
+          "amount": "6783",
+          "proration": {
+            "rate": "0.62305",
+            "billing_period": {
+              "starts_at": "2024-01-01T00:00:00Z",
+              "ends_at": "2024-01-20T07:33:49.542313Z"
+            }
+          },
+          "totals": {
+            "subtotal": "6230",
+            "tax": "553",
+            "total": "6783"
+          }
+        },
+        {
+          "id": "adjitm_01hkrape8pq0s8yxbpd9x3bp1f",
+          "item_id": "txnitm_01hj328ac2ak7h82bjfzdk992c",
+          "type": "proration",
+          "amount": "20350",
+          "proration": {
+            "rate": "0.62305",
+            "billing_period": {
+              "starts_at": "2024-01-01T00:00:00Z",
+              "ends_at": "2024-01-20T07:33:49.542313Z"
+            }
+          },
+          "totals": {
+            "subtotal": "18691",
+            "tax": "1659",
+            "total": "20350"
+          }
+        }
+      ],
+      "totals": {
+        "subtotal": "24921",
+        "tax": "2212",
+        "total": "27133",
+        "fee": "1378",
+        "retained_fee": "1378",
+        "earnings": "23543",
+        "currency_code": "USD"
+      },
+      "payout_totals": {
+        "subtotal": "24921",
+        "tax": "2212",
+        "total": "27133",
+        "fee": "1378",
+        "earnings": "23543",
+        "currency_code": "USD",
+        "retained_fee": "1378",
+        "chargeback_fee": {
+          "amount": "0",
+          "original": null
+        }
+      },
+      "created_at": "2024-01-10T00:00:02.343628Z",
+      "updated_at": "2024-01-10T00:00:05.88352Z",
+      "tax_rates_used": []
+    },
+    {
+      "id": "adj_01hkmv8zzdphm0szm330xw4ryh",
+      "action": "credit_reverse",
+      "type": "partial",
+      "credit_applied_to_balance": true,
+      "transaction_id": "txn_01hkmv58gk496gyak35j4gt1nh",
+      "subscription_id": "sub_01hkmv7trnae9vbksdqpmctnmg",
+      "customer_id": "ctm_01hkmv5x0djj0xae30nmqxmdc0",
+      "reason": "subscription_update_failed",
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [
+        {
+          "id": "adjitm_01hkmv8zzdphm0szm3314waab3",
+          "item_id": "txnitm_01hkmv5xkdf83cvkevfy9z2s4m",
+          "type": "proration",
+          "amount": "-32662",
+          "proration": {
+            "rate": "1",
+            "billing_period": {
+              "starts_at": "2024-01-08T15:32:46.434Z",
+              "ends_at": "2024-02-08T15:32:10.959052Z"
+            }
+          },
+          "totals": {
+            "subtotal": "-30000",
+            "tax": "-2662",
+            "total": "-32662"
+          }
+        }
+      ],
+      "totals": {
+        "subtotal": "-30000",
+        "tax": "-2662",
+        "total": "-32662",
+        "fee": "-1658",
+        "retained_fee": "-1658",
+        "earnings": "-28342",
+        "currency_code": "USD"
+      },
+      "payout_totals": {
+        "subtotal": "-30000",
+        "tax": "-2662",
+        "total": "-32662",
+        "fee": "-1658",
+        "earnings": "-28342",
+        "currency_code": "USD",
+        "retained_fee": "-1658",
+        "chargeback_fee": {
+          "amount": "0",
+          "original": null
+        }
+      },
+      "created_at": "2024-01-08T15:32:49.774707Z",
+      "updated_at": "2024-01-08T15:32:49.774707Z",
+      "tax_rates_used": []
+    },
+    {
+      "id": "adj_01hkmv8wv1e8yt0k1q0h5h2cq2",
+      "action": "credit",
+      "type": "partial",
+      "credit_applied_to_balance": true,
+      "transaction_id": "txn_01hkmv58gk496gyak35j4gt1nh",
+      "subscription_id": "sub_01hkmv7trnae9vbksdqpmctnmg",
+      "customer_id": "ctm_01hkmv5x0djj0xae30nmqxmdc0",
+      "reason": "subscription_recurring",
+      "currency_code": "USD",
+      "status": "reversed",
+      "items": [
+        {
+          "id": "adjitm_01hkmv8wv1e8yt0k1q0kskhgks",
+          "item_id": "txnitm_01hkmv5xkdf83cvkevfy9z2s4m",
+          "type": "proration",
+          "amount": "32662",
+          "proration": {
+            "rate": "1",
+            "billing_period": {
+              "starts_at": "2024-01-08T15:32:46.434Z",
+              "ends_at": "2024-02-08T15:32:10.959052Z"
+            }
+          },
+          "totals": {
+            "subtotal": "30000",
+            "tax": "2662",
+            "total": "32662"
+          }
+        }
+      ],
+      "totals": {
+        "subtotal": "30000",
+        "tax": "2662",
+        "total": "32662",
+        "fee": "1658",
+        "retained_fee": "1658",
+        "earnings": "28342",
+        "currency_code": "USD"
+      },
+      "payout_totals": {
+        "subtotal": "30000",
+        "tax": "2662",
+        "total": "32662",
+        "fee": "1658",
+        "earnings": "28342",
+        "currency_code": "USD",
+        "retained_fee": "1658",
+        "chargeback_fee": {
+          "amount": "0",
+          "original": null
+        }
+      },
+      "created_at": "2024-01-08T15:32:46.571866Z",
+      "updated_at": "2024-01-08T15:32:49.774707Z",
+      "tax_rates_used": []
+    }
+  ],
+  "meta": {
+    "request_id": "8295b301-8306-436d-813a-55f6ed03ccf8",
+    "pagination": {
+      "per_page": 10,
+      "next": "https://api.paddle.com/adjustments?after=adj_01hkmv8wv1e8yt0k1q0h5h2cq2",
+      "has_more": false,
+      "estimated_total": 5
+    }
+  }
+}

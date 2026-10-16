@@ -335,7 +335,9 @@ class StripePayments:
             raise RuntimeError("refund currency differs from the approved currency")
         return out["id"]
 
-    def cancel_subscription(self, subscription, idempotency_key):
+    def cancel_subscription(self, subscription, idempotency_key, effective="immediately"):
+        if effective != "immediately":   # DELETE cancels at once; a period-end cancel is not built for Stripe
+            raise RuntimeError("stripe: only an immediate cancel is supported")
         out = self.http.request("DELETE", f"/subscriptions/{subscription}",
                                 extra_headers={"Idempotency-Key": idempotency_key})
         return out["id"]
@@ -667,6 +669,9 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
         return crisp.build(name, section, config)
     if kind == "stripe":
         return StripePayments(section)
+    if kind == "paddle":
+        from sayso.adapters.paddle import PaddlePayments
+        return PaddlePayments(section)
     if kind == "github":
         return GitHubCodeHost(section)
     if kind == "hermes" and name == "drafter":

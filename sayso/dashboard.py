@@ -166,10 +166,10 @@ STATUS_LABEL = {"open": "Waiting", "approved": "Approved", "done": "Done", "void
                 "ok": "Healthy", "stale": "Stale", "never": "Not run yet", "pending": "Pending",
                 "unreadable": "Unreadable"}
 EXEC_LABEL = {"SENT_AND_VERIFIED": "Sent · verified", "VERIFIED_WITH_PROVIDER": "Verified with provider",
-              "UNVERIFIED": "Unverified", "pending": "In progress"}
+              "UNVERIFIED": "Unverified", "pending": "In progress", "PENDING_WITH_PROVIDER": "Waiting for provider approval"}
 TONE = {"open": "amber", "pending": "amber", "never": "grey", "approved": "violet", "done": "green", "ok": "green",
         "running": "green", "SENT_AND_VERIFIED": "green", "VERIFIED_WITH_PROVIDER": "green", "void": "grey",
-        "expired": "grey", "declined": "red", "stale": "red", "UNVERIFIED": "red", "paused": "amber",
+        "expired": "grey", "declined": "red", "stale": "red", "UNVERIFIED": "red", "paused": "amber", "PENDING_WITH_PROVIDER": "amber",
         "unreadable": "red"}
 STAGE_TONE = {stages.NEW: "blue", stages.IN_SUPPORT: "indigo", stages.IN_DEV: "violet", stages.IN_QA: "cyan",
               stages.AWAITING: "amber", stages.DONE: "green", stages.BLOCKED: "red"}
@@ -1406,7 +1406,7 @@ def render_case(s: Snapshot, key: str, products: list[str]) -> str | None:
 
 MONEY_VIEWS = (("", "All"), ("waiting", "Waiting"), ("done", "Refunded"), ("declined", "Declined"))
 PROVIDER_CHECK = {"VERIFIED_WITH_PROVIDER": ("Verified with provider", "good"), "UNVERIFIED": ("Not verified", "bad"),
-                  "pending": ("Running", "warn")}
+                  "pending": ("Running", "warn"), "PENDING_WITH_PROVIDER": ("Waiting for provider approval", "warn")}
 
 
 def _money_view(r: dict) -> str:

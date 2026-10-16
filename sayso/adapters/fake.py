@@ -242,8 +242,8 @@ class FakePayments:
             raise FaultInjected("timeout after refund")
         return rid
 
-    def cancel_subscription(self, subscription, idempotency_key):
-        self.w.data["subs"][subscription] = "canceled"
+    def cancel_subscription(self, subscription, idempotency_key, effective=None):
+        self.w.data["subs"][subscription] = "cancel_scheduled" if effective == "next_billing_period" else "canceled"
         self.w.save()
         return subscription
 

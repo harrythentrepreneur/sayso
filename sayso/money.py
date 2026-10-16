@@ -11,6 +11,9 @@ from typing import Any
 _KEY = re.compile(r"^[A-Za-z0-9_\-]{3,80}$")
 REFUND_FIELDS = frozenset({"action", "charge", "amount", "currency", "customer"})
 CANCEL_FIELDS = frozenset({"action", "subscription", "customer"})
+# Optional on a cancel: when it takes effect. Absent = the provider adapter's own default (Stripe: at once;
+# Paddle: end of the billing period). "immediately" only when the approved spec says so.
+CANCEL_EFFECTIVE = ("next_billing_period", "immediately")
 
 
 class MoneySpecError(ValueError):
@@ -34,8 +37,10 @@ def validate(spec: Any, *, max_minor: int, currencies: tuple[str, ...]) -> dict[
         if not _KEY.match(str(spec["charge"])):
             raise MoneySpecError("charge id is malformed")
     elif action == "cancel_subscription":
-        if set(spec) != CANCEL_FIELDS:
-            raise MoneySpecError(f"cancel spec needs exactly {sorted(CANCEL_FIELDS)}")
+        if set(spec) - {"effective"} != CANCEL_FIELDS:
+            raise MoneySpecError(f"cancel spec needs exactly {sorted(CANCEL_FIELDS)} (and optionally effective)")
+        if "effective" in spec and spec["effective"] not in CANCEL_EFFECTIVE:
+            raise MoneySpecError(f"effective must be one of {list(CANCEL_EFFECTIVE)}")
         if not _KEY.match(str(spec["subscription"])):
             raise MoneySpecError("subscription id is malformed")
     else:
@@ -48,4 +53,5 @@ def validate(spec: Any, *, max_minor: int, currencies: tuple[str, ...]) -> dict[
 def describe(spec: dict[str, Any]) -> str:
     if spec["action"] == "refund":
         return f"refund {spec['amount'] / 100:.2f} {spec['currency'].upper()}"
-    return "cancel the subscription"
+    when = {"immediately": " immediately", "next_billing_period": " at the end of the billing period"}
+    return "cancel the subscription" + when.get(spec.get("effective"), "")

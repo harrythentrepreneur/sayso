@@ -44,6 +44,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | helpdesk | `fake`, `frappe`, `crisp` | `fake` |
 | mailbox | `fake`, `imap`, `crisp` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
+| mailbox | `fake`, `imap` | `fake` |
+| payments | `none`, `fake`, `stripe`, `paddle` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
 | dev_runner | `none`, `fake`, `hermes` | `none` |
@@ -68,6 +70,8 @@ Reference adapter keys:
     (see [ADAPTERS.md](ADAPTERS.md#oauth-mailboxes-microsoft-365-google))
 - gmail: `user`, `auth` (`oauth` default, or `password`), `client_id_env`, `client_secret_env`, `refresh_token_env` (oauth) or `password_env` (app password), optional `sent_folder` (default: the folder IMAP flags `\Sent`). See ONBOARDING.md, "Gmail with Google sign-in".
 - stripe: `api_key_env`
+- paddle: `api_key_env`, optional `environment` (`"live"` default, or `"sandbox"`; must match the key's
+  `pdl_live_`/`pdl_sdbx_` prefix)
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
   defaults to `repo`). Cross-repository PRs outside that list are refused before any network call.
 - hermes (drafter and dev_runner): `profile`

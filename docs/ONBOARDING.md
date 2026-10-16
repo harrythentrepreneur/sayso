@@ -15,6 +15,7 @@ and prove each one before you switch the next.
 | Mailbox, Gmail with Google sign-in | `gmail` | A Google Cloud OAuth client and one sign-in ([below](#gmail-with-google-sign-in)) |
 | Helpdesk + mailbox on Crisp (instead of the two rows above) | `crisp` | Crisp website id and a token keypair (see "Crisp" below) |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
+| Payments (optional, instead of Stripe) | `paddle` | A Paddle Billing API key with only the permissions in "Paddle setup" below |
 | Code host (optional) | `github` | Repo `owner/name`, a fine-grained token: pull requests read/write, contents read |
 | Drafter | `hermes` | A Hermes profile that writes support replies |
 | Dev runner (optional) | `hermes` | A Hermes profile that codes, opens a PR and stops |
@@ -235,6 +236,34 @@ Use this when your team answers customers in Crisp. Set BOTH `[helpdesk]` and `[
 
 Crisp is both the record and the send receipt, so the mailbox check is weaker than an IMAP Sent folder
 (see [ADAPTERS.md](ADAPTERS.md)).
+## Paddle setup (instead of Stripe)
+
+Sayso uses Paddle Billing API v1 (not Paddle Classic). One payments provider per product.
+
+1. Start in the **sandbox** (sandbox-vendors.paddle.com). Make a sandbox account, a product, a price and one
+   completed test checkout, so there is a transaction (`txn_...`) and a subscription (`sub_...`) to work on.
+2. Paddle > Developer tools > Authentication > API keys > New API key. Name it `Sayso`, set an expiry, and tick
+   ONLY: Transactions read, Adjustments read, Adjustments write, Subscriptions read, Subscriptions write
+   (Customers read too, if a host checks who owns a transaction). Copy it: Paddle shows it once.
+   Legacy keys (made before May 2025, no `pdl_` prefix) are refused, because they cannot be limited.
+3. Put it in the secrets file (`ACME_PADDLE_KEY=pdl_sdbx_apikey_...`) and in the TOML:
+   ```toml
+   [payments]
+   adapter = "paddle"
+   api_key_env = "ACME_PADDLE_KEY"
+   environment = "sandbox"   # "live" for a pdl_live_ key
+   ```
+4. Money specs name Paddle ids: a refund's `charge` is the transaction id (`txn_...`), `customer` is `ctm_...`,
+   a cancel's `subscription` is `sub_...`. A cancel takes effect at the end of the billing period unless the
+   spec has `"effective": "immediately"`.
+5. Prove it on the sandbox: approve one small refund on your test transaction and run `sayso run money`.
+   It shows `PENDING_WITH_PROVIDER` until Paddle approves it (sandbox: about every ten minutes), then
+   `VERIFIED_WITH_PROVIDER`. Only then switch to a live key.
+
+Paddle notes: most live refunds wait for Paddle's approval, and a transaction with a refund waiting cannot
+get another one. Paddle has no idempotency header; the adapter writes `sayso-ref:<hash>` into the refund
+reason and looks for it before it creates a refund. A 429 blocks the server's IP for 60 seconds; the
+adapter does not retry inside a run.
 
 ## Go-live checklist
 

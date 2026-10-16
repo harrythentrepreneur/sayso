@@ -26,14 +26,35 @@ def request(ctx, *, case_key: str, spec: dict, subject: str) -> dict:
                            question=f"{money.describe(spec)}?", identity=ident, material=spec, spec=spec)
 
 
+# The provider made the refund but has not approved it yet (Paddle: pending_approval). The attempt stays
+# re-readable: it is never executed again and never DONE until the provider says succeeded.
+PENDING_WITH_PROVIDER = "PENDING_WITH_PROVIDER"
+
+
 def _verify(ctx, spec) -> dict | None:
     if spec["action"] == "refund":
-        rows = [r for r in ctx.payments.read_refunds(spec["charge"]) if r.status == "succeeded"]
-        if len(rows) == 1 and rows[0].amount == spec["amount"] and (rows[0].currency or "").lower() == spec["currency"]:
-            return {"provider_id": rows[0].provider_id, "amount": rows[0].amount, "currency": rows[0].currency}
+        rows = ctx.payments.read_refunds(spec["charge"])
+        done = [r for r in rows if r.status == "succeeded"]
+        if len(done) == 1 and done[0].amount == spec["amount"] and (done[0].currency or "").lower() == spec["currency"]:
+            return {"provider_id": done[0].provider_id, "amount": done[0].amount, "currency": done[0].currency}
         return None
     sub = ctx.payments.read_subscription(spec["subscription"])
-    return {"provider_id": sub.provider_id, "status": sub.status} if sub.status == "canceled" else None
+    if sub.status == "canceled" or (sub.status == "cancel_scheduled" and spec.get("effective") != "immediately"):
+        return {"provider_id": sub.provider_id, "status": sub.status, **({"effective_at": sub.details["effective_at"]}
+                                                                         if sub.details.get("effective_at") else {})}
+    return None
+
+
+def _waiting(ctx, spec) -> dict | None:
+    """The one refund matching the spec that the provider still has to approve, else None."""
+    if spec["action"] != "refund":
+        return None
+    rows = ctx.payments.read_refunds(spec["charge"])
+    wait = [r for r in rows if r.status == "pending"]
+    if (len(wait) == 1 and not any(r.status == "succeeded" for r in rows) and wait[0].amount == spec["amount"]
+            and (wait[0].currency or "").lower() == spec["currency"]):
+        return {"provider_id": wait[0].provider_id, "amount": wait[0].amount, "currency": wait[0].currency}
+    return None
 
 
 def run(ctx) -> dict:
@@ -60,7 +81,7 @@ def run(ctx) -> dict:
         with locked(ctx.paths.attempts):
             attempts = load_json(ctx.paths.attempts)
             att = attempts.get(key)
-            if att and att["status"] != "pending":
+            if att and att["status"] not in ("pending", PENDING_WITH_PROVIDER):
                 out[key] = "already-" + att["status"]
                 continue
             first = att is None
@@ -72,10 +93,22 @@ def run(ctx) -> dict:
                 if spec["action"] == "refund":
                     ctx.payments.refund(spec["charge"], spec["amount"], spec["currency"], idempotency_key=key)
                 else:
-                    ctx.payments.cancel_subscription(spec["subscription"], idempotency_key=key)
+                    when = {"effective": spec["effective"]} if "effective" in spec else {}
+                    ctx.payments.cancel_subscription(spec["subscription"], idempotency_key=key, **when)
             except Exception as exc:  # noqa: BLE001 - may have happened; verify, never repeat
                 ctx.journal.append("money_error", key=key, error=type(exc).__name__)
         receipt = _verify(ctx, spec)
+        waiting = None if receipt else _waiting(ctx, spec)
+        if waiting:
+            with locked(ctx.paths.attempts):
+                attempts = load_json(ctx.paths.attempts)
+                attempts[key].update(status=PENDING_WITH_PROVIDER, receipt=waiting)
+                save_json(ctx.paths.attempts, attempts)
+            ctx.board.post(rec["card_id"], f"Waiting for the payment provider to approve: {money.describe(spec)} "
+                           f"(provider id {waiting['provider_id']}). Not done yet; it is checked again on every run.",
+                           idempotency_key=f"money-pending:{key}")
+            out[key] = PENDING_WITH_PROVIDER
+            continue
         status = "VERIFIED_WITH_PROVIDER" if receipt else "UNVERIFIED"
         with locked(ctx.paths.attempts):
             attempts = load_json(ctx.paths.attempts)
