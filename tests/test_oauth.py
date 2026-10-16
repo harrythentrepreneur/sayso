@@ -430,6 +430,85 @@ class AuthCodeTests(unittest.TestCase):
 OAUTH_ENV = {"T_CID": "client-id-1", "T_CSEC": "client-secret-1", "T_RT": "refresh-token-1"}
 
 
+class _DocImapServer:
+    """A localhost IMAP server that speaks the Microsoft doc's XOAUTH2 exchange (S: "+", C: <base64>, S: OK).
+
+    Accepts only the exact SASL string for ``user`` + ``token``; anything else gets the doc's failure line."""
+
+    def __init__(self, user: str, token: str):
+        import socketserver
+        import threading
+        expect = base64.b64encode(oauth.xoauth2(user, token))
+        self.seen: list[bytes] = []
+        outer = self
+
+        class Handler(socketserver.StreamRequestHandler):
+            def handle(self):
+                w = self.wfile.write
+                w(b"* OK IMAP4rev1 ready\r\n")
+                for line in self.rfile:
+                    outer.seen.append(line.rstrip(b"\r\n"))
+                    tag, _, rest = line.rstrip(b"\r\n").partition(b" ")
+                    cmd = rest.split(b" ")[0].upper()
+                    if cmd == b"CAPABILITY":
+                        w(b"* CAPABILITY IMAP4rev1 AUTH=XOAUTH2\r\n" + tag + b" OK done\r\n")
+                    elif cmd == b"AUTHENTICATE":
+                        w(b"+ \r\n")
+                        answer = self.rfile.readline().rstrip(b"\r\n")
+                        outer.seen.append(answer)
+                        if answer == expect:
+                            w(tag + b" OK AUTHENTICATE completed.\r\n")
+                        else:
+                            w(tag + b" NO AUTHENTICATE failed.\r\n")
+                    elif cmd in (b"SELECT", b"EXAMINE"):
+                        w(b"* 2 EXISTS\r\n" + tag + b" OK [READ-ONLY] done\r\n")
+                    elif cmd == b"SEARCH":
+                        w(b"* SEARCH 2\r\n" + tag + b" OK done\r\n")
+                    elif cmd == b"LOGOUT":
+                        w(b"* BYE\r\n" + tag + b" OK bye\r\n")
+                        return
+                    else:
+                        w(tag + b" BAD unknown\r\n")
+
+        self.srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), Handler)
+        self.srv.daemon_threads = True
+        self.port = self.srv.server_address[1]
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+
+    def close(self):
+        self.srv.shutdown()
+        self.srv.server_close()
+
+
+@mock.patch.dict(os.environ, OAUTH_ENV)
+class ImapWireTests(unittest.TestCase):
+    """Real imaplib against a localhost server: the bytes on the wire are the doc's AUTHENTICATE XOAUTH2 form."""
+
+    def test_real_imaplib_sends_the_documented_exchange(self):
+        import imaplib
+        srv = _DocImapServer("help@contoso.com", "eyJ0eX...EV1Q...")
+        self.addCleanup(srv.close)
+        sec = Section("imap", {"host": "outlook.office365.com", "user": "help@contoso.com", "auth": "oauth",
+                               "sent_folder": '"Sent Items"', "client_id_env": "T_CID",
+                               "client_secret_env": "T_CSEC", "refresh_token_env": "T_RT"})
+        box = reference.ImapMailbox(sec, connect=lambda: imaplib.IMAP4("127.0.0.1", srv.port),
+                                    transport=Recorder((200, MS_TOKEN)))
+        self.assertEqual(box.sent_copies("abc@x"), 1)
+        self.assertIn(b"AUTHENTICATE XOAUTH2", b" ".join(srv.seen))
+        self.assertFalse(any(b"LOGIN" in ln for ln in srv.seen), "no password LOGIN on the wire")
+
+    def test_wrong_token_is_refused_by_the_server(self):
+        import imaplib
+        srv = _DocImapServer("help@contoso.com", "the-right-token-1")
+        self.addCleanup(srv.close)
+        sec = Section("imap", {"host": "h", "user": "help@contoso.com", "auth": "oauth", "client_id_env": "T_CID",
+                               "client_secret_env": "T_CSEC", "refresh_token_env": "T_RT"})
+        box = reference.ImapMailbox(sec, connect=lambda: imaplib.IMAP4("127.0.0.1", srv.port),
+                                    transport=Recorder((200, MS_TOKEN)))
+        with self.assertRaises(RuntimeError):
+            box.sent_copies("abc@x")
+
+
 @mock.patch.dict(os.environ, OAUTH_ENV)
 class ImapOAuthTests(unittest.TestCase):
     def box(self, conn, rec, **opts):
