@@ -616,6 +616,13 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
         return FrappeHelpdesk(section, config.support_address)
     if kind == "imap":
         return ImapMailbox(section)
+    if kind == "intercom":
+        from sayso.adapters.intercom import IntercomHelpdesk, IntercomMailbox
+        desk = config.section("helpdesk")
+        if desk.adapter != "intercom":
+            raise ConfigError("[mailbox] intercom needs [helpdesk] adapter = \"intercom\"")
+        helpdesk = IntercomHelpdesk.from_section(desk, config.support_address)
+        return helpdesk if name == "helpdesk" else IntercomMailbox(helpdesk)
     if kind == "stripe":
         return StripePayments(section)
     if kind == "github":

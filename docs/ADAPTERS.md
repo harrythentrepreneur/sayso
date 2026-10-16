@@ -55,3 +55,16 @@ Rules for every adapter:
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.
+- **Intercom** (`sayso/adapters/intercom.py`, `adapter = "intercom"` for both
+  `[helpdesk]` and `[mailbox]`): pin `Intercom-Version` on every request. A ticket is a
+  conversation id (digits only). Reply with `POST /conversations/{id}/reply`,
+  `type: admin`, `message_type: comment` and a real admin's id: a `note` never reaches
+  the customer, and bot/Operator replies to email conversations are not emailed by
+  default. The reply endpoint has NO idempotency key, so each reply ends with a
+  `Ref: sayso-<key>.<body>` marker; `send_reply` reads the conversation first and does
+  not post when that key's marker is already there. Search `>` on a date means
+  "greater or equal" and has no sort order: read every page before moving the cursor.
+  A 429 sends `X-RateLimit-Reset` as a header; the adapter turns it into a bounded
+  wait. A retrieved conversation holds at most its 500 newest parts. Refuse group
+  conversations (more than one contact). Hosts are fixed per region
+  (`api.intercom.io`, `api.eu.intercom.io`, `api.au.intercom.io`); there is no URL option.

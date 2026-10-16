@@ -1067,6 +1067,279 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.intercom.HOSTS": {
+   "keys": [
+    "au",
+    "eu",
+    "us"
+   ],
+   "kind": "value",
+   "type": "dict"
+  },
+  "sayso.adapters.intercom.IntercomHelpdesk": {
+   "init": [
+    [
+     "token",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "admin_id",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "support_address",
+     "KEYWORD_ONLY",
+     false
+    ],
+    [
+     "region",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "transport",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "clock",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "backfill_hours",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "token",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "admin_id",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "support_address",
+      "KEYWORD_ONLY",
+      false
+     ],
+     [
+      "region",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "transport",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "clock",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "backfill_hours",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "sleep",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "fetch_inbound": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "cursor",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "from_section": [
+     [
+      "cls",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "support_address",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "kw",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "last_inbound_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_sent_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "part": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "send_reply": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipient",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_readback": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body_sha",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.intercom.IntercomMailbox": {
+   "init": [
+    [
+     "helpdesk",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "helpdesk",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_copies": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.intercom.VERSION": {
+   "kind": "value",
+   "type": "str",
+   "value": "2.14"
+  },
   "sayso.adapters.reference.DiscordForumBoard": {
    "init": [
     [

@@ -33,8 +33,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | Section | Choices | Default |
 |---|---|---|
 | board | `fake`, `discord` | `fake` |
-| helpdesk | `fake`, `frappe` | `fake` |
-| mailbox | `fake`, `imap` | `fake` |
+| helpdesk | `fake`, `frappe`, `intercom` | `fake` |
+| mailbox | `fake`, `imap`, `intercom` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
@@ -48,6 +48,7 @@ A missing or empty variable is an error when the adapter starts.
 Reference adapter keys:
 - discord: `forum_id`, `alerts_channel_id`, `token_env`
 - frappe: `url`, `api_key_env`, `api_secret_env`
+- intercom (`[helpdesk]`): `token_env`, `admin_id`, `region` (`us`|`eu`|`au`, default `us`), `backfill_hours` (0-720, default 24). `[mailbox] adapter = "intercom"` takes no keys and needs the Intercom helpdesk.
 - imap: `host`, `user`, `sent_folder` (default `"[Gmail]/Sent Mail"`), `password_env`
 - stripe: `api_key_env`
 - github: `repo` (`owner/name`), `token_env`, optional `allowed_repos` (comma-separated `owner/name` list;
