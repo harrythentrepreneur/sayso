@@ -457,6 +457,20 @@ MUTATIONS = [
      "set(was[\"keys\"]) <= set(now.get(\"keys\", ()))", "True"),
     ("stable api: a removed class method passes", "scripts/stable_api.py",
      "            return got is not None and sig_compatible(v, got)", "            return True"),
+    ("lemonsqueezy: other store's object accepted", 'sayso/adapters/lemonsqueezy.py',
+     'if isinstance(store, bool) or not isinstance(store, int) or store != self.store_id:', 'if False:'),
+    ('lemonsqueezy: refund sent again after a refund', 'sayso/adapters/lemonsqueezy.py',
+     'if o["refunded_amount"] != 0 or o["status"] != REFUNDABLE_STATUS:', 'if o["status"] not in READABLE_ORDER_STATUSES:'),
+    ('lemonsqueezy: unprefixed id accepted', 'sayso/adapters/lemonsqueezy.py',
+     'm = pattern.fullmatch(str(value)) if isinstance(value, str) else None', 'm = re.search(r"([0-9]+)$", str(value))'),
+    ('lemonsqueezy: cancel sent again when already cancelled', 'sayso/adapters/lemonsqueezy.py',
+     'if s["status"] in ENDED_STATUSES or s["cancelled"]:', 'if False:'),
+    ('lemonsqueezy: cancelled status read as done without the flag', 'sayso/adapters/lemonsqueezy.py',
+     'done = s["cancelled"] is True and s["status"] in ENDED_STATUSES', 'done = s["status"] in ENDED_STATUSES'),
+    ('lemonsqueezy: refund currency not checked', 'sayso/adapters/lemonsqueezy.py',
+     'if o["currency"] != str(currency).lower():', 'if False:'),
+    ('lemonsqueezy: missing refunded_amount read as zero', 'sayso/adapters/lemonsqueezy.py',
+     'status, total, refunded = a.get("status"), a.get("total"), a.get("refunded_amount")', 'status, total, refunded = a.get("status"), a.get("total"), a.get("refunded_amount", 0)'),
 ]
 
 
