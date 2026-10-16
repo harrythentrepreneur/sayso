@@ -55,3 +55,17 @@ Rules for every adapter:
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.
   On a private repo, some plans cannot enforce required checks, so a green CI
   run is a convention, not a gate.
+- **Crisp** (`sayso/adapters/crisp.py`, `adapter = "crisp"` for both `[helpdesk]` and `[mailbox]`):
+  REST API v1 at `https://api.crisp.chat/v1/`, `Authorization: Basic base64(identifier:key)` plus
+  `X-Crisp-Tier: plugin` (or `website` for a workspace token). One conversation (`session_id`) is one
+  ticket; the customer is the conversation's `meta.email` (conversations without an email are skipped).
+  Message times are epoch milliseconds. Crisp has no idempotency header: the reply carries a numeric
+  message `fingerprint` derived from the idempotency key, and the adapter reads that fingerprint
+  before it posts, so a retry never sends twice. A reply goes only to a conversation whose own email is
+  the approved recipient. Read-back = operator `text` messages in the conversation with the same body
+  hash; status `Sent` only when Crisp marks the message `stamped`. `last_inbound_at` also reads every
+  other conversation of the same email (`/people/conversations/{email}/list/{page}`). 429 and 420 are
+  retried; 423 (`quota_limit_exceeded`, the daily plugin quota) raises.
+  **Weaker receipt:** Crisp is both the record and the receipt. `CrispMailbox.sent_copies` reads the
+  message back from Crisp by fingerprint; there is no independent Sent folder. A message Crisp stored
+  but never delivered (for example an email-origin conversation that bounced) still reads as sent.

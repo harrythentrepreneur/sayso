@@ -616,6 +616,9 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
         return FrappeHelpdesk(section, config.support_address)
     if kind == "imap":
         return ImapMailbox(section)
+    if kind == "crisp":
+        from sayso.adapters import crisp
+        return crisp.build(name, section, config)
     if kind == "stripe":
         return StripePayments(section)
     if kind == "github":

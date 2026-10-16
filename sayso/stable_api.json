@@ -566,6 +566,265 @@
     ]
    }
   },
+  "sayso.adapters.crisp.API": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.crisp.CrispError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.crisp.CrispHelpdesk": {
+   "init": [
+    [
+     "section",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "support_address",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "now",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "support_address",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "sleep",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "now",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "fetch_inbound": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "cursor",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_inbound_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_sent_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "send_reply": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipient",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_readback": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body_sha",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.crisp.CrispMailbox": {
+   "init": [
+    [
+     "section",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "sleep",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "sent_copies": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.crisp.CrispRefused": {
+   "bases": [
+    "sayso.adapters.crisp.CrispError",
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.crisp.SESSION_ID": {
+   "kind": "value",
+   "type": "Pattern"
+  },
+  "sayso.adapters.crisp.TIERS": {
+   "kind": "value",
+   "type": "tuple",
+   "value": [
+    "plugin",
+    "website"
+   ]
+  },
+  "sayso.adapters.crisp.WEBSITE_ID": {
+   "kind": "value",
+   "type": "Pattern"
+  },
+  "sayso.adapters.crisp.crisp_fingerprint": {
+   "kind": "function",
+   "signature": [
+    [
+     "idempotency_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.fake.FakeBoard": {
    "init": [
     [
@@ -1728,6 +1987,52 @@
     "builtins.object"
    ],
    "kind": "exception"
+  },
+  "sayso.config.Section": {
+   "init": [
+    [
+     "adapter",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "options",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "adapter",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "options",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "secret": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
   },
   "sayso.config.load": {
    "kind": "function",

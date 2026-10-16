@@ -1,0 +1,573 @@
+{
+ "_source": "https://docs.crisp.chat/references/rest-api/v1/ (request/response examples embedded in the page, fetched 2026-10-16; copied verbatim)",
+ "get-website-information": {
+  "request": null,
+  "responses": {
+   "200 OK": {
+    "error": false,
+    "reason": "resolved",
+    "data": {
+     "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+     "name": "Crisp",
+     "domain": "crisp.chat",
+     "logo": "https://storage.crisp.chat/users/avatar/website/8c842203-7ed8-4e29-a608-7cf78a7d2fcc/b6c2948d-b061-405e-91a9-2fdf855d1cc0.png",
+     "verified": true,
+     "institutional": false
+    }
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "not_subscribed",
+    "data": {}
+   },
+   "406 Not Acceptable": {
+    "error": true,
+    "reason": "domain_restricted",
+    "data": {}
+   }
+  }
+ },
+ "list-conversations": {
+  "request": null,
+  "responses": {
+   "200 OK": {
+    "error": false,
+    "reason": "listed",
+    "data": [
+     {
+      "session_id": "session_aaea8e1d-d6e3-4238-9252-d8c2e5579f5c",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "people_id": "0cb89450-34fb-4d51-8905-040c1d14a594",
+      "status": 1,
+      "state": "unresolved",
+      "is_verified": false,
+      "is_blocked": false,
+      "availability": "offline",
+      "active": {
+       "now": false
+      },
+      "last_message": "All right, thanks.",
+      "preview_message": null,
+      "mentions": [],
+      "verifications": [],
+      "scheduled_messages": 0,
+      "participants": [
+       {
+        "type": "email",
+        "target": "jane.doe@acme-inc.com"
+       }
+      ],
+      "updated_at": 1468401603070,
+      "created_at": 1468341857826,
+      "unread": {
+       "operator": 0,
+       "visitor": 1
+      },
+      "assigned": {
+       "user_id": "a4c32c68-be91-4e29-8a05-976e93abbe3f"
+      },
+      "meta": {
+       "nickname": "Dan Boy",
+       "email": "dan.boy@acme-inc.com",
+       "ip": "104.236.186.68",
+       "avatar": null,
+       "connection": {
+        "isp": "DigitalOcean LLC",
+        "asn": "14061"
+       },
+       "device": {
+        "capabilities": [
+         "call"
+        ],
+        "geolocation": {
+         "country": "US",
+         "region": "CA",
+         "city": "San Francisco",
+         "coordinates": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+         }
+        },
+        "system": {
+         "os": {
+          "version": "10.11.5",
+          "name": "Mac OS"
+         },
+         "engine": {
+          "name": "WebKit",
+          "version": "537.36"
+         },
+         "browser": {
+          "major": "51",
+          "version": "51.0.2683.0",
+          "name": "Chrome"
+         },
+         "useragent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2683.0 Safari/537.36"
+        },
+        "timezone": -120,
+        "locales": [
+         "en",
+         "fr"
+        ]
+       },
+       "segments": [
+        "customer",
+        "friend"
+       ]
+      }
+     }
+    ]
+   },
+   "206 Partial Content": {
+    "error": false,
+    "reason": "listed",
+    "data": [
+     {
+      "session_id": "session_aaea8e1d-d6e3-4238-9252-d8c2e5579f5c",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "people_id": "0cb89450-34fb-4d51-8905-040c1d14a594",
+      "status": 1,
+      "state": "unresolved",
+      "is_verified": false,
+      "is_blocked": false,
+      "availability": "offline",
+      "active": {
+       "now": false
+      },
+      "last_message": "All right, thanks.",
+      "preview_message": null,
+      "mentions": [],
+      "participants": [
+       {
+        "type": "email",
+        "target": "jane.doe@acme-inc.com"
+       }
+      ],
+      "updated_at": 1468401603070,
+      "created_at": 1468341857826,
+      "unread": {
+       "operator": 0,
+       "visitor": 1
+      },
+      "assigned": {
+       "user_id": "a4c32c68-be91-4e29-8a05-976e93abbe3f"
+      },
+      "meta": {
+       "nickname": "Dan Boy",
+       "email": "dan.boy@acme-inc.com",
+       "ip": "104.236.186.68",
+       "avatar": null,
+       "connection": {
+        "isp": "DigitalOcean LLC",
+        "asn": "14061"
+       },
+       "device": {
+        "capabilities": [
+         "call"
+        ],
+        "geolocation": {
+         "country": "US",
+         "region": "CA",
+         "city": "San Francisco",
+         "coordinates": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+         }
+        },
+        "system": {
+         "os": {
+          "version": "10.11.5",
+          "name": "Mac OS"
+         },
+         "engine": {
+          "name": "WebKit",
+          "version": "537.36"
+         },
+         "browser": {
+          "major": "51",
+          "version": "51.0.2683.0",
+          "name": "Chrome"
+         },
+         "useragent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2683.0 Safari/537.36"
+        },
+        "timezone": -120,
+        "locales": [
+         "en",
+         "fr"
+        ]
+       },
+       "segments": [
+        "customer",
+        "friend"
+       ]
+      }
+     }
+    ]
+   },
+   "400 Bad Request": {
+    "error": true,
+    "reason": "search_query_too_long|page_number_too_high",
+    "data": {}
+   },
+   "402 Payment Required": {
+    "error": true,
+    "reason": "subscription_upgrade_required",
+    "data": {}
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed|inbox_access_not_allowed|scheduled_message_filter_not_permitted",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "not_subscribed",
+    "data": {}
+   },
+   "416 Requested Range Not Satisfiable": {
+    "error": true,
+    "reason": "underflow_page_size|overflow_page_size",
+    "data": {}
+   },
+   "423 Locked": {
+    "error": true,
+    "reason": "quota_limit_exceeded",
+    "data": {}
+   }
+  }
+ },
+ "get-messages": {
+  "request": null,
+  "responses": {
+   "200 OK": {
+    "error": false,
+    "reason": "listed",
+    "data": [
+     {
+      "session_id": "session_0839e4c2-a059-445b-8de5-390d6417f893",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "type": "text",
+      "from": "user",
+      "origin": "chat",
+      "content": "Hey, how are you doing?",
+      "preview": [],
+      "mentions": [],
+      "stamped": true,
+      "read": "email",
+      "delivered": "email",
+      "fingerprint": 5719231201,
+      "timestamp": 1468413681043,
+      "user": {
+       "nickname": "Dan Boy",
+       "user_id": "session_0839e4c2-a059-445b-8de5-390d6417f893"
+      }
+     }
+    ]
+   },
+   "206 Partial Content": {
+    "error": false,
+    "reason": "listed",
+    "data": [
+     {
+      "session_id": "session_0839e4c2-a059-445b-8de5-390d6417f893",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "type": "text",
+      "from": "user",
+      "origin": "chat",
+      "content": "Hey, how are you doing?",
+      "preview": [],
+      "mentions": [],
+      "stamped": true,
+      "read": "email",
+      "delivered": "email",
+      "fingerprint": 5719231201,
+      "timestamp": 1468413681043,
+      "user": {
+       "nickname": "Dan Boy",
+       "user_id": "session_0839e4c2-a059-445b-8de5-390d6417f893"
+      }
+     },
+     {
+      "session_id": "session_0839e4c2-a059-445b-8de5-390d6417f893",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "type": "text",
+      "from": "operator",
+      "origin": "chat",
+      "content": "👍",
+      "preview": [],
+      "mentions": [],
+      "stamped": true,
+      "read": "chat",
+      "delivered": "chat",
+      "fingerprint": 5720387819,
+      "timestamp": 1468413690687,
+      "user": {
+       "nickname": "Valerian Saliou",
+       "user_id": "aa0b64dd-9fb4-4db9-80d6-5a49eb84087b"
+      }
+     },
+     {
+      "session_id": "session_0839e4c2-a059-445b-8de5-390d6417f893",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "type": "file",
+      "from": "operator",
+      "origin": "email",
+      "content": {
+       "name": "Thats awesome.jpg",
+       "url": "https://storage.crisp.chat/users/upload/operator/aa0b64dd-9fb4-4db9-80d6-5a49eb84087b/19d956c7-0294-45ad-89e1-58ce45e7008f.jpg",
+       "type": "image/jpeg"
+      },
+      "preview": [],
+      "mentions": [],
+      "stamped": true,
+      "read": null,
+      "delivered": "chat",
+      "fingerprint": 8682935614,
+      "timestamp": 1468487977677,
+      "user": {
+       "nickname": "Valerian Saliou",
+       "user_id": "aa0b64dd-9fb4-4db9-80d6-5a49eb84087b"
+      }
+     },
+     {
+      "session_id": "session_0839e4c2-a059-445b-8de5-390d6417f893",
+      "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+      "type": "text",
+      "from": "user",
+      "origin": "chat",
+      "content": "Hey check that: https://crisp.chat/",
+      "preview": [
+       {
+        "url": "https://crisp.chat/",
+        "website": "crisp.chat",
+        "title": "Simple Customer service built for startups.",
+        "preview": {
+         "excerpt": "Chat with your customers, Collaborate with your team",
+         "image": "https://crisp.chat/tile.png"
+        }
+       }
+      ],
+      "mentions": [],
+      "stamped": true,
+      "read": "chat",
+      "delivered": null,
+      "fingerprint": 9663657330,
+      "timestamp": 1468488196711,
+      "user": {
+       "nickname": "Dan Boy",
+       "user_id": "session_0839e4c2-a059-445b-8de5-390d6417f893"
+      }
+     }
+    ]
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "session_not_found|not_subscribed",
+    "data": {}
+   }
+  }
+ },
+ "send-text-message": {
+  "request": {
+   "type": "text",
+   "from": "operator",
+   "origin": "chat",
+   "content": "Hey there! Need help?"
+  },
+  "responses": {
+   "202 Accepted": {
+    "error": false,
+    "reason": "dispatched",
+    "data": {
+     "fingerprint": 150912675256156
+    }
+   },
+   "400 Bad Request": {
+    "error": true,
+    "reason": "invalid_message_content",
+    "data": {}
+   },
+   "402 Payment Required": {
+    "error": true,
+    "reason": "subscription_upgrade_required",
+    "data": {}
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed|message_author_not_permitted",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "session_not_found|not_subscribed",
+    "data": {}
+   },
+   "406 Not Acceptable": {
+    "error": true,
+    "reason": "message_rule_spammy|message_rule_blocked",
+    "data": {}
+   },
+   "409 Conflict": {
+    "error": true,
+    "reason": "too_many_messages",
+    "data": {}
+   }
+  }
+ },
+ "get-a-message": {
+  "request": null,
+  "responses": {
+   "200 OK": {
+    "error": false,
+    "reason": "resolved",
+    "data": {
+     "session_id": "session_0839e4c2-a059-445b-8de5-390d6417f893",
+     "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc",
+     "type": "text",
+     "from": "user",
+     "origin": "chat",
+     "content": "Hey, how are you doing?",
+     "preview": [],
+     "mentions": [],
+     "stamped": true,
+     "read": "email",
+     "delivered": "email",
+     "fingerprint": 5719231201,
+     "timestamp": 1468413681043,
+     "user": {
+      "nickname": "Dan Boy",
+      "user_id": "session_0839e4c2-a059-445b-8de5-390d6417f893"
+     }
+    }
+   },
+   "400 Bad Request": {
+    "error": true,
+    "reason": "invalid_message_fingerprint",
+    "data": {}
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "conversation_not_found|message_not_found|not_subscribed",
+    "data": {}
+   }
+  }
+ },
+ "list-people-conversations": {
+  "request": null,
+  "responses": {
+   "200 OK": {
+    "error": false,
+    "reason": "listed",
+    "data": [
+     "session_b7642ced-5e5a-449b-9864-6489ebdadca3",
+     "session_2fedcdb1-c1d7-4adf-a34c-e8c83e887572"
+    ]
+   },
+   "206 Partial Content": {
+    "error": false,
+    "reason": "listed",
+    "data": [
+     "session_b7642ced-5e5a-449b-9864-6489ebdadca3"
+    ]
+   },
+   "402 Payment Required": {
+    "error": true,
+    "reason": "subscription_upgrade_required",
+    "data": {}
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "website_not_found|people_not_found|not_subscribed",
+    "data": {}
+   }
+  }
+ },
+ "get-metas": {
+  "request": null,
+  "responses": {
+   "200 OK": {
+    "error": false,
+    "reason": "resolved",
+    "data": {
+     "nickname": "Dan Boy",
+     "email": "dan.boy@acme-inc.com",
+     "ip": "104.236.186.68",
+     "avatar": null,
+     "connection": {
+      "isp": "DigitalOcean LLC",
+      "asn": "14061"
+     },
+     "device": {
+      "capabilities": [
+       "call"
+      ],
+      "geolocation": {
+       "country": "US",
+       "region": "CA",
+       "city": "San Francisco",
+       "coordinates": {
+        "latitude": 37.7749,
+        "longitude": -122.4194
+       }
+      },
+      "system": {
+       "os": {
+        "version": "10.11.5",
+        "name": "Mac OS"
+       },
+       "engine": {
+        "name": "WebKit",
+        "version": "537.36"
+       },
+       "browser": {
+        "major": "51",
+        "version": "51.0.2683.0",
+        "name": "Chrome"
+       },
+       "useragent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2683.0 Safari/537.36"
+      },
+      "timezone": -120,
+      "locales": [
+       "en",
+       "fr"
+      ]
+     },
+     "segments": [
+      "customer",
+      "friend"
+     ]
+    }
+   },
+   "403 Forbidden": {
+    "error": true,
+    "reason": "not_allowed",
+    "data": {}
+   },
+   "404 Not Found": {
+    "error": true,
+    "reason": "conversation_not_found|not_subscribed",
+    "data": {}
+   }
+  }
+ }
+}
