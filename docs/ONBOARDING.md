@@ -54,6 +54,11 @@ A different vendor needs a new adapter class. See [ADAPTERS.md](ADAPTERS.md).
    and run `sayso run sender`. It must end `SENT_AND_VERIFIED`, with the email
    in your inbox and exactly one copy in the Sent folder.
 7. **Install the timers.** See [INSTALL.md](INSTALL.md).
+8. **Optional: customer lookup.** To give drafts the customer's plan and usage from your
+   own app, build the small signed endpoint in [CUSTOMER_LOOKUP.md](CUSTOMER_LOOKUP.md), add a
+   `[customer_facts]` section and its secret, and check it with
+   `python3 -m sayso.adapters.facts --config acme.toml --email you@example.com`.
+   A failing lookup never blocks a draft.
 
 ## Go-live checklist
 

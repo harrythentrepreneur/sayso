@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 
 from sayso import cases, decisions, money, safety, stages, votes
+from sayso.adapters import facts
 from sayso.jobs import sender
 
 
@@ -186,7 +187,9 @@ def run(ctx) -> dict:
         if not rec.get("needs_draft") and (rec.get("draft_version") or rec.get("no_reply_asked_for")
                                            or rec.get("held_draft")):
             continue                          # drafted, a no-reply decision pending/settled, or held for a person
-        text = ctx.drafter.draft({"case_key": key, **rec}, ctx.board.messages(rec["card_id"])).strip()
+        known = facts.lookup(ctx, key, rec)   # read-only facts from the business's app; failure = {} (never blocks)
+        text = ctx.drafter.draft({"case_key": key, **rec, "customer_facts": known},
+                                 ctx.board.messages(rec["card_id"])).strip()
         try:
             decision = decisions.parse(text)
         except decisions.DecisionError as exc:

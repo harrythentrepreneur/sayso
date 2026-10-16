@@ -566,6 +566,198 @@
     ]
    }
   },
+  "sayso.adapters.facts.FactsError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.facts.HttpFacts": {
+   "init": [
+    [
+     "url",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "clock",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "url",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "secret",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "clock",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ],
+    "facts": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "email",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "from_section": [
+     [
+      "cls",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.facts.lookup": {
+   "kind": "function",
+   "signature": [
+    [
+     "ctx",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "case_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "rec",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.facts.prompt_block": {
+   "kind": "function",
+   "signature": [
+    [
+     "facts",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.facts.sign": {
+   "kind": "function",
+   "signature": [
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "timestamp",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "email",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.facts.snapshot": {
+   "kind": "function",
+   "signature": [
+    [
+     "root",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "case_key",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.facts.verify": {
+   "kind": "function",
+   "signature": [
+    [
+     "secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "timestamp",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "email",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "header",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "now",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "tolerance",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
   "sayso.adapters.fake.FakeBoard": {
    "init": [
     [

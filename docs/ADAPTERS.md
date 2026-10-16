@@ -15,6 +15,7 @@ The core never imports a vendor SDK.
 | Drafter | `draft(case, thread) -> str` | Its output is data. It is never sent unapproved. It may answer `NO-REPLY: <reason>` as its first line (no reply is owed: one close vote, nothing sent), or end a reply with `MONEY: {json spec}` lines (one money vote each; the reply waits for every provider receipt, then gets its own vote as written). See `sayso/decisions.py`. |
 | DevRunner | `start(case_key, brief, key) -> run_id, result(run_id), state(run_id)` | `result` returns one PR (`{"pr": int}`) or several (`{"prs": [int or "owner/repo#N"]}`); `state` is `running`, `dead` or `unknown` (unknown never retries). Measured `usage` is optional. |
 | QaRunner | `fails_on_old_code(pr, head), start(case_key, brief, key) -> run_id, result(run_id)` | Must be a different agent from the dev runner. `result` returns `{"text": str}` or None. |
+| CustomerFacts | `facts(email) -> dict` | Optional (`none` by default). Read-only; flat string/number/bool fields only. The draft job calls it through `facts.lookup`, which turns any failure into no facts plus one alert per outage, and passes the result to the drafter as `case["customer_facts"]` (untrusted data: wrap it with `facts.prompt_block`). Reference: `http`, see [CUSTOMER_LOOKUP.md](CUSTOMER_LOOKUP.md). |
 
 Rules for every adapter:
 1. **Honour the idempotency key** on every write. Pass it to the vendor when

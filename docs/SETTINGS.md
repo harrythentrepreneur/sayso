@@ -40,6 +40,7 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | drafter | `fake`, `hermes` | `fake` |
 | dev_runner | `none`, `fake`, `hermes` | `none` |
 | qa_runner | `none`, `fake`, `hermes` | `none` |
+| customer_facts | `none`, `http` | `none` |
 
 A key ending in `_env` names an **environment variable**, never a value.
 `token_env = "ACME_DISCORD_TOKEN"` is accepted. `token_env = "abc123"` is refused.
@@ -55,6 +56,7 @@ Reference adapter keys:
 - hermes (drafter and dev_runner): `profile`
 - hermes (qa_runner): `profile` (must differ from the dev profile), `red_proof_cmd` (prints one JSON line
   `{"state": "red-proved" | "not-red" | "head-red" | "error"}`; gets the PR number and head SHA as its last two arguments)
+- http (customer_facts): `url` (https), `secret_env` (the shared HMAC secret). Contract: [CUSTOMER_LOOKUP.md](CUSTOMER_LOOKUP.md)
 
 ## [policy]
 

@@ -24,6 +24,7 @@ ADAPTER_CHOICES = {
     "drafter": ("fake", "hermes"),
     "dev_runner": ("none", "fake", "hermes"),
     "qa_runner": ("none", "fake", "hermes"),
+    "customer_facts": ("none", "http"),
 }
 DEFAULT_JOBS = {
     "intake": 60,
@@ -171,7 +172,8 @@ def _need(table: dict, key: str, where: str) -> Any:
 
 def parse(raw: dict, path: Path) -> Config:
     top = _take(raw, {"product", "operators", "state", "board", "helpdesk", "mailbox", "payments",
-                      "codehost", "drafter", "dev_runner", "qa_runner", "policy", "jobs", "plugins"}, "top level")
+                      "codehost", "drafter", "dev_runner", "qa_runner", "policy", "jobs", "plugins",
+                      "customer_facts"}, "top level")
     product = _take(_need(top, "product", "top level"),
                     {"name", "slug", "mode", "support_address", "own_addresses", "labels"}, "product")
     slug = _need(product, "slug", "product")
