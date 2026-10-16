@@ -566,6 +566,15 @@
     ]
    }
   },
+  "sayso.adapters.facts.BLOCK_END": {
+   "kind": "value",
+   "type": "str",
+   "value": "End of customer facts."
+  },
+  "sayso.adapters.facts.BLOCK_HEAD": {
+   "kind": "value",
+   "type": "str"
+  },
   "sayso.adapters.facts.FactsError": {
    "bases": [
     "builtins.RuntimeError",
@@ -657,6 +666,26 @@
      ]
     ]
    }
+  },
+  "sayso.adapters.facts.MAX_BYTES": {
+   "kind": "value",
+   "type": "int",
+   "value": 16384
+  },
+  "sayso.adapters.facts.TIMEOUT": {
+   "kind": "value",
+   "type": "float",
+   "value": 3.0
+  },
+  "sayso.adapters.facts.clean": {
+   "kind": "function",
+   "signature": [
+    [
+     "data",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
   },
   "sayso.adapters.facts.lookup": {
    "kind": "function",
