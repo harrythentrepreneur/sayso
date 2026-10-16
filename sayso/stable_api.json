@@ -1067,6 +1067,31 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.http.urllib_transport": {
+   "kind": "function",
+   "signature": [
+    [
+     "method",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "url",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "headers",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "body",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.reference.DiscordForumBoard": {
    "init": [
     [
@@ -1321,6 +1346,11 @@
      ]
     ]
    }
+  },
+  "sayso.adapters.slack.MAX_RETRIES": {
+   "kind": "value",
+   "type": "int",
+   "value": 3
   },
   "sayso.adapters.slack.NO": {
    "kind": "value",
@@ -1667,6 +1697,14 @@
     "builtins.object"
    ],
    "kind": "exception"
+  },
+  "sayso.adapters.slack.TS": {
+   "kind": "value",
+   "type": "Pattern"
+  },
+  "sayso.adapters.slack.USER": {
+   "kind": "value",
+   "type": "Pattern"
   },
   "sayso.adapters.slack.YES": {
    "kind": "value",
