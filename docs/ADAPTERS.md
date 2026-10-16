@@ -188,8 +188,9 @@ fallback), and whether a reply thread's `to` lists the customer.
 ## Other integrations (help desks, payments, Slack)
 
 One help desk at a time: `[mailbox] adapter = "helpscout" | "zendesk" | "intercom" | "crisp"` reads the SAME
-account as `[helpdesk]`, so `config.check_one_helpdesk` refuses a mismatch when the settings are read. One
-payment provider at a time: `[payments]` is a single section.
+account as `[helpdesk]`, so `config.check_one_helpdesk` refuses a mismatch when the settings are read: a different
+adapter, or a key the `[mailbox]` repeats with another value (for example another `mailbox_id` or `website_id`). One
+payment provider at a time: `[payments]` is a single section (`[[payments]]` twice is refused).
 
 - **Zendesk** (`sayso/adapters/zendesk.py`, helpdesk + mailbox = `zendesk`):
   - Inbound reads the ticket-events export (`/api/v2/incremental/ticket_events?include=comment_events`).

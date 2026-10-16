@@ -4,6 +4,12 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- Config (release QA): a help-desk `[mailbox]` (Help Scout, Crisp, Zendesk, Intercom) that repeats a key with a
+  value other than `[helpdesk]` (another `mailbox_id`, `website_id` or key name) is refused: it must read the same
+  account. `[[payments]]` (or any adapter section) written twice is a clear ConfigError, not a crash.
+  `check_one_helpdesk` gains two optional keyword arguments (existing two-argument calls are unchanged).
+- Security (release QA): an id_token with several audiences must carry `azp` = our client id (OpenID Connect
+  Core 3.1.3.7), for Microsoft and Google sign-in alike.
 - Security: the dashboard and the console answer only to the Host they were started on (DNS-rebinding guard,
   `sayso/hostcheck.py`). A loopback server answers to `127.0.0.1:<port>`, `localhost:<port>` and
   `[::1]:<port>`; any other Host, a missing Host or two Host headers get `421 Misdirected Request` (plain

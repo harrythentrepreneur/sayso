@@ -34,10 +34,18 @@ HELPDESK_MAILBOXES = ("helpscout", "zendesk", "intercom", "crisp")
 PAYMENT_PROVIDERS = ("stripe", "paddle", "lemonsqueezy")
 
 
-def check_one_helpdesk(helpdesk: str, mailbox: str) -> None:
-    """One help desk at a time: a help-desk mailbox must read the help desk that is connected."""
+def check_one_helpdesk(helpdesk: str, mailbox: str, desk_options: dict | None = None,
+                       mailbox_options: dict | None = None) -> None:
+    """One help desk at a time: a help-desk mailbox must read the help desk that is connected, and the SAME
+    account: every key the [mailbox] repeats must hold the [helpdesk] value."""
     if mailbox in HELPDESK_MAILBOXES and helpdesk != mailbox:
         raise ConfigError(f'[mailbox] {mailbox} needs [helpdesk] adapter = "{mailbox}" (one help desk at a time)')
+    if mailbox in HELPDESK_MAILBOXES and mailbox_options:
+        desk_options = desk_options or {}
+        differ = sorted(k for k, v in mailbox_options.items() if desk_options.get(k) != v)
+        if differ:
+            raise ConfigError(f"[mailbox] {mailbox} must read the same account as [helpdesk]: "
+                              f"{', '.join(differ)} differ (one help desk at a time)")
 
 
 DEFAULT_JOBS = {
@@ -219,7 +227,10 @@ def parse(raw: dict, path: Path) -> Config:
 
     sections: dict[str, Section] = {}
     for name, choices in ADAPTER_CHOICES.items():
-        table = dict(top.get(name) or {"adapter": choices[0]})
+        given = top.get(name)
+        if given is not None and not isinstance(given, dict):
+            raise ConfigError(f"[{name}] must be one table, not a list ([[{name}]]): one {name} adapter per product")
+        table = dict(given or {"adapter": choices[0]})
         adapter = table.pop("adapter", choices[0])
         if adapter not in choices:
             raise ConfigError(f"[{name}] adapter must be one of {choices}")
@@ -230,7 +241,8 @@ def parse(raw: dict, path: Path) -> Config:
             raise ConfigError(f"[{name}] real adapter {adapter!r} needs [product] mode = \"live\"")
         sections[name] = Section(adapter, table)
 
-    check_one_helpdesk(sections["helpdesk"].adapter, sections["mailbox"].adapter)
+    check_one_helpdesk(sections["helpdesk"].adapter, sections["mailbox"].adapter,
+                       sections["helpdesk"].options, sections["mailbox"].options)
 
     pol = _take(top.get("policy", {}), set(Policy.__dataclass_fields__), "policy")
     pol = dict(pol)

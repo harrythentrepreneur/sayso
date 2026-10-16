@@ -420,6 +420,16 @@ class AuthCodeTests(unittest.TestCase):
         with self.assertRaises(oauth.OAuthError):
             oauth.id_claims("not-a-jwt", client_id="cid", nonce="n1")
 
+    def test_several_audiences_need_azp_of_this_app(self):
+        good = {"aud": "cid", "nonce": "n1", "exp": 2_000, "email": "help@contoso.com"}
+        for claims in (dict(good, aud=["cid", "other"]), dict(good, aud=["cid", "other"], azp="other"),
+                       dict(good, aud=["cid"], azp="other")):
+            with self.subTest(claims=claims), self.assertRaises(oauth.OAuthError):
+                oauth.id_claims(self._jwt(claims), client_id="cid", nonce="n1", now=1_000)
+        for claims in (dict(good, aud=["cid", "other"], azp="cid"), dict(good, aud=["cid"]), dict(good, azp="cid")):
+            with self.subTest(claims=claims):
+                oauth.id_claims(self._jwt(claims), client_id="cid", nonce="n1", now=1_000)
+
     def test_mailbox_address(self):
         self.assertEqual(oauth.mailbox_address({"email": "Help@Contoso.com"}), "help@contoso.com")
         self.assertEqual(oauth.mailbox_address({"preferred_username": "help@contoso.com"}), "help@contoso.com")

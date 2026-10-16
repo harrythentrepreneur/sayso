@@ -34,12 +34,33 @@ class OneHelpdeskTests(unittest.TestCase):
                 with self.subTest(desk=desk, mailbox=mailbox):
                     parse(helpdesk={"adapter": desk}, mailbox={"adapter": mailbox})
 
+    def test_mailbox_must_read_the_same_account(self):
+        hs = {"adapter": "helpscout", "mailbox_id": "13", "client_id_env": "HS_ID", "client_secret_env": "HS_SECRET"}
+        cr = {"adapter": "crisp", "website_id": "8c842203-7ed8-4e29-a608-7cf78a7d2fcc", "key_env": "CR_KEY"}
+        for desk, over in ((hs, {"mailbox_id": "99"}), (hs, {"client_id_env": "OTHER_ID"}),
+                           (cr, {"website_id": "11111111-2222-4333-8444-555555555555"})):
+            with self.subTest(desk=desk["adapter"], over=over):
+                with self.assertRaises(ConfigError) as ctx:
+                    parse(helpdesk=desk, mailbox=dict(desk, **over))
+                self.assertIn("same account", str(ctx.exception))
+                self.assertIn(next(iter(over)), str(ctx.exception))
+        for desk in (hs, cr):
+            parse(helpdesk=desk, mailbox=dict(desk))
+            parse(helpdesk=desk, mailbox={"adapter": desk["adapter"]})
+
     def test_lists_agree_with_adapter_choices(self):
         self.assertEqual(set(config.HELPDESKS), set(config.ADAPTER_CHOICES["helpdesk"]) - {"fake"})
         self.assertTrue(set(config.HELPDESK_MAILBOXES) <= set(config.ADAPTER_CHOICES["mailbox"]))
 
 
 class OnePaymentProviderTests(unittest.TestCase):
+    def test_payments_twice_is_a_config_error_not_a_crash(self):
+        for name in config.ADAPTER_CHOICES:
+            with self.subTest(section=name):
+                with self.assertRaises(ConfigError) as ctx:
+                    parse(**{name: [{"adapter": "fake"}, {"adapter": "none"}]})
+                self.assertIn(f"[[{name}]]", str(ctx.exception))
+
     def test_providers_are_the_payments_choices(self):
         self.assertEqual(set(config.PAYMENT_PROVIDERS), set(config.ADAPTER_CHOICES["payments"]) - {"none", "fake"})
 
