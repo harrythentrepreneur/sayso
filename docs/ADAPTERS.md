@@ -50,6 +50,19 @@ Rules for every adapter:
   one Sent Communication **and** one Email Queue row with status Sent.
 - **Gmail/IMAP:** the Sent folder is the independent receipt. Search by
   `Message-ID` with the angle brackets. Open the folder read-only.
+- **Gmail with Google sign-in (`gmail` mailbox, `sayso/adapters/gmail.py`):** XOAUTH2 through the shared
+  `sayso.adapters.oauth.TokenSource("google", ...)`; the SASL string is
+  `user={address}^Aauth=Bearer {token}^A^A`, and an error challenge gets an empty reply. The only scope that
+  works for IMAP and SMTP is `https://mail.google.com/`, which Google classes as restricted (a public app
+  needs OAuth verification and a yearly security assessment). Ask with `access_type=offline` and
+  `prompt=consent`, or Google returns no refresh token; refuse a grant whose `scope` lacks the mail scope
+  (granular consent lets people untick it). The Sent folder is the one LIST flags `\Sent`
+  (`[Gmail]/Sent Mail`, but `[Google Mail]/...` or localised in some accounts, and hidden when "Show in IMAP"
+  is off): zero or two are refused, never guessed. A message counts only with `\Sent` in its `X-GM-LABELS`.
+  Gmail files SMTP mail in Sent itself: never APPEND, or every send reads as two copies. `invalid_grant`
+  (revoked, password changed, six months unused, 7-day Testing expiry) raises `SignInExpired` and is never
+  retried; `[THROTTLED]`/`[ALERT]` replies raise `Throttled` and end the read for that run. Sending limit:
+  2,000 messages a day per Workspace user (500 on trial accounts).
 - **Stripe:** use a restricted key. Pass `Idempotency-Key`. Verify the refund
   by listing refunds for the charge and matching amount and currency exactly.
 - **GitHub:** `PUT /pulls/{n}/merge` with `sha` fails with 409 when the head moved.

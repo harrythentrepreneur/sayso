@@ -18,7 +18,7 @@ MODES = ("dry-run", "live")
 ADAPTER_CHOICES = {
     "board": ("fake", "discord"),
     "helpdesk": ("fake", "frappe"),
-    "mailbox": ("fake", "imap"),
+    "mailbox": ("fake", "imap", "gmail"),
     "payments": ("none", "fake", "stripe"),
     "codehost": ("none", "fake", "github"),
     "drafter": ("fake", "hermes"),

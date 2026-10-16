@@ -957,6 +957,198 @@
     ]
    }
   },
+  "sayso.adapters.gmail.IMAP_HOST": {
+   "kind": "value",
+   "type": "str",
+   "value": "imap.gmail.com"
+  },
+  "sayso.adapters.gmail.NotUnderstood": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.gmail.REVOKE_URL": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.gmail.SCOPE": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.gmail.SENT_FOLDER": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.gmail.SMTP_HOST": {
+   "kind": "value",
+   "type": "str",
+   "value": "smtp.gmail.com"
+  },
+  "sayso.adapters.gmail.SMTP_PORT": {
+   "kind": "value",
+   "type": "int",
+   "value": 465
+  },
+  "sayso.adapters.gmail.SignInExpired": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.gmail.TOKEN_URL": {
+   "kind": "value",
+   "type": "str"
+  },
+  "sayso.adapters.gmail.Throttled": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.gmail.authorize_url": {
+   "kind": "function",
+   "signature": [
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "redirect_uri",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "state",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "code_challenge",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "login_hint",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.gmail.check_grant": {
+   "kind": "function",
+   "signature": [
+    [
+     "data",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.gmail.exchange_code": {
+   "kind": "function",
+   "signature": [
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "code",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "redirect_uri",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "verifier",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.gmail.id_email": {
+   "kind": "function",
+   "signature": [
+    [
+     "id_token",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "now",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ]
+   ]
+  },
+  "sayso.adapters.gmail.is_sign_in_expired": {
+   "kind": "function",
+   "signature": [
+    [
+     "exc",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.gmail.labels": {
+   "kind": "function",
+   "signature": [
+    [
+     "fetch_meta",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.gmail.pkce_pair": {
+   "kind": "function",
+   "signature": []
+  },
+  "sayso.adapters.gmail.sent_folder": {
+   "kind": "function",
+   "signature": [
+    [
+     "list_lines",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.http.Client": {
    "init": [
     [

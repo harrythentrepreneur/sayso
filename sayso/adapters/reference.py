@@ -646,6 +646,9 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
         return FrappeHelpdesk(section, config.support_address)
     if kind == "imap":
         return ImapMailbox(section)
+    if kind == "gmail":
+        from sayso.adapters.gmail import GmailMailbox
+        return GmailMailbox(section)
     if kind == "stripe":
         return StripePayments(section)
     if kind == "github":

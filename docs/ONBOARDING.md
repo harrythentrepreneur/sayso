@@ -10,6 +10,7 @@ and prove each one before you switch the next.
 | Board (human work surface) | `discord` | A forum channel, an alerts channel, a bot token |
 | Helpdesk (owns correspondence) | `frappe` | Helpdesk URL, API key and secret, site timezone set to UTC |
 | Mailbox (independent send receipt) | `imap` | IMAP host, user, app password, Sent folder name |
+| Mailbox, Gmail with Google sign-in | `gmail` | A Google Cloud OAuth client and one sign-in ([below](#gmail-with-google-sign-in)) |
 | Payments (optional) | `stripe` | A **restricted** key: refunds write, subscriptions write, charges read |
 | Code host (optional) | `github` | Repo `owner/name`, a fine-grained token: pull requests read/write, contents read |
 | Drafter | `hermes` | A Hermes profile that writes support replies |
@@ -79,6 +80,50 @@ Business Outlook mailboxes no longer accept passwords for IMAP. Use OAuth:
 
 A refresh token stops working after 90 days without use, or when the user resets their password or
 an admin revokes the app. The adapter then raises `ReconnectNeeded`; repeat step 4.
+
+## Gmail with Google sign-in
+
+Use this when an app password is not possible (2-Step Verification off, or the Workspace admin blocks app
+passwords). The mailbox then signs in with a refresh token over XOAUTH2. Nothing here is sent to Sayso.
+
+1. **Create a Google Cloud project** at console.cloud.google.com (or reuse one you own).
+2. **Turn on nothing.** IMAP/SMTP need no API to be enabled; only the OAuth client below.
+3. **Branding / consent screen** (Google Auth Platform > Branding): app name, support email, your
+   address as developer contact. Audience: *Internal* if the mailbox is in your own Workspace
+   organisation (no review, no user cap), otherwise *External* and keep it in **Testing**, then add
+   the mailbox address under Audience > Test users.
+4. **Data access**: add the scope `https://mail.google.com/` (Google lists it as *restricted*; it is
+   the only scope that works for IMAP and SMTP).
+5. **Clients > Create client > Desktop app.** Copy the client id and secret into your secrets file:
+   ```
+   ACME_GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+   ACME_GOOGLE_CLIENT_SECRET=...
+   ```
+6. **Sign in once** on a machine with a browser (it listens on 127.0.0.1 only):
+   ```bash
+   set -a; . ~/.config/sayso/acme.env; set +a
+   python3 -m sayso.adapters.gmail --client-id-env ACME_GOOGLE_CLIENT_ID \
+       --client-secret-env ACME_GOOGLE_CLIENT_SECRET --out ~/.config/sayso/acme.env \
+       --var ACME_GOOGLE_REFRESH_TOKEN --user help@yourshop.com
+   ```
+   Tick the Gmail box on the Allow screen. The command appends the refresh token to the env file
+   (mode 600) and never prints it.
+7. **Settings:**
+   ```toml
+   [mailbox]
+   adapter = "gmail"
+   user = "help@yourshop.com"
+   client_id_env = "ACME_GOOGLE_CLIENT_ID"
+   client_secret_env = "ACME_GOOGLE_CLIENT_SECRET"
+   refresh_token_env = "ACME_GOOGLE_REFRESH_TOKEN"
+   ```
+8. **Workspace admins** who restrict third-party apps: Admin console > Security > API controls >
+   App access control > add the client id as *Trusted*. Without it Google answers `admin_policy_enforced`.
+
+Limits to know: an External app in **Testing** gets refresh tokens that expire after **7 days** (sign in
+again weekly, or use Internal). Google keeps at most 100 live refresh tokens per account per client; the
+oldest silently stops working. A password change on the Google account ends the token. When the token
+stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
 
 ## Go-live checklist
 
