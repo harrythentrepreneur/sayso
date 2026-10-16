@@ -4,6 +4,11 @@ All notable changes are recorded here. Versions follow [Semantic Versioning](htt
 
 ## [Unreleased]
 
+- **Lemon Squeezy payments adapter** (`payments = "lemonsqueezy"`): refunds (`POST /v1/orders/{id}/refund`,
+  partial allowed) and cancellations (`DELETE /v1/subscriptions/{id}`, runs to period end), verified by reading
+  the order and subscription back. No idempotency header exists, so every write reads first (one refund per
+  order). Specs use prefixed ids (`ls_order_`, `ls_sub_`, `ls_cust_`); the send check and the masker refuse
+  them in customer text. See docs/ADAPTERS.md and docs/ONBOARDING.md.
 - Console and dashboard pages, ported from Sayso Cloud: a grouped sidebar (daily work, then Admin), a dry-run
   strip and an account menu; **Decisions** as a priority queue (money and billing, repeat contacts, oldest) with
   waiting and expiry badges and a say-so lock on every decision (what the Yes binds to plus its fingerprint),
