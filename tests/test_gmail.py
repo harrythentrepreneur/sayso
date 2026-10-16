@@ -296,6 +296,18 @@ class AuthorizeTests(unittest.TestCase):
             gmail.authorize_url("id", "https://x/cb", "s" * 32, "")
 
 
+class CheckGrantTests(unittest.TestCase):
+    """check_grant is public (Cloud and the sign-in CLI call it): it must refuse on its own, not only through
+    the shared oauth.exchange_code."""
+
+    def test_refresh_token_required(self):
+        for bad in ({k: v for k, v in DOC_TOKEN.items() if k != "refresh_token"}, dict(DOC_TOKEN, refresh_token=" ")):
+            with self.subTest(bad=bad):
+                with self.assertRaises(gmail.NotUnderstood):
+                    gmail.check_grant(bad)
+        self.assertEqual(gmail.check_grant(DOC_TOKEN), DOC_TOKEN["refresh_token"])
+
+
 class ExchangeTests(unittest.TestCase):
     def ex(self, *answers, code="4/P7q7W91a-oMsCeLvIaQm6bTrgtp7"):
         self.rec = Recorder(*answers)
