@@ -1067,6 +1067,11 @@
    ],
    "kind": "exception"
   },
+  "sayso.adapters.oauth.EXPIRY_SKEW": {
+   "kind": "value",
+   "type": "int",
+   "value": 300
+  },
   "sayso.adapters.oauth.MS_IMAP_SCOPE": {
    "kind": "value",
    "type": "str"
@@ -1422,6 +1427,16 @@
     ],
     [
      "data",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
+  "sayso.adapters.oauth.pkce_challenge": {
+   "kind": "function",
+   "signature": [
+    [
+     "verifier",
      "POSITIONAL_OR_KEYWORD",
      false
     ]
