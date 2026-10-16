@@ -641,6 +641,13 @@
       true
      ]
     ],
+    "check": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
     "fetch_inbound": [
      [
       "self",

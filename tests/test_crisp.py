@@ -226,6 +226,19 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(hdr["X-Crisp-Tier"], "plugin")
         self.assertTrue(fake.calls[0]["url"].startswith("https://api.crisp.chat/v1/website/" + WEBSITE))
 
+    def test_check_reads_only(self):
+        fake = FakeCrisp()
+        fake.conv(SESSION, EMAIL)
+        out = helpdesk(fake).check()
+        self.assertEqual(out, {"website": "Crisp", "conversations": 1})
+        self.assertEqual([c["method"] for c in fake.calls], ["GET", "GET"])
+
+    def test_check_refusal_raises(self):
+        fake = FakeCrisp()
+        fake.fail = [(404, _doc("get-website-information", "404 Not Found"))]
+        with self.assertRaises(HttpError):
+            helpdesk(fake).check()
+
     def test_website_tier(self):
         fake = FakeCrisp()
         helpdesk(fake, tier="website").api.website_info()

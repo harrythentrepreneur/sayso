@@ -236,6 +236,17 @@ class CrispHelpdesk:
         self.now = now
         self.skipped_no_email = 0
 
+    def check(self) -> dict:
+        """The safe connection test. Reads the website, then one page of conversations. Writes nothing.
+
+        Returns {"website": <name>, "conversations": <count on the first page>}. Any refusal raises
+        (401/403/404 not_subscribed, 402, 423 quota)."""
+        site = self.api.website_info()
+        rows = self.api.call("GET", self.api.site("/conversations/1"), query={"per_page": "20"})
+        if not isinstance(rows, list):
+            raise CrispError("conversation list is not a list")
+        return {"website": str(site.get("name") or ""), "conversations": len(rows)}
+
     # ------------------------------------------------------------------ inbound
     def _changed_conversations(self, since_ms: int) -> list[dict]:
         since = datetime.fromtimestamp(since_ms / 1000, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
