@@ -9,7 +9,9 @@ import re
 
 _CARD = re.compile(r"(?<!\d)\d(?:[ -]?\d){12,18}(?!\d)")
 _PAYMENT_ID = re.compile(r"\b(?:cus|sub|pi|ch|py|in|re|cs)_[A-Za-z0-9]{6,}\b")
-_SECRET = re.compile(r"\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]+|\bghp_[A-Za-z0-9]{20,}|\bxox[abp]-[A-Za-z0-9-]+")
+# Paddle Billing ids: a prefix and 26 lower-case letters/digits (developer.paddle.com, "Paddle IDs").
+_PADDLE_ID = re.compile(r"\b(?:txn|txnitm|ctm|adj|adjitm|add|biz|inv|sub)_[a-z\d]{26}\b")
+_SECRET = re.compile(r"\bpdl_(?:live|sdbx)_apikey_[A-Za-z0-9_]+|\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]+|\bghp_[A-Za-z0-9]{20,}|\bxox[abp]-[A-Za-z0-9-]+")
 
 # Past-tense money claims. A reply must not tell a customer money moved unless
 # a money vote for that case has a verified provider receipt.
@@ -29,7 +31,7 @@ class Refused(RuntimeError):
 
 
 def check_no_payment_identifiers(text: str) -> None:
-    if _CARD.search(text) or _PAYMENT_ID.search(text):
+    if _CARD.search(text) or _PAYMENT_ID.search(text) or _PADDLE_ID.search(text):
         raise Refused("text carries a card number or payment-provider id")
     if _SECRET.search(text):
         raise Refused("text carries something that looks like a credential")

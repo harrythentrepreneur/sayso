@@ -300,6 +300,15 @@ class PaddleRefundTests(unittest.TestCase):
             self.p.refund(TXN, 6000, "usd", "k2")
         self.assertEqual(len(self.fake.writes()), 1)
 
+    def test_earlier_refund_without_item_rows_still_counts(self):
+        # an approved refund whose items list is empty (only its total says how much went back)
+        self.fake.created_status = "approved"
+        self.p.refund(TXN, 60000, "usd", "k1")
+        self.fake.adjustments[0]["items"] = []
+        with self.assertRaises(PaddleError):
+            self.p.refund(TXN, 6000, "usd", "k2")
+        self.assertEqual(len(self.fake.writes()), 1)
+
     def test_second_partial_skips_what_is_already_refunded(self):
         self.fake.created_status = "approved"
         self.p.refund(TXN, 32662, "usd", "k1")
@@ -498,6 +507,17 @@ class MoneySpecTests(unittest.TestCase):
         self.assertEqual(money.describe(dict(spec, effective="immediately")), "cancel the subscription immediately")
 
 
+class ReplySafetyTests(unittest.TestCase):
+    def test_paddle_ids_and_keys_never_reach_a_customer(self):
+        from sayso import safety
+        for text in (f"Your order {TXN} is refunded.", f"Customer {CTM}", "adj_01hvgf2s84dr6reszzg29zbvcm done",
+                     "invoice inv_01hv8x29nsh54c2pgt0hnq0zkx", "use " + LIVE_KEY):
+            with self.assertRaises(safety.Refused, msg=text):
+                safety.check_no_payment_identifiers(text)
+        self.assertTrue(safety.has_secret("key " + SDBX_KEY))
+        safety.check_no_payment_identifiers("Your refund for the March invoice is on its way.")
+
+
 # -- the loop, with Paddle as the payments provider ---------------------------------------------------
 REFUND = {"action": "refund", "charge": TXN, "amount": 1900, "currency": "usd", "customer": CTM}
 CANCEL = {"action": "cancel_subscription", "subscription": SUB, "customer": CTM}
@@ -535,8 +555,12 @@ class PaddleLoopTests(LoopTest):
 
     def test_pending_refund_is_reread_never_reexecuted_then_done_when_approved(self):
         key = self.approve(REFUND)
+        calls = []
+        real = self.ctx.payments.refund
+        self.ctx.payments.refund = lambda *a, **k: calls.append(a) or real(*a, **k)
         for _ in range(4):
             self.tick("money")
+        self.assertEqual(len(calls), 1, "the loop must only re-read a pending refund, never call refund again")
         self.assertEqual(len(self.fake.writes()), 1, "a pending refund must never be created again")
         self.assertNotEqual(self.status(key), votes.DONE)
         self.fake.adjustments[0]["status"] = "approved"                 # Paddle approves it
