@@ -124,6 +124,20 @@ Limits to know: an External app in **Testing** gets refresh tokens that expire a
 again weekly, or use Internal). Google keeps at most 100 live refresh tokens per account per client; the
 oldest silently stops working. A password change on the Google account ends the token. When the token
 stops working the mailbox raises `SignInExpired` once, and you repeat step 6.
+### Help Scout instead of Frappe + IMAP
+
+1. In Help Scout, open **Your Profile > My Apps > Create My App**. Any redirect URL works for
+   Client Credentials (for example `https://example.com`). Copy the App ID and App Secret.
+   The app acts as YOUR user, so that user must be able to see and reply in the inbox.
+   The Free plan has no API access.
+2. Find the inbox number: `GET https://api.helpscout.net/v2/mailboxes` once with a token from
+   step 1 lists every inbox with its `id` and `email`.
+3. Put `ACME_HS_CLIENT_ID=...` and `ACME_HS_CLIENT_SECRET=...` in the secrets file and set
+   `[helpdesk]` and `[mailbox]` to `adapter = "helpscout"` (see [ADAPTERS.md](ADAPTERS.md)).
+   Set `support_address` to the inbox's own email address.
+4. Read-only proof: `sayso run intake` after writing in from your own test address. The card's
+   ticket is the Help Scout conversation id. Then step 6 above with your own conversation: the
+   sender must end `SENT_AND_VERIFIED`, and Help Scout must show exactly one reply.
 
 ## Go-live checklist
 

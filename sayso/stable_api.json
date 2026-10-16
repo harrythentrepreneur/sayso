@@ -1149,6 +1149,430 @@
     ]
    ]
   },
+  "sayso.adapters.helpscout.HelpScoutApi": {
+   "init": [
+    [
+     "client_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "client_secret",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "sleep",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "now",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "token_store",
+     "KEYWORD_ONLY",
+     true
+    ],
+    [
+     "max_retries",
+     "KEYWORD_ONLY",
+     true
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "client_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "client_secret",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "sleep",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "now",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "token_store",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "max_retries",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "call": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "method",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "query",
+      "KEYWORD_ONLY",
+      true
+     ],
+     [
+      "json_body",
+      "KEYWORD_ONLY",
+      true
+     ]
+    ],
+    "forget_token": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "get": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "query",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "pages": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "path",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "query",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "token": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.helpscout.HelpScoutError": {
+   "bases": [
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.helpscout.HelpScoutHelpdesk": {
+   "init": [
+    [
+     "section_or_api",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "support_address",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ],
+    [
+     "mailbox_id",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "start_hours",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "transport",
+     "POSITIONAL_OR_KEYWORD",
+     true
+    ],
+    [
+     "kw",
+     "VAR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "section_or_api",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "support_address",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "mailbox_id",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "start_hours",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "transport",
+      "POSITIONAL_OR_KEYWORD",
+      true
+     ],
+     [
+      "kw",
+      "VAR_KEYWORD",
+      false
+     ]
+    ],
+    "conversation": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "fetch_inbound": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "cursor",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "inbox_email": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_inbound_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "customer",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "last_sent_at": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "send_reply": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "recipient",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "subject",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "idempotency_key",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_readback": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "body_sha",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "threads": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "ticket",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.helpscout.HelpScoutMailbox": {
+   "init": [
+    [
+     "helpdesk",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ],
+   "kind": "class",
+   "members": {
+    "__init__": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "helpdesk",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ],
+    "sent_copies": [
+     [
+      "self",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ],
+     [
+      "message_id",
+      "POSITIONAL_OR_KEYWORD",
+      false
+     ]
+    ]
+   }
+  },
+  "sayso.adapters.helpscout.HelpScoutRateLimited": {
+   "bases": [
+    "sayso.adapters.helpscout.HelpScoutError",
+    "builtins.RuntimeError",
+    "builtins.Exception",
+    "builtins.BaseException",
+    "builtins.object"
+   ],
+   "kind": "exception"
+  },
+  "sayso.adapters.helpscout.web_url": {
+   "kind": "function",
+   "signature": [
+    [
+     "conversation_id",
+     "POSITIONAL_OR_KEYWORD",
+     false
+    ]
+   ]
+  },
   "sayso.adapters.http.Client": {
    "init": [
     [

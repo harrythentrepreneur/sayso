@@ -644,6 +644,9 @@ def build(name: str, kind: str, section: Section, config: Config) -> Any:
         return DiscordForumBoard(section)
     if kind == "frappe":
         return FrappeHelpdesk(section, config.support_address)
+    if kind == "helpscout":
+        from sayso.adapters import helpscout
+        return helpscout.build(name, section, config)
     if kind == "imap":
         return ImapMailbox(section)
     if kind == "gmail":

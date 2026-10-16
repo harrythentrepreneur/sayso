@@ -35,6 +35,8 @@ Each section takes `adapter = "..."` plus the adapter's own keys.
 | board | `fake`, `discord` | `fake` |
 | helpdesk | `fake`, `frappe` | `fake` |
 | mailbox | `fake`, `imap`, `gmail` | `fake` |
+| helpdesk | `fake`, `frappe`, `helpscout` | `fake` |
+| mailbox | `fake`, `imap`, `helpscout` | `fake` |
 | payments | `none`, `fake`, `stripe` | `none` |
 | codehost | `none`, `fake`, `github` | `none` |
 | drafter | `fake`, `hermes` | `fake` |
