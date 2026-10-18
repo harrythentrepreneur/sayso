@@ -430,6 +430,26 @@ class GuardTests(LoopTest):
         self.assertTrue(any(f.startswith("unverified-attempt:") for f in found))
         self.assertEqual(self.w.data["outbox"], before)
 
+    def test_reconcile_alerts_once_per_finding_across_ticks(self):
+        """A finding that stays true for 5 ticks makes ONE journal alert line and
+        ONE board alert, not one per tick (11,880 identical lines in a live demo)."""
+        self.w.data["faults"] = ["send_not_delivered"]
+        self.w.save()
+        self.write_in()
+        self.tick("intake", "draft")
+        self.vote("reply")
+        self.tick("votes", "sender")
+        board_before = len(self.w.data["alerts"])
+        for _ in range(5):
+            found = self.tick("reconcile")["reconcile"]["findings"]
+            self.assertTrue(any(f.startswith("unverified-attempt:") for f in found))
+            self.ctx.clock.advance(minutes=5)
+        lines = [j for j in self.ctx.journal.read()
+                 if j.get("event") == "alert" and j["key"].startswith("unverified-attempt:")]
+        self.assertEqual(len(lines), 1, f"journal alert lines: {len(lines)}")
+        board = self.w.data["alerts"][board_before:]
+        self.assertEqual(len([a for a in board if "attempt never proven" in a]), 1, board)
+
     def test_health_flags_stale_job(self):
         self.tick()
         self.ctx.clock.advance(hours=2)

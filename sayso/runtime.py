@@ -65,6 +65,8 @@ class Paths:
     def fake_world(self) -> Path: return self.root / "fake-world.json"
     @property
     def locks(self) -> Path: return self.root / "locks"
+    @property
+    def alerted(self) -> Path: return self.root / "alerted.json"
 
 
 @dataclass
@@ -101,7 +103,20 @@ class Context:
     def alert(self, key: str, text: str) -> None:
         """Alert once per key. Repeats of the same problem stay quiet."""
         self.board.alert(f"[{self.config.name}] {text}", idempotency_key=key)
-        self.journal.append("alert", key=key, text=text)
+        with locked(self.paths.alerted):
+            seen = self._alerted_keys()
+            if key in seen:
+                return
+            self.journal.append("alert", key=key, text=text)
+            seen.add(key)
+            save_json(self.paths.alerted, sorted(seen))
+
+    def _alerted_keys(self) -> set[str]:
+        """Keys already written to the journal as alerts. Kept in alerted.json; a
+        state dir from before that file existed is seeded once from the journal."""
+        if self.paths.alerted.exists():
+            return set(load_json(self.paths.alerted, default=[]))
+        return {j["key"] for j in self.journal.read() if j.get("event") == "alert" and "key" in j}
 
     def notify(self, key: str, text: str, *, mention: str | None = None) -> None:
         """A decision notice in the alerts channel. It pings ``mention`` (one operator
