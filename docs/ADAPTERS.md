@@ -141,9 +141,17 @@ client_id_env = "ACME_HS_CLIENT_ID"
 client_secret_env = "ACME_HS_CLIENT_SECRET"
 # start_hours = 24                     # the first run reads this far back only
 
-[mailbox]
-adapter = "helpscout"                  # same four keys
+[mailbox]                              # the Sent-folder receipt reads the SAME inbox: repeat the keys
+adapter = "helpscout"
+mailbox_id = 12345                     # must equal [helpdesk] mailbox_id (13 and "13" are the same)
+client_id_env = "ACME_HS_CLIENT_ID"
+client_secret_env = "ACME_HS_CLIENT_SECRET"
 ```
+
+The `[mailbox]` section builds its own Help Scout client, so it needs `mailbox_id` and both `_env` keys
+too. Leave one out and the error says `[helpdesk] helpscout needs mailbox_id`: the key is missing from
+`[mailbox]`, not from `[helpdesk]`. Any key given in both sections must hold the same value, or the
+config is refused (one help desk at a time).
 
 How each method maps to the API (docs: https://developer.helpscout.com/mailbox-api/):
 - **Auth:** OAuth2 Client Credentials (`POST /v2/oauth2/token`). The token lives 2 days and is

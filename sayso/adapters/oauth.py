@@ -392,8 +392,10 @@ def decode_id_token(id_token: str, *, client_id: str, now: float | None = None) 
     aud = claims.get("aud")
     if not client_id or (aud != client_id and not (isinstance(aud, list) and client_id in aud)):
         raise OAuthError("id_token is for another app")
-    # OpenID Connect Core 3.1.3.7: with several audiences, azp must be present and name this app.
-    if isinstance(aud, list) and (len(aud) != 1 or "azp" in claims) and claims.get("azp") != client_id:
+    # OpenID Connect Core 3.1.3.7: with several audiences, azp must be present and name this app; and an azp
+    # that is present must name this app, whatever the shape of aud (a string aud included).
+    several = isinstance(aud, list) and len(aud) != 1
+    if (several or "azp" in claims) and claims.get("azp") != client_id:
         raise OAuthError("id_token is for another app")
     exp = claims.get("exp")
     if not isinstance(exp, (int, float)) or (now if now is not None else time.time()) > exp + 300:

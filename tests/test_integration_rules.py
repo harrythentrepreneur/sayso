@@ -48,9 +48,44 @@ class OneHelpdeskTests(unittest.TestCase):
             parse(helpdesk=desk, mailbox=dict(desk))
             parse(helpdesk=desk, mailbox={"adapter": desk["adapter"]})
 
+    def test_a_number_and_the_same_digits_are_the_same_account(self):
+        """QA-2 N2: mailbox_id = 13 in one section and "13" in the other is the same inbox."""
+        hs = {"adapter": "helpscout", "client_id_env": "HS_ID", "client_secret_env": "HS_SECRET"}
+        for a, b in ((13, "13"), ("13", 13), (13, 13), ("13", "13")):
+            with self.subTest(helpdesk=a, mailbox=b):
+                parse(helpdesk=dict(hs, mailbox_id=a), mailbox=dict(hs, mailbox_id=b))
+        for a, b in ((13, "14"), ("13", 14), (13, " 13"), (13, "13.0"), (13, "+13"), (1, True), (13, "١٣")):
+            with self.subTest(helpdesk=a, mailbox=b):
+                with self.assertRaises(ConfigError) as ctx:
+                    parse(helpdesk=dict(hs, mailbox_id=a), mailbox=dict(hs, mailbox_id=b))
+                self.assertIn("mailbox_id differ", str(ctx.exception))
+
+    def test_same_value_rule(self):
+        same = config._same_value
+        self.assertTrue(same(13, "13") and same("13", 13) and same("a", "a") and same(None, None))
+        self.assertTrue(same(24, 24.0) and same(True, True), "plain equality is unchanged")
+        for a, b in ((13, "14"), ("A", "a"), ("a ", "a"), (True, 1), (1, True), (True, "1"), (None, ""), (0, None),
+                     ("013", 13), (13.0, "13")):
+            with self.subTest(a=a, b=b):
+                self.assertFalse(same(a, b))
+
     def test_lists_agree_with_adapter_choices(self):
         self.assertEqual(set(config.HELPDESKS), set(config.ADAPTER_CHOICES["helpdesk"]) - {"fake"})
         self.assertTrue(set(config.HELPDESK_MAILBOXES) <= set(config.ADAPTER_CHOICES["mailbox"]))
+
+
+class HelpScoutDocBlockTests(unittest.TestCase):
+    def test_adapters_doc_help_scout_block_loads_and_repeats_the_keys(self):
+        """QA-2 N3: the documented [mailbox] block must carry the keys its own client needs."""
+        import re
+        import tomllib
+        doc = (Path(__file__).resolve().parents[1] / "docs" / "ADAPTERS.md").read_text()
+        part = doc[doc.index("## Help Scout"):]
+        block = re.search(r"```toml\n(.*?)```", part, re.S).group(1)
+        raw = tomllib.loads(block)
+        for key in ("mailbox_id", "client_id_env", "client_secret_env"):
+            self.assertEqual(raw["mailbox"].get(key), raw["helpdesk"][key], key)
+        parse(**raw)
 
 
 class OnePaymentProviderTests(unittest.TestCase):
@@ -60,6 +95,17 @@ class OnePaymentProviderTests(unittest.TestCase):
                 with self.assertRaises(ConfigError) as ctx:
                     parse(**{name: [{"adapter": "fake"}, {"adapter": "none"}]})
                 self.assertIn(f"[[{name}]]", str(ctx.exception))
+
+    def test_a_single_value_is_named_as_a_value_not_a_list(self):
+        """QA-2 N4: payments = "fake" (a string or number) is refused with words that fit a single value."""
+        for value in ("fake", 3, True):
+            with self.subTest(value=value):
+                with self.assertRaises(ConfigError) as ctx:
+                    parse(payments=value)
+                msg = str(ctx.exception)
+                self.assertIn("not a single value", msg)
+                self.assertNotIn("not a list", msg)
+                self.assertIn("[payments]", msg)
 
     def test_providers_are_the_payments_choices(self):
         self.assertEqual(set(config.PAYMENT_PROVIDERS), set(config.ADAPTER_CHOICES["payments"]) - {"none", "fake"})

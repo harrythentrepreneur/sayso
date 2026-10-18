@@ -430,6 +430,20 @@ class AuthCodeTests(unittest.TestCase):
             with self.subTest(claims=claims):
                 oauth.id_claims(self._jwt(claims), client_id="cid", nonce="n1", now=1_000)
 
+    def test_string_audience_with_a_foreign_azp_is_refused(self):
+        """QA-2 N1: aud = this app (a string) but azp names another client. OIDC Core 3.1.3.7: an azp that is
+        present must be this client id. Microsoft (id_claims) and Google (gmail, decode_id_token) both refuse."""
+        good = {"aud": "cid", "nonce": "n1", "exp": 2_000, "email": "help@contoso.com"}
+        for azp in ("other", "", None, ["cid"], "CID"):
+            claims = dict(good, azp=azp)
+            with self.subTest(azp=azp):
+                with self.assertRaises(oauth.OAuthError):
+                    oauth.id_claims(self._jwt(claims), client_id="cid", nonce="n1", now=1_000)
+                with self.assertRaises(oauth.OAuthError):
+                    oauth.decode_id_token(self._jwt(claims), client_id="cid", now=1_000)
+        oauth.decode_id_token(self._jwt(dict(good, azp="cid")), client_id="cid", now=1_000)
+        oauth.decode_id_token(self._jwt(good), client_id="cid", now=1_000)
+
     def test_mailbox_address(self):
         self.assertEqual(oauth.mailbox_address({"email": "Help@Contoso.com"}), "help@contoso.com")
         self.assertEqual(oauth.mailbox_address({"preferred_username": "help@contoso.com"}), "help@contoso.com")
