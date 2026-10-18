@@ -219,6 +219,50 @@ class DraftedMoneyTests(Base):
         self.assertEqual(r["spec"]["version"], 2)
         self.assertIn("declined", self.posts())
 
+    def test_declined_money_proposed_again_is_held_not_looped(self):
+        """r4 QA-1 p30 D: after a declined refund the drafter (unchanged prompt) proposed the SAME refund again.
+        open_vote handed back the declined vote, release_held dropped the reply at once and asked for a new
+        draft: one drafter call every other pass, for ever. Now the repeat is held for a person: one call, one
+        held note, then nothing for 6 passes."""
+        self.refund_case()
+        self.vote("money", answer="no")
+        self.tick("votes", "money")
+        self.drafter_says(f"Hi Pat,\n\nWe have refunded the duplicate charge.\n\nSupport\n{money_line(REFUND)}")
+        calls = []
+        orig = self.ctx.drafter.draft
+        self.ctx.drafter.draft = lambda *a: calls.append(1) or orig(*a)
+        for _ in range(8):
+            self.tick("draft")
+        self.assertEqual(len(calls), 1, "one redraft after the decline, then it waits")
+        self.assertEqual(self.posts().count("already declined or voided"), 1)
+        self.assertEqual(len(self.all_votes("money")), 1)
+        self.assertEqual(self.all_votes("money")[0]["status"], votes.DECLINED)
+        self.assertEqual(self.all_votes("reply"), [])
+        key = self.only_case()[0]
+        self.assertTrue(cases.load(self.ctx)[key].get("held_draft"), "held: Cloud shows it as Needs you")
+
+    def test_declined_money_then_a_person_asks_and_the_drafter_drops_it(self):
+        self.refund_case()
+        self.vote("money", answer="no")
+        self.drafter_says(f"Hi Pat,\n\nWe have refunded the duplicate charge.\n\nSupport\n{money_line(REFUND)}")
+        self.tick("votes", "money", "draft", "draft")
+        key = self.only_case()[0]
+        self.assertTrue(cases.load(self.ctx)[key].get("held_draft"))
+        self.drafter_says("Hi Pat,\n\nWe could not refund this one; here is why.\n\nSupport")
+        cases.update(self.ctx, key, needs_draft=True)          # "Write a new draft"
+        self.tick("draft")
+        (r,) = self.all_votes("reply")
+        self.assertEqual(r["status"], votes.OPEN)
+
+    def test_a_different_refund_after_a_decline_still_opens_a_vote(self):
+        self.refund_case()
+        self.vote("money", answer="no")
+        other = {**REFUND, "charge": "ch_test0002"}
+        self.drafter_says(f"Hi Pat,\n\nWe have refunded the other charge.\n\nSupport\n{money_line(other)}")
+        self.tick("votes", "money", "draft", "draft")
+        live = [v for v in self.all_votes("money") if v["status"] == votes.OPEN]
+        self.assertEqual([v["spec"]["charge"] for v in live], ["ch_test0002"])
+
     def test_held_file_changed_is_never_offered(self):
         self.refund_case()
         held = cases.load(self.ctx)[self.only_case()[0]]["held_reply"]

@@ -14,6 +14,11 @@ from sayso.adapters import events
 from sayso.store import load_json, locked, save_json
 
 
+def vote_key(case_key: str, spec: dict) -> str:
+    """The money vote key for this case and action. One key per (case, action, object): it never opens twice."""
+    return f"money:{case_key}:{spec['action']}:{spec.get('charge') or spec.get('subscription')}"
+
+
 def request(ctx, *, case_key: str, spec: dict, subject: str) -> dict:
     """Open a money vote. Called by an agent or operator tool, never by a customer."""
     if ctx.payments is None:
@@ -22,7 +27,7 @@ def request(ctx, *, case_key: str, spec: dict, subject: str) -> dict:
     money.validate(spec, max_minor=p.refund_max_minor, currencies=p.currencies)
     case = load_json(ctx.paths.cases)[case_key]
     ident = {"case_key": case_key, "action": spec["action"]}
-    return votes.open_vote(ctx, key=f"money:{case_key}:{spec['action']}:{spec.get('charge') or spec.get('subscription')}",
+    return votes.open_vote(ctx, key=vote_key(case_key, spec),
                            kind="money", case_key=case_key, card_id=case["card_id"], subject=subject,
                            question=f"{money.describe(spec)}?", identity=ident, material=spec, spec=spec)
 

@@ -836,6 +836,8 @@ MUTATIONS = [
      "        differ = []"),
     ("helpscout: non-ASCII digits in mailbox_id crash int()", "sayso/adapters/helpscout.py",
      'not (str(raw or "").isascii() and str(raw or "").isdigit())', 'not str(raw or "").isdigit()'),
+    ("draft: a declined money action proposed again loops (redraft every other pass)", "sayso/jobs/draft.py",
+     "    if settled:\n        _hold(", "    if False:\n        _hold("),
     ("config: a single value called a list (N4)", "sayso/config.py",
      "        if isinstance(given, list):\n", "        if not isinstance(given, (dict, type(None))):\n"),
     ("facts: line breaks kept in values", "sayso/adapters/facts.py",

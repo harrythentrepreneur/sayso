@@ -147,6 +147,18 @@ def _money_first(ctx, key: str, rec: dict, reply: str, specs: list[dict]) -> str
         _hold(ctx, key, rec, f"proposed money action refused: {exc}", reply)
         cases.update(ctx, key, needs_draft=False)
         return "held"
+    # A money action that a person already declined (or that was voided or expired) is never asked again by the
+    # drafter: votes.open_vote would hand back the settled vote, release_held would drop the reply at once and ask
+    # for a new draft, and the case would redraft (one AI call) every other pass, for ever. Hold it for a person.
+    from sayso.jobs import money_job
+    all_votes = votes.load(ctx)
+    settled = [money.describe(s) for s in specs
+               if (all_votes.get(money_job.vote_key(key, s)) or {}).get("status") in (votes.DECLINED, votes.VOID,
+                                                                                    votes.EXPIRED)]
+    if settled:
+        _hold(ctx, key, rec, f"the drafter proposed {' and '.join(settled)} again, which was already declined or "
+                             "voided; a person decides", reply)
+        return "held"
     proposed = frozenset("refund" if s["action"] == "refund" else "cancel" for s in specs)
     try:
         sender.check_sendable(ctx, key, rec, rec["customer"], reply, assume_money=proposed)
@@ -155,7 +167,6 @@ def _money_first(ctx, key: str, rec: dict, reply: str, specs: list[dict]) -> str
         cases.update(ctx, key, needs_draft=False)
         return "held"
     version, path, body = _store_draft(ctx, key, rec, reply)
-    from sayso.jobs import money_job
     keys = [money_job.request(ctx, case_key=key, spec=s, subject=_subject(rec))["key"] for s in specs]
     cases.update(ctx, key, draft_version=version, needs_draft=False,
                  held_reply={"version": version, "path": path, "sha256": hashlib.sha256(body.encode()).hexdigest(),
