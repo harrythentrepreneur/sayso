@@ -42,8 +42,9 @@ def _hold(ctx, key: str, rec: dict, why: str, text: str) -> None:
     # hold and gets its own note (else the note was deduplicated and the newest thing on the card stayed the
     # customer's mail, so the hold was invisible). The same text for the same mail still posts once.
     marker = str(rec.get("last_inbound") or rec.get("created_at") or "held")
+    answers = f"{rec.get('last_inbound_id') or ''}{chr(0)}{marker}"     # message id: unique even if two mails share a time
     ctx.board.post(rec["card_id"], f"Draft held, not offered for a vote: {why}",
-                   idempotency_key=f"draft-held:{key}:{hashlib.sha256((marker + chr(0) + text).encode()).hexdigest()[:12]}")
+                   idempotency_key=f"draft-held:{key}:{hashlib.sha256((answers + chr(0) + text).encode()).hexdigest()[:12]}")
     cases.update(ctx, key, needs_draft=False, held_draft=marker)
 
 

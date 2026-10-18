@@ -66,7 +66,7 @@ def run(ctx) -> dict:
         if after != before:
             cases.set_tags_verified(ctx, rec["card_id"], after)
             reopened += 1
-        cases.update(ctx, key, needs_draft=True, last_inbound=msg.received_at)
+        cases.update(ctx, key, needs_draft=True, last_inbound=msg.received_at, last_inbound_id=msg.message_id)
         _mark_seen(seen_path, msg.message_id, ctx)
         ctx.journal.append("mail_appended", case_key=key, voided=voided)
     if new_cursor is not None:

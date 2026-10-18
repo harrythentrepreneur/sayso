@@ -271,6 +271,20 @@ class DraftedMoneyTests(Base):
         last = self.ctx.board.messages(self.card())[-1]
         self.assertTrue(last.startswith("Draft held, not offered for a vote:"), last[:80])
 
+    def test_same_held_text_for_a_second_mail_at_the_same_time_posts_a_new_note(self):
+        """r4 QA-2 p63 #11 with a frozen clock: two customer mails with the same received time."""
+        same = f"Hi Pat,\n\nWe have refunded the duplicate charge.\n\nSupport\n{money_line(REFUND)}"
+        self.refund_case()
+        self.vote("money", answer="no")
+        self.drafter_says(same)
+        self.tick("votes", "money", "draft", "draft")
+        self.write_in(subject="Charged twice", body="Any news?")          # no clock advance
+        self.drafter_says(same)
+        self.tick("intake", "draft", "draft", "draft")
+        self.assertEqual(self.posts().count("already declined or voided"), 2)
+        last = self.ctx.board.messages(self.card())[-1]
+        self.assertTrue(last.startswith("Draft held, not offered for a vote:"), last[:80])
+
     def test_a_different_refund_after_a_decline_still_opens_a_vote(self):
         self.refund_case()
         self.vote("money", answer="no")
