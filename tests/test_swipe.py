@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import shutil
@@ -168,6 +169,50 @@ class SwipeTests(_Fixture):
     def test_swipe_script_parses(self):
         js = Path(swipe.__file__).with_name("swipe.js")
         self.assertEqual(subprocess.run(["node", "--check", str(js)], capture_output=True).returncode, 0)
+
+
+CHROME = os.environ.get("SAYSO_TEST_CHROME", "/home/harry/.local/opt/google-chrome/opt/google/chrome/chrome")
+PW_NODE_MODULES = os.environ.get("SAYSO_TEST_PLAYWRIGHT",
+                                 "/home/harry/qa/offline-ui-qa-verification/scratch-portable/node_modules")
+_HAVE_TOUCH_RIG = bool(shutil.which("node")) and Path(CHROME).exists() and (Path(PW_NODE_MODULES) / "playwright").exists()
+
+
+@unittest.skipUnless(_HAVE_TOUCH_RIG, "needs node, Chrome and playwright (SAYSO_TEST_CHROME / SAYSO_TEST_PLAYWRIGHT)")
+class SwipeTouchTests(_Fixture):
+    """Real touch on a phone-sized page (CDP Input.dispatchTouchEvent). On a phone most of the card is its
+    text body; a drag that starts there must swipe sideways and scroll up and down (Kaviru, 19 Oct 2026)."""
+
+    def drag(self, axis):
+        _, cookie = self.login()
+        url = f"http://127.0.0.1:{self.port}/p/{self.config.slug}/swipe"
+        env = {**os.environ, "NODE_PATH": PW_NODE_MODULES}
+        r = subprocess.run(["node", str(Path(__file__).with_name("swipe_touch.cjs")), CHROME, url,
+                            "sayso_session", cookie, axis], capture_output=True, text=True, timeout=120, env=env)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        return json.loads(r.stdout.strip().splitlines()[-1])
+
+    def web_votes(self):
+        p = self.config.state_dir / "web-votes.json"
+        return json.loads(p.read_text()) if p.exists() else {}
+
+    def test_touch_drag_sideways_from_card_body_moves_card_and_casts_vote(self):
+        out = self.drag("x")
+        self.assertTrue(out["during"]["transform"].startswith("translate("),
+                        f"card did not move on a body drag: {out}")
+        self.assertNotIn("pointercancel", out["after"]["events"], out)
+        self.assertEqual(out["after"]["gone"], 1, out)
+        ballots = self.web_votes().get(out["geo"]["key"], {})
+        self.assertEqual([b["answer"] for b in ballots.values()], ["yes"], self.web_votes())
+        v = json.loads((self.config.state_dir / "votes.json").read_text())[out["geo"]["key"]]
+        self.assertEqual([b["fingerprint"] for b in ballots.values()], [v["fingerprint"]])
+
+    def test_touch_drag_up_and_down_in_card_body_scrolls_and_casts_nothing(self):
+        out = self.drag("y")
+        self.assertGreater(out["geo"]["h"], out["geo"]["ch"], out)      # the body really can scroll
+        self.assertGreater(out["during"]["scrollTop"], 0, f"body did not scroll: {out}")
+        self.assertIn(out["during"]["transform"], ("", None), out)
+        self.assertEqual(out["after"]["gone"], 0, out)
+        self.assertEqual(self.web_votes(), {})
 
 
 if __name__ == "__main__":

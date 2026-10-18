@@ -65,7 +65,11 @@ def css() -> str:
         ".s-card-swipe .s-card-q{font:600 17px/1.35 var(--font-head,inherit);color:var(--sw-ink);margin:0 0 4px}"
         ".s-card-swipe .s-card-who{font-size:13px;color:var(--sw-soft);margin:0 0 12px}"
         ".s-card-swipe .s-card-body{max-height:max(140px,calc(100svh - 300px));overflow:auto;-webkit-overflow-scrolling:touch;"
-        "border-top:1px solid var(--sw-line);padding-top:12px}"
+        "border-top:1px solid var(--sw-line);padding-top:12px;touch-action:pan-y}"
+        # The body scrolls, so it starts its own touch-action chain: without pan-y here a sideways drag that
+        # starts in the text (most of the card on a phone) gets pointercancel and the card never moves.
+        # Same for anything inside it that scrolls (a wide <pre>, a quoted table).
+        ".s-card-swipe .s-card-body *{touch-action:pan-y}"
         ".s-card-hint{display:flex;justify-content:space-between;gap:10px;margin:10px 0 0;font-size:12px;color:var(--sw-faint)}"
         ".s-card-btns{display:flex;gap:8px;margin:12px 0 0}"
         ".s-card-btns button{flex:1;min-height:44px;border-radius:var(--radius-sm,6px);font:600 15px var(--font-text,inherit);"
