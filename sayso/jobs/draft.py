@@ -38,10 +38,13 @@ def _hold(ctx, key: str, rec: dict, why: str, text: str) -> None:
     """Hold a draft for a person. The case then waits: it is NOT redrafted on the next pass (that would bill
     the drafter and post the same note every minute) until the customer writes again or a person asks for a
     new draft; both set needs_draft. ``held_draft`` records which inbound message the hold answered."""
+    # The key covers the message the hold answers too: the same held text for a NEWER customer mail is a new
+    # hold and gets its own note (else the note was deduplicated and the newest thing on the card stayed the
+    # customer's mail, so the hold was invisible). The same text for the same mail still posts once.
+    marker = str(rec.get("last_inbound") or rec.get("created_at") or "held")
     ctx.board.post(rec["card_id"], f"Draft held, not offered for a vote: {why}",
-                   idempotency_key=f"draft-held:{key}:{hashlib.sha256(text.encode()).hexdigest()[:12]}")
-    cases.update(ctx, key, needs_draft=False,
-                 held_draft=str(rec.get("last_inbound") or rec.get("created_at") or "held"))
+                   idempotency_key=f"draft-held:{key}:{hashlib.sha256((marker + chr(0) + text).encode()).hexdigest()[:12]}")
+    cases.update(ctx, key, needs_draft=False, held_draft=marker)
 
 
 def _store_draft(ctx, key: str, rec: dict, text: str) -> tuple[int, str, str]:

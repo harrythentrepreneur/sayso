@@ -838,6 +838,8 @@ MUTATIONS = [
      'not (str(raw or "").isascii() and str(raw or "").isdigit())', 'not str(raw or "").isdigit()'),
     ("draft: a declined money action proposed again loops (redraft every other pass)", "sayso/jobs/draft.py",
      "    if settled:\n        _hold(", "    if False:\n        _hold("),
+    ("draft: held note key ignores the message it answers (a hold after new mail is invisible)", "sayso/jobs/draft.py",
+     "hashlib.sha256((marker + chr(0) + text).encode())", "hashlib.sha256(text.encode())"),
     ("config: a single value called a list (N4)", "sayso/config.py",
      "        if isinstance(given, list):\n", "        if not isinstance(given, (dict, type(None))):\n"),
     ("facts: line breaks kept in values", "sayso/adapters/facts.py",

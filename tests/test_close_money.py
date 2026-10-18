@@ -254,6 +254,23 @@ class DraftedMoneyTests(Base):
         (r,) = self.all_votes("reply")
         self.assertEqual(r["status"], votes.OPEN)
 
+    def test_same_held_text_after_a_new_customer_mail_posts_a_new_held_note(self):
+        """r4 QA-2 p63 #11: the held note's key hashed only the text, so the same held text for a NEWER mail was
+        deduplicated; the newest message on the card stayed the customer's, and the hold was invisible."""
+        same = f"Hi Pat,\n\nWe have refunded the duplicate charge.\n\nSupport\n{money_line(REFUND)}"
+        self.refund_case()
+        self.vote("money", answer="no")
+        self.drafter_says(same)
+        self.tick("votes", "money", "draft", "draft")
+        self.assertEqual(self.posts().count("already declined or voided"), 1)
+        self.ctx.clock.advance(minutes=5)
+        self.write_in(subject="Charged twice", body="Any news?")
+        self.drafter_says(same)
+        self.tick("intake", "draft", "draft", "draft")
+        self.assertEqual(self.posts().count("already declined or voided"), 2)
+        last = self.ctx.board.messages(self.card())[-1]
+        self.assertTrue(last.startswith("Draft held, not offered for a vote:"), last[:80])
+
     def test_a_different_refund_after_a_decline_still_opens_a_vote(self):
         self.refund_case()
         self.vote("money", answer="no")
