@@ -55,7 +55,10 @@ const [chrome, url, cname, cvalue, axis] = process.argv.slice(2);
       return { transform: card.style.transform, scrollTop: card.querySelector(".s-card-body").scrollTop };
     });
     await touch("touchEnd", ex, ey);
-    await page.waitForTimeout(900);
+    await page.waitForTimeout(400);
+    // A released swipe posts and waits for the server; wait for its answer (no answer for a scroll).
+    await page.waitForFunction(() => !/^Saying /.test((document.querySelector("[data-deck-msg]") || {}).textContent || ""),
+                               null, { timeout: 20000 });
     const after = await page.evaluate(() => ({
       msg: (document.querySelector("[data-deck-msg]") || {}).textContent || "",
       gone: document.querySelectorAll(".s-card-swipe.is-gone").length,
