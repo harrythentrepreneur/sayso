@@ -267,6 +267,13 @@ class TokenTests(unittest.TestCase):
             hs.HelpScoutHelpdesk(Section("helpscout", {"mailbox_id": 13, "client_id_env": "NOPE_UNSET",
                                                        "client_secret_env": "HS_SECRET"}), SUPPORT)
 
+    def test_mailbox_id_must_be_ascii_digits(self):
+        """r4 QA-1 p20: a superscript or other non-ASCII digit passed str.isdigit() and then crashed in int()."""
+        for bad in ("²", "١٣", "13a", "", True, None):
+            with self.subTest(mailbox_id=bad), self.assertRaises(ConfigError):
+                hs._options(Section("helpscout", {"mailbox_id": bad}))
+        self.assertEqual(hs._options(Section("helpscout", {"mailbox_id": "13"}))[0], 13)
+
     def test_mailbox_id_required(self):
         with self.assertRaises(ConfigError):
             hs.HelpScoutHelpdesk(Section("helpscout", {"client_id_env": "HS_ID", "client_secret_env": "HS_SECRET"}),

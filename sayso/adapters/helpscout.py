@@ -271,7 +271,7 @@ class HelpScoutApi:
 
 def _options(section: Section) -> tuple[int, float]:
     raw = section.options.get("mailbox_id")
-    if isinstance(raw, bool) or not str(raw or "").isdigit():
+    if isinstance(raw, bool) or not (str(raw or "").isascii() and str(raw or "").isdigit()):   # "²".isdigit() is True
         raise ConfigError("[helpdesk] helpscout needs mailbox_id = <the inbox number>")
     hours = section.options.get("start_hours", 24)
     if isinstance(hours, bool) or not isinstance(hours, (int, float)) or not 0 < hours <= 24 * 30:

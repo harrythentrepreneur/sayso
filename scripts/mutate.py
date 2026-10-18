@@ -834,6 +834,8 @@ MUTATIONS = [
     ("config: same-account check skipped (N2)", "sayso/config.py",
      "        differ = sorted(k for k, v in mailbox_options.items() if not _same_value(desk_options.get(k), v))",
      "        differ = []"),
+    ("helpscout: non-ASCII digits in mailbox_id crash int()", "sayso/adapters/helpscout.py",
+     'not (str(raw or "").isascii() and str(raw or "").isdigit())', 'not str(raw or "").isdigit()'),
     ("config: a single value called a list (N4)", "sayso/config.py",
      "        if isinstance(given, list):\n", "        if not isinstance(given, (dict, type(None))):\n"),
     ("facts: line breaks kept in values", "sayso/adapters/facts.py",
