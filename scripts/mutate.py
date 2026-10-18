@@ -540,8 +540,8 @@ MUTATIONS = [
      '{"product", "operators", "state", "policy", "jobs", "plugins", "board", "helpdesk", "mailbox", "payments", '
      '"codehost", "drafter", "dev_runner", "qa_runner"}'),
     ("oauth: id_token with several audiences accepted without our azp", "sayso/adapters/oauth.py",
-     '    if isinstance(aud, list) and (len(aud) != 1 or "azp" in claims) and claims.get("azp") != client_id:',
-     "    if False:"),
+     '    several = isinstance(aud, list) and len(aud) != 1',
+     "    several = False"),
     ("oauth: weak state allowed (Microsoft and Google)", "sayso/adapters/oauth.py",
      "if not client_id or not state or len(state) < 16 or not code_challenge:", "if not client_id:"),
     ("gmail: id_token from another issuer accepted", "sayso/adapters/gmail.py",
