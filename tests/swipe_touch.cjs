@@ -36,7 +36,10 @@ const [chrome, url, cname, cvalue, axis] = process.argv.slice(2);
       ["pointerdown", "pointermove", "pointerup", "pointercancel"].forEach((t) =>
         card.addEventListener(t, (e) => window.__sayso_log(e.type), true));
       const r = body.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: body.scrollHeight, ch: body.clientHeight,
+               bodyTouch: getComputedStyle(body).touchAction, hitTouch: getComputedStyle(hit).touchAction,
+               hitInBody: body.contains(hit) && hit !== body,
                key: card.querySelector("input[name=key]").value };
     });
     const cdp = await ctx.newCDPSession(page);

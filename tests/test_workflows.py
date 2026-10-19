@@ -450,6 +450,15 @@ class GuardTests(LoopTest):
         board = self.w.data["alerts"][board_before:]
         self.assertEqual(len([a for a in board if "attempt never proven" in a]), 1, board)
 
+    def test_alert_already_in_an_old_journal_is_not_written_again(self):
+        """A state dir from before alerted.json: the key already in journal.jsonl stays one line."""
+        self.ctx.journal.append("alert", key="old-finding:x", text="seen before the upgrade")
+        self.assertFalse(self.ctx.paths.alerted.exists())
+        for _ in range(3):
+            self.ctx.alert("old-finding:x", "seen before the upgrade")
+        lines = [j for j in self.ctx.journal.read() if j.get("event") == "alert" and j.get("key") == "old-finding:x"]
+        self.assertEqual(len(lines), 1, f"journal alert lines: {len(lines)}")
+
     def test_health_flags_stale_job(self):
         self.tick()
         self.ctx.clock.advance(hours=2)

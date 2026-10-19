@@ -197,6 +197,10 @@ class SwipeTouchTests(_Fixture):
 
     def test_touch_drag_sideways_from_card_body_moves_card_and_casts_vote(self):
         out = self.drag("x")
+        # The drag starts on text inside the body, and the body itself (the scroll container) allows only
+        # vertical panning, so the browser never claims a sideways drag as a pan.
+        self.assertTrue(out["geo"]["hitInBody"], out)
+        self.assertEqual((out["geo"]["bodyTouch"], out["geo"]["hitTouch"]), ("pan-y", "pan-y"), out)
         self.assertTrue(out["during"]["transform"].startswith("translate("),
                         f"card did not move on a body drag: {out}")
         self.assertNotIn("pointercancel", out["after"]["events"], out)
