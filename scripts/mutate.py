@@ -890,6 +890,19 @@ def _one(tmp: str, base: Path, i: int, rel: str, old: str, new: str,
         shutil.rmtree(work, ignore_errors=True)
 
 
+def shard() -> tuple[int, int]:
+    """MUTATE_SHARD="k/n" (1-based) runs every n-th entry starting at k, so n CI jobs share the list.
+    Unset means the whole list. A malformed value fails loudly rather than silently testing less."""
+    raw = os.environ.get("MUTATE_SHARD", "").strip()
+    if not raw:
+        return 0, 1
+    k, _, n = raw.partition("/")
+    k, n = int(k), int(n)
+    if not 1 <= k <= n:
+        raise SystemExit(f"MUTATE_SHARD={raw!r}: need k/n with 1 <= k <= n")
+    return k - 1, n
+
+
 def workers() -> int:
     """Parallel suite runs. MUTATE_JOBS overrides; default = CPUs, at most 8."""
     return max(1, int(os.environ.get("MUTATE_JOBS") or min(8, os.cpu_count() or 1)))
@@ -907,6 +920,10 @@ def main() -> int:
         jobs = workers()
         print(f"baseline green; {len(MUTATIONS)} mutations + {len(EQUIVALENT)} equivalents on {jobs} workers", flush=True)
         everything = [(n, r, o, w, False) for n, r, o, w in MUTATIONS] + [(n, r, o, w, True) for n, r, o, w in EQUIVALENT]
+        index, count = shard()
+        everything = [e for i, e in enumerate(everything) if i % count == index]   # every entry in exactly one shard
+        if count > 1:
+            print(f"shard {index + 1}/{count}: {len(everything)} entries", flush=True)
         with ThreadPoolExecutor(max_workers=jobs) as pool:
             futures = [pool.submit(_one, tmp, base, i, r, o, w, not eq) for i, (_, r, o, w, eq) in enumerate(everything)]
             results = [f.result() for f in futures]          # report in list order, whatever finished first
@@ -927,7 +944,7 @@ def main() -> int:
             else:
                 survived.append(name)
                 print(f"SURVIVED  {name}")
-        total = len(MUTATIONS)
+        total = sum(1 for e in everything if not e[4])
         verdict = "PASS" if not survived else "FAIL"
         print(f"MUTATION VERDICT: {verdict} {killed}/{total} killed")
         return 0 if not survived else 1

@@ -14,7 +14,7 @@ permissions:
 jobs:
   test:
     runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","ci-shared"]') || 'ubuntu-latest' }}
-    timeout-minutes: 180
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -45,12 +45,36 @@ jobs:
         run: python -m sayso.cli demo
       - name: Example settings validate
         run: python -m sayso.cli validate --config examples/acme-dry-run.toml
-      - name: Seeded-fault proof (every guard must fail a test when removed)
-        # Once, on 3.12: a mutation tests the guards, not the interpreter. Parallel copies
-        # (one per CPU the container has) keep it inside the job timeout.
-        if: matrix.python == '3.12'
+
+  # Seeded-fault proof, split in two halves that run at the same time (one per pool runner).
+  # A mutation tests the guards, not the interpreter, so it runs on 3.12 only. 344 mutants
+  # in one job took ~2 h 40 min against a 3 h limit (19 Oct 2026).
+  mutate:
+    needs: test
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","ci-shared"]') || 'ubuntu-latest' }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ["1/2", "2/2"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python 3.12
+        run: |
+          if [ "$RUNNER_ENVIRONMENT" = "github-hosted" ]; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq wamerican
+          fi
+          export UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/uv-python"
+          uv --version >/dev/null 2>&1 || pip install -q uv
+          uv venv -q -p 3.12 "$RUNNER_TEMP/venv"
+          VIRTUAL_ENV="$RUNNER_TEMP/venv" uv pip install -q markdown-it-py==3.0.0
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+      - name: Seeded-fault proof, shard ${{ matrix.shard }} (every guard must fail a test when removed)
         env:
           MUTATE_JOBS: "4"
+          MUTATE_SHARD: ${{ matrix.shard }}
         run: |
           python scripts/mutate.py | tee mutate.log
           grep -q '^MUTATION VERDICT: PASS' mutate.log
